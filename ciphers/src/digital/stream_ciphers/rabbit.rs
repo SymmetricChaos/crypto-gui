@@ -1,4 +1,4 @@
-use utils::byte_formatting::{u16s_to_bytes_be, xor_into_bytes, ByteFormat};
+use utils::byte_formatting::xor_into_bytes;
 
 const A: [u32; 8] = [
     0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3,
@@ -12,8 +12,6 @@ fn g_func(n: u32) -> u32 {
 
 #[derive(Debug, Clone)]
 pub struct Rabbit {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub state: [u32; 8],
     pub ctrs: [u32; 8],
     pub carry: u32, // only one bit is used by matching the type makes it easier to use, a bool would likely be aligned similarly anyway
@@ -22,8 +20,6 @@ pub struct Rabbit {
 impl Default for Rabbit {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             state: Default::default(),
             ctrs: Default::default(),
             carry: 0,
@@ -32,10 +28,11 @@ impl Default for Rabbit {
 }
 
 impl Rabbit {
+    // This does work. Checked with another implementation.
     pub fn with_key(key: [u8; 16]) -> Self {
         let mut k = [0_u32; 8];
         for i in 0..8 {
-            k[i] = (key[i] as u32) | ((key[i + 1] as u32) << 8);
+            k[i] = (key[2 * i] as u32) | ((key[2 * i + 1] as u32) << 8);
         }
 
         let mut state = [0; 8];
@@ -52,8 +49,6 @@ impl Rabbit {
         }
 
         let mut out = Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             state,
             ctrs,
             carry: 0,
@@ -64,7 +59,7 @@ impl Rabbit {
         }
 
         for i in 0..8 {
-            out.ctrs[i] ^= out.ctrs[(i + 4) & 0x07]
+            out.ctrs[i] ^= out.state[(i + 4) % 8]
         }
 
         out
@@ -110,14 +105,14 @@ impl Rabbit {
         let mut t = [0; 8];
         let s = self.state;
 
-        t[0] = (s[0] as u16) ^ (s[5] >> 16) as u16;
-        t[1] = (s[0] >> 16) as u16 ^ (s[3] as u16);
-        t[2] = (s[2] as u16) ^ (s[7] >> 16) as u16;
-        t[3] = (s[2] >> 16) as u16 ^ (s[5] as u16);
-        t[4] = (s[4] as u16) ^ (s[1] >> 16) as u16;
-        t[5] = (s[4] >> 16) as u16 ^ (s[7] as u16);
-        t[6] = (s[6] as u16) ^ (s[3] >> 16) as u16;
-        t[7] = (s[6] >> 16) as u16 ^ (s[1] as u16);
+        t[0] = ((s[0]) ^ (s[5] >> 16)) as u16;
+        t[1] = ((s[0] >> 16) ^ (s[3])) as u16;
+        t[2] = ((s[2]) ^ (s[7] >> 16)) as u16;
+        t[3] = ((s[2] >> 16) ^ (s[5])) as u16;
+        t[4] = ((s[4]) ^ (s[1] >> 16)) as u16;
+        t[5] = ((s[4] >> 16) ^ (s[7])) as u16;
+        t[6] = ((s[6]) ^ (s[3] >> 16)) as u16;
+        t[7] = ((s[6] >> 16) ^ (s[1])) as u16;
 
         [
             t[0] as u8,
@@ -148,10 +143,89 @@ impl Rabbit {
         let mut ptr = 0;
 
         while ptr < bytes.len() {
+            self.step();
             keystream = self.extract();
             xor_into_bytes(&mut bytes[ptr..], &keystream);
             ptr += 16;
-            self.step();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use hex_literal::hex;
+
+    use super::*;
+
+    // TODO: Why do all of these fail on the third extract?
+
+    #[test]
+    fn test1() {
+        let mut cipher = Rabbit::with_key([0; 16]);
+
+        cipher.step();
+        assert_eq!(
+            hex!("02 F7 4A 1C 26 45 6B F5 EC D6 A5 36 F0 54 57 B1"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("A7 8A C6 89 47 6C 69 7B 39 0C 9C C5 15 D8 E8 88"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("EF 9A 69 71 8B 82 49 A1 A7 3C 5A 6E 5B 90 45 95"),
+            cipher.extract()
+        );
+    }
+
+    #[test]
+    fn test2() {
+        let mut cipher = Rabbit::with_key(hex!("C2 1F CF 38 81 CD 5E E8 62 8A CC B0 A9 89 0D F8"));
+
+        cipher.step();
+        assert_eq!(
+            hex!("3D 02 E0 C7 30 55 91 12 B4 73 B7 90 DE E0 18 DF"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("CD 6D 73 0C E5 4E 19 F0 C3 5E C4 79 0E B6 C7 4A"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("9F B4 92 E1 B5 40 36 3A E3 83 C0 1F 9F A2 26 1A"),
+            cipher.extract()
+        );
+    }
+
+    #[test]
+    fn test3() {
+        let mut cipher = Rabbit::with_key(hex!("1D 27 2C 6A 2D 8E 3D FC AC 14 05 6B 78 D6 33 A0"));
+
+        cipher.step();
+        assert_eq!(
+            hex!("A3 A9 7A BB 80 39 38 20 B7 E5 0C 4A BB 53 82 3D"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("C4 42 37 99 C2 EF C9 FF B3 A4 12 5F 1F 4C 99 A8"),
+            cipher.extract()
+        );
+
+        cipher.step();
+        assert_eq!(
+            hex!("97 C0 73 3F F1 F1 8D 25 6A 59 E2 BA AB C1 F4 F1"),
+            cipher.extract()
+        );
     }
 }
