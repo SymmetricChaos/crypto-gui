@@ -88,6 +88,7 @@ cipher_ids_and_names!(
     Porta, "Porta";
     Purple, "Purple";
     Quagmire, "Quagmire";
+    Rabbit, "Rabbit";
     RailFence, "Rail Fence";
     Rc2, "RC2";
     Rc4, "RC4";

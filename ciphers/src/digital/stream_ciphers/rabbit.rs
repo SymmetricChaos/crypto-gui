@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{u16s_to_bytes_be, xor_into_bytes, ByteFormat};
 
 const A: [u32; 8] = [
     0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3,
@@ -10,6 +10,7 @@ fn g_func(n: u32) -> u32 {
     ((sq >> 32) ^ sq) as u32
 }
 
+#[derive(Debug, Clone)]
 pub struct Rabbit {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -34,7 +35,7 @@ impl Rabbit {
     pub fn with_key(key: [u8; 16]) -> Self {
         let mut k = [0_u32; 8];
         for i in 0..8 {
-            k[i] = (key[i] as u32) | ((key[i + 1] << 8) as u32)
+            k[i] = (key[i] as u32) | ((key[i + 1] as u32) << 8);
         }
 
         let mut state = [0; 8];
@@ -103,5 +104,54 @@ impl Rabbit {
             .wrapping_add(g[5].rotate_left(16))
             .wrapping_add(g[4].rotate_left(16));
         self.state[7] = g[7].wrapping_add(g[6].rotate_left(8)).wrapping_add(g[5]);
+    }
+
+    pub fn extract(&self) -> [u8; 16] {
+        let mut t = [0; 8];
+        let s = self.state;
+
+        t[0] = (s[0] as u16) ^ (s[5] >> 16) as u16;
+        t[1] = (s[0] >> 16) as u16 ^ (s[3] as u16);
+        t[2] = (s[2] as u16) ^ (s[7] >> 16) as u16;
+        t[3] = (s[2] >> 16) as u16 ^ (s[5] as u16);
+        t[4] = (s[4] as u16) ^ (s[1] >> 16) as u16;
+        t[5] = (s[4] >> 16) as u16 ^ (s[7] as u16);
+        t[6] = (s[6] as u16) ^ (s[3] >> 16) as u16;
+        t[7] = (s[6] >> 16) as u16 ^ (s[1] as u16);
+
+        [
+            t[0] as u8,
+            (t[0] >> 8) as u8,
+            t[1] as u8,
+            (t[1] >> 8) as u8,
+            t[2] as u8,
+            (t[2] >> 8) as u8,
+            t[3] as u8,
+            (t[3] >> 8) as u8,
+            t[4] as u8,
+            (t[4] >> 8) as u8,
+            t[5] as u8,
+            (t[5] >> 8) as u8,
+            t[6] as u8,
+            (t[6] >> 8) as u8,
+            t[7] as u8,
+            (t[7] >> 8) as u8,
+        ]
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.clone().encrypt_bytes_mut(bytes);
+    }
+
+    pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
+        let mut keystream: [u8; 16];
+        let mut ptr = 0;
+
+        while ptr < bytes.len() {
+            keystream = self.extract();
+            xor_into_bytes(&mut bytes[ptr..], &keystream);
+            ptr += 16;
+            self.step();
+        }
     }
 }

@@ -759,6 +759,17 @@
       "Polyalphabetic"
     ]
   },
+  "Rabbit": {
+    "Names": [
+      "Rabbit"
+    ],
+    "Description": "Rabbit is a stream cipher submitted to the eSTREAM competition.",
+    "Authors": "Martin Boesgaard, Mette Vesterager, Thomas Christensen, Erik Zenner",
+    "Publication": "2012",
+    "Traits": [
+      "Stream Cipher"
+    ]
+  },
   "RC2": {
     "Names": [
       "RC2",
