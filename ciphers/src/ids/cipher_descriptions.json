@@ -765,7 +765,7 @@
     ],
     "Description": "Rabbit is a stream cipher submitted to the eSTREAM competition.",
     "Authors": "Martin Boesgaard, Mette Vesterager, Thomas Christensen, Erik Zenner",
-    "Publication": "2012",
+    "Publication": "2008",
     "Traits": [
       "Stream Cipher"
     ]

@@ -16,6 +16,7 @@ mod middle_square_binary_controls;
 mod middle_square_controls;
 mod naor_reingold_controls;
 mod pcg_controls;
+mod rabbit_controls;
 mod rc4_controls;
 mod rule30_controls;
 mod salsa20_controls;

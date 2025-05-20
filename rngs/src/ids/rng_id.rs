@@ -48,6 +48,7 @@ rng_ids_and_names!(
     Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
+    Rabbit, "Rabbit";
     Rc4, "RC4";
     Rule30, "Rule 30";
     Salsa20, "Salsa20";

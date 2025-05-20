@@ -1,4 +1,4 @@
-use utils::byte_formatting::xor_into_bytes;
+use utils::byte_formatting::{u32s_to_bytes_be, xor_into_bytes};
 
 const A: [u32; 8] = [
     0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3,
@@ -28,7 +28,12 @@ impl Default for Rabbit {
 }
 
 impl Rabbit {
-    // This does work. Checked with another implementation.
+    pub fn with_key_u32(key: [u32; 4]) -> Self {
+        let mut bytes = [0u8; 16];
+        u32s_to_bytes_be(&mut bytes, key);
+        Self::with_key(bytes)
+    }
+
     pub fn with_key(key: [u8; 16]) -> Self {
         let mut k = [0_u32; 8];
         for i in 0..8 {
@@ -163,7 +168,7 @@ mod tests {
     use super::*;
 
     // TODO: Why does the reference code have the wrong values for all of these?
-    // Did find the correct third value for test1 in another reference
+    // Did find the correct third value for test1 in another reference!
 
     #[test]
     fn test1() {
@@ -185,25 +190,40 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn test2() {
-    //     let mut cipher = Rabbit::with_key(hex!("C2 1F CF 38 81 CD 5E E8 62 8A CC B0 A9 89 0D F8"));
+    #[test]
+    fn test2() {
+        let mut cipher = Rabbit::with_key(hex!("C2 1F CF 38 81 CD 5E E8 62 8A CC B0 A9 89 0D F8"));
 
-    //     assert_eq!(
-    //         hex!("3D 02 E0 C7 30 55 91 12 B4 73 B7 90 DE E0 18 DF"),
-    //         cipher.next_block()
-    //     );
+        assert_eq!(
+            hex!("3D 02 E0 C7 30 55 91 12 B4 73 B7 90 DE E0 18 DF"),
+            cipher.next_block()
+        );
 
-    //     assert_eq!(
-    //         hex!("CD 6D 73 0C E5 4E 19 F0 C3 5E C4 79 0E B6 C7 4A"),
-    //         cipher.next_block()
-    //     );
+        assert_eq!(
+            hex!("CD 6D 73 0C E5 4E 19 F0 C3 5E C4 79 0E B6 C7 4A"),
+            cipher.next_block()
+        );
 
-    //     assert_eq!(
-    //         hex!("9F B4 92 E1 B5 40 36 3A E3 83 C0 1F 9F A2 26 1A"),
-    //         cipher.next_block()
-    //     );
-    // }
+        // assert_eq!(
+        //     hex!("9F B4 92 E1 B5 40 36 3A E3 83 C0 1F 9F A2 26 1A"),
+        //     cipher.next_block()
+        // );
+
+        let mut cipher = Rabbit::with_key_u32([0xC21FCF38, 0x81CD5EE8, 0x628ACCB0, 0xA9890DF8]);
+        assert_eq!(
+            hex!("3D 02 E0 C7 30 55 91 12 B4 73 B7 90 DE E0 18 DF"),
+            cipher.next_block()
+        );
+
+        assert_eq!(
+            hex!("CD 6D 73 0C E5 4E 19 F0 C3 5E C4 79 0E B6 C7 4A"),
+            cipher.next_block()
+        );
+
+        // assert_eq!(
+        //     hex!("9F B4 92 E1 B5 40 36 3A E3 83 C0 1F 9F A2 26 1A"),
+        //     ci
+    }
 
     // #[test]
     // fn test3() {

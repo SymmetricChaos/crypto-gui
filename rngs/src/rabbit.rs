@@ -1,4 +1,4 @@
-use utils::byte_formatting::fill_u32s_be;
+use utils::byte_formatting::u32s_to_bytes_be;
 
 use crate::ClassicRng;
 
@@ -17,7 +17,8 @@ pub struct Rabbit {
     pub state: [u32; 8],
     pub ctrs: [u32; 8],
     pub carry: u32, // only one bit is used, but matching the type makes it easier to use, a bool would likely be aligned similarly anyway
-    pub cache: Vec<u32>,
+    pub cache: [u32; 4],
+    ptr: usize,
 }
 
 impl Default for Rabbit {
@@ -26,12 +27,19 @@ impl Default for Rabbit {
             state: Default::default(),
             ctrs: Default::default(),
             carry: 0,
-            cache: Vec::with_capacity(4),
+            cache: [0; 4],
+            ptr: 0,
         }
     }
 }
 
 impl Rabbit {
+    pub fn with_key_u32(key: [u32; 4]) -> Self {
+        let mut bytes = [0u8; 16];
+        u32s_to_bytes_be(&mut bytes, key);
+        Self::with_key(bytes)
+    }
+
     pub fn with_key(key: [u8; 16]) -> Self {
         let mut k = [0_u32; 8];
         for i in 0..8 {
@@ -55,7 +63,8 @@ impl Rabbit {
             state,
             ctrs,
             carry: 0,
-            cache: Vec::with_capacity(4),
+            cache: [0; 4],
+            ptr: 0,
         };
 
         for _ in 0..4 {
@@ -105,52 +114,31 @@ impl Rabbit {
         self.state[7] = g[7].wrapping_add(g[6].rotate_left(8)).wrapping_add(g[5]);
     }
 
-    pub fn extract(&self) -> [u8; 16] {
-        let mut t = [0; 8];
+    pub fn extract(&self) -> [u32; 4] {
         let s = self.state;
 
-        t[0] = ((s[0]) ^ (s[5] >> 16)) as u16;
-        t[1] = ((s[0] >> 16) ^ (s[3])) as u16;
-        t[2] = ((s[2]) ^ (s[7] >> 16)) as u16;
-        t[3] = ((s[2] >> 16) ^ (s[5])) as u16;
-        t[4] = ((s[4]) ^ (s[1] >> 16)) as u16;
-        t[5] = ((s[4] >> 16) ^ (s[7])) as u16;
-        t[6] = ((s[6]) ^ (s[3] >> 16)) as u16;
-        t[7] = ((s[6] >> 16) ^ (s[1])) as u16;
-
         [
-            t[0] as u8,
-            (t[0] >> 8) as u8,
-            t[1] as u8,
-            (t[1] >> 8) as u8,
-            t[2] as u8,
-            (t[2] >> 8) as u8,
-            t[3] as u8,
-            (t[3] >> 8) as u8,
-            t[4] as u8,
-            (t[4] >> 8) as u8,
-            t[5] as u8,
-            (t[5] >> 8) as u8,
-            t[6] as u8,
-            (t[6] >> 8) as u8,
-            t[7] as u8,
-            (t[7] >> 8) as u8,
+            ((s[0]) ^ (s[5] >> 16)) | ((s[0] >> 16) ^ (s[3])),
+            ((s[2]) ^ (s[7] >> 16)) | ((s[2] >> 16) ^ (s[5])),
+            ((s[4]) ^ (s[1] >> 16)) | ((s[4] >> 16) ^ (s[7])),
+            ((s[6]) ^ (s[3] >> 16)) | ((s[6] >> 16) ^ (s[1])),
         ]
     }
 
-    pub fn next_block(&mut self) -> [u8; 16] {
+    pub fn refill_cache(&mut self) {
         self.step();
-        self.extract()
+        self.cache = self.extract();
     }
 }
 
 impl ClassicRng for Rabbit {
     fn next_u32(&mut self) -> u32 {
-        if self.cache.is_empty() {
-            let b = self.next_block();
-            fill_u32s_be(&mut self.cache, &b);
-            self.cache.reverse();
+        if self.ptr > 4 {
+            self.refill_cache();
+            self.ptr = 0;
         }
-        self.cache.pop().unwrap()
+        let out = self.cache[self.ptr];
+        self.ptr += 1;
+        out
     }
 }

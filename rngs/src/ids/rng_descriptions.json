@@ -165,6 +165,15 @@
       "LCG-based"
     ]
   },
+  "Rabbit": {
+    "Description": "Rabbit is a stream cipher submitted to the eSTREAM competition. It also functions as a CSPRNG.",
+    "Authors": "Martin Boesgaard, Mette Vesterager, Thomas Christensen, Erik Zenner",
+    "Publication": "2008",
+    "Traits": [
+      "Stream Cipher",
+      "Cryptographic"
+    ]
+  },
   "RC4": {
     "Description": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
     "Authors": "Rivest",
