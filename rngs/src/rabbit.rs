@@ -34,10 +34,24 @@ impl Default for Rabbit {
 }
 
 impl Rabbit {
+    pub fn with_key_and_iv(key: [u8; 16], iv: [u8; 8]) -> Self {
+        let mut out = Self::with_key(key);
+        out.iv(iv);
+        out
+    }
+
     pub fn with_key_u32(key: [u32; 4]) -> Self {
         let mut bytes = [0u8; 16];
         u32s_to_bytes_be(&mut bytes, key);
         Self::with_key(bytes)
+    }
+
+    pub fn with_key_and_iv_u32(key: [u32; 4], iv: [u32; 2]) -> Self {
+        let mut key_bytes = [0u8; 16];
+        let mut iv_bytes = [0u8; 8];
+        u32s_to_bytes_be(&mut key_bytes, key);
+        u32s_to_bytes_be(&mut iv_bytes, iv);
+        Self::with_key_and_iv(key_bytes, iv_bytes)
     }
 
     pub fn with_key(key: [u8; 16]) -> Self {
@@ -76,6 +90,28 @@ impl Rabbit {
         }
 
         out
+    }
+
+    fn iv(&mut self, iv: [u8; 8]) {
+        let mut i = [0_u32; 4];
+
+        i[0] = iv[0] as u32 | (iv[1] as u32) << 8 | (iv[2] as u32) << 16 | (iv[3] as u32) << 24;
+        i[2] = iv[4] as u32 | (iv[5] as u32) << 8 | (iv[6] as u32) << 16 | (iv[7] as u32) << 24;
+        i[1] = (i[0] >> 16) | (i[2] & 0xFFFF0000);
+        i[3] = (i[2] << 16) | (i[0] & 0x0000FFFF);
+
+        self.ctrs[0] ^= i[0];
+        self.ctrs[1] ^= i[1];
+        self.ctrs[2] ^= i[2];
+        self.ctrs[3] ^= i[3];
+        self.ctrs[4] ^= i[0];
+        self.ctrs[5] ^= i[1];
+        self.ctrs[6] ^= i[2];
+        self.ctrs[7] ^= i[3];
+
+        for _ in 0..4 {
+            self.step();
+        }
     }
 
     fn step(&mut self) {

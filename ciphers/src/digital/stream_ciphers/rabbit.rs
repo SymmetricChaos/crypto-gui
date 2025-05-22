@@ -203,11 +203,10 @@ mod tests {
 
     use super::*;
 
-    // TODO: Why does the reference code have the wrong values for all of these?
-    // Did find the correct third value for test1 in another reference!
-
     #[test]
     fn test1() {
+        // TODO: Why does the reference code have the wrong values for the third block?
+        // Did find the correct third value in another reference with same two first blocks
         let mut cipher = Rabbit::with_key(hex!("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"));
 
         assert_eq!(
@@ -228,6 +227,7 @@ mod tests {
 
     #[test]
     fn test2() {
+        // TODO: Why does the reference code have the wrong values for the third block?
         let mut cipher = Rabbit::with_key(hex!("C2 1F CF 38 81 CD 5E E8 62 8A CC B0 A9 89 0D F8"));
 
         assert_eq!(
@@ -242,8 +242,7 @@ mod tests {
 
         // assert_eq!(
         //     hex!("9F B4 92 E1 B5 40 36 3A E3 83 C0 1F 9F A2 26 1A"),
-        //     cipher.next_block()
-        // );
+        //     ci
 
         let mut cipher = Rabbit::with_key_u32([0xC21FCF38, 0x81CD5EE8, 0x628ACCB0, 0xA9890DF8]);
         assert_eq!(
@@ -261,23 +260,42 @@ mod tests {
         //     ci
     }
 
-    // #[test]
-    // fn test3() {
-    //     let mut cipher = Rabbit::with_key(hex!("1D 27 2C 6A 2D 8E 3D FC AC 14 05 6B 78 D6 33 A0"));
+    #[test]
+    fn test5() {
+        let mut cipher = Rabbit::with_key_and_iv(
+            hex!("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"),
+            hex!("59 7E 26 C1 75 F5 73 C3"),
+        );
 
-    //     assert_eq!(
-    //         hex!("A3 A9 7A BB 80 39 38 20 B7 E5 0C 4A BB 53 82 3D"),
-    //         cipher.next_block()
-    //     );
+        assert_eq!(
+            hex!("6D 7D 01 22 92 CC DC E0 E2 12 00 58 B9 4E CD 1F"),
+            cipher.next_block()
+        );
 
-    //     assert_eq!(
-    //         hex!("C4 42 37 99 C2 EF C9 FF B3 A4 12 5F 1F 4C 99 A8"),
-    //         cipher.next_block()
-    //     );
+        assert_eq!(
+            hex!("2E 6F 93 ED FF 99 24 7B 01 25 21 D1 10 4E 5F A7"),
+            cipher.next_block()
+        );
 
-    //     assert_eq!(
-    //         hex!("97 C0 73 3F F1 F1 8D 25 6A 59 E2 BA AB C1 F4 F1"),
-    //         cipher.next_block()
-    //     );
-    // }
+        assert_eq!(
+            hex!("A7 9B 02 12 D0 BD 56 23 39 38 E7 93 C3 12 C1 EB"),
+            cipher.next_block()
+        );
+
+        let mut cipher = Rabbit::with_key_and_iv_u32([0, 0, 0, 0], [0x597E26C1, 0x75F573C3]);
+        assert_eq!(
+            hex!("6D 7D 01 22 92 CC DC E0 E2 12 00 58 B9 4E CD 1F"),
+            cipher.next_block()
+        );
+
+        assert_eq!(
+            hex!("2E 6F 93 ED FF 99 24 7B 01 25 21 D1 10 4E 5F A7"),
+            cipher.next_block()
+        );
+
+        assert_eq!(
+            hex!("A7 9B 02 12 D0 BD 56 23 39 38 E7 93 C3 12 C1 EB"),
+            cipher.next_block()
+        );
+    }
 }

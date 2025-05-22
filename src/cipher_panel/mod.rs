@@ -57,6 +57,7 @@ mod polybius_square_controls;
 mod porta_controls;
 mod purple_controls;
 mod quagmire_controls;
+mod rabbit_controls;
 mod rail_fence_controls;
 mod rc2_controls;
 mod rc4_controls;
@@ -330,6 +331,7 @@ pub struct CipherInterface {
     chacha: chacha_controls::ChaChaFrame,
     chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
     isaac: isaac_controls::IsaacFrame,
+    rabbit: rabbit_controls::RabbitFrame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
     snow3g: snow3g_controls::Snow3GFrame,
@@ -496,6 +498,7 @@ impl CipherInterface {
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Isaac,
+                CipherId::Rabbit,
                 CipherId::Rc4,
                 CipherId::Salsa20,
                 CipherId::Snow3G,
@@ -573,6 +576,7 @@ impl CipherInterface {
             CipherId::Porta => &mut self.porta,
             CipherId::Purple => &mut self.purple,
             CipherId::Quagmire => &mut self.quagmire,
+            CipherId::Rabbit => &mut self.rabbit,
             CipherId::RailFence => &mut self.rail_fence,
             CipherId::Rc2 => &mut self.rc2,
             CipherId::Rc4 => &mut self.rc4,
