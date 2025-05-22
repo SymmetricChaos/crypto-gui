@@ -3,6 +3,7 @@ pub mod a52;
 pub mod aes_gcm;
 pub mod chacha;
 pub mod fish;
+pub mod hc256;
 pub mod isaac;
 pub mod lfsr_copy;
 pub mod rabbit;
