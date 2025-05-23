@@ -98,12 +98,77 @@ mod tests {
     use super::*;
 
     #[test]
-    fn keystream() {
+    fn keystream_1() {
         let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
         for _ in 0..16 {
             println!("{:08x?}", cipher.step());
         }
         let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
         assert_eq!(0x8589075b, cipher.step());
+        // assert_eq!(0x0df3f6d8, cipher.step());
+        // assert_eq!(0x2fc0c542, cipher.step());
+        // assert_eq!(0x5179b6a6, cipher.step());
+        // assert_eq!(0x3465f053, cipher.step());
+        // assert_eq!(0xf2891f80, cipher.step());
+        // assert_eq!(0x8b24744e, cipher.step());
+        // assert_eq!(0x18480b72, cipher.step());
+        // assert_eq!(0xec2792cd, cipher.step());
+        // assert_eq!(0xbf4dcfeb, cipher.step());
+        // assert_eq!(0x7769bf8d, cipher.step());
+        // assert_eq!(0xfa14aee4, cipher.step());
+        // assert_eq!(0x7b4c50e8, cipher.step());
+        // assert_eq!(0xeaf3a9c8, cipher.step());
+        // assert_eq!(0xf506016c, cipher.step());
+        // assert_eq!(0x81697e32, cipher.step());
+    }
+
+    #[test]
+    fn keystream_2() {
+        let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [1, 0, 0, 0, 0, 0, 0, 0]);
+        for _ in 0..16 {
+            println!("{:08x?}", cipher.step());
+        }
+        let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [1, 0, 0, 0, 0, 0, 0, 0]);
+        assert_eq!(0xbfa2e2af, cipher.step());
+        // assert_eq!(0xe9ce174f, cipher.step());
+        // assert_eq!(0x8b05c2fe, cipher.step());
+        // assert_eq!(0xb18bb1d1, cipher.step());
+        // assert_eq!(0xee42c05f, cipher.step());
+        // assert_eq!(0x01312b71, cipher.step());
+        // assert_eq!(0xc61f50dd, cipher.step());
+        // assert_eq!(0x502a080b, cipher.step());
+        // assert_eq!(0xedfec706, cipher.step());
+        // assert_eq!(0x633d9241, cipher.step());
+        // assert_eq!(0xa6dac448, cipher.step());
+        // assert_eq!(0xaf8561ff, cipher.step());
+        // assert_eq!(0x5e04135a, cipher.step());
+        // assert_eq!(0x9448c434, cipher.step());
+        // assert_eq!(0x2de7e9f3, cipher.step());
+        // assert_eq!(0x37520bdf, cipher.step());
+    }
+
+    #[test]
+    fn keystream_3() {
+        let mut cipher = Hc256::with_key_and_iv_u32([0x55, 0, 0, 0, 0, 0, 0, 0], [0; 8]);
+        for _ in 0..16 {
+            println!("{:08x?}", cipher.step());
+        }
+        let mut cipher = Hc256::with_key_and_iv_u32([0x55, 0, 0, 0, 0, 0, 0, 0], [0; 8]);
+        assert_eq!(0xfe4a401c, cipher.step());
+        // assert_eq!(0xed5fe24f, cipher.step());
+        // assert_eq!(0xd19a8f95, cipher.step());
+        // assert_eq!(0x6fc036ae, cipher.step());
+        // assert_eq!(0x3c5aa688, cipher.step());
+        // assert_eq!(0x23e2abc0, cipher.step());
+        // assert_eq!(0x2f90b3ae, cipher.step());
+        // assert_eq!(0xa8d30e42, cipher.step());
+        // assert_eq!(0x59f03a6c, cipher.step());
+        // assert_eq!(0x6e39eb44, cipher.step());
+        // assert_eq!(0x8f7579fb, cipher.step());
+        // assert_eq!(0x70137a5e, cipher.step());
+        // assert_eq!(0x6d10b7d8, cipher.step());
+        // assert_eq!(0xadd0f7cd, cipher.step());
+        // assert_eq!(0x723423da, cipher.step());
+        // assert_eq!(0xf575dde6, cipher.step());
     }
 }
