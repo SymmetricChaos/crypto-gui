@@ -84,7 +84,7 @@ impl Hc256 {
         } else {
             self.q[j % 1024] = self.q[j % 1024]
                 .wrapping_add(self.q[(j - 10) % 1024])
-                .wrapping_add(self.g1(self.q[(j - 3) % 1024], self.q[(j - 1023) % 1024]));
+                .wrapping_add(self.g2(self.q[(j - 3) % 1024], self.q[(j - 1023) % 1024]));
             out = self.h2(self.q[(j - 12) % 1024]) ^ self.q[j % 1024]
         }
         self.ctr = (self.ctr + 1) % 2048;
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn keystream() {
         let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
-        for _ in 0..10 {
+        for _ in 0..16 {
             println!("{:08x?}", cipher.step());
         }
         let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
