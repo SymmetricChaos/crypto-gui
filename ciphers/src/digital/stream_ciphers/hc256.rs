@@ -9,7 +9,7 @@ fn f2(n: u32) -> u32 {
 pub struct Hc256 {
     p: [u32; 1024],
     q: [u32; 1024],
-    ctr: usize,
+    ctr: u32,
 }
 
 impl Default for Hc256 {
@@ -66,12 +66,28 @@ impl Hc256 {
         out.p.copy_from_slice(&w[512..1536]);
         out.q.copy_from_slice(&w[1536..2560]);
 
-        for i in 0..4096 {
+        for _ in 0..4096 {
             out.step();
         }
 
         out
     }
 
-    fn step(&mut self) -> u32 {}
+    fn step(&mut self) -> u32 {
+        let j = (self.ctr % 1024) as usize + 1024;
+        let out: u32;
+        if self.ctr % 2048 < 1024 {
+            self.p[j] = self.p[j]
+                .wrapping_add(self.p[(j - 10) % 1024])
+                .wrapping_add(self.g1(self.p[(j - 3) % 1024], self.p[(j - 1023) % 1024]));
+            out = self.h1(self.p[(j - 12) % 1024]) ^ self.p[j]
+        } else {
+            self.q[j] = self.q[j]
+                .wrapping_add(self.q[(j - 10) % 1024])
+                .wrapping_add(self.g1(self.q[(j - 3) % 1024], self.q[(j - 1023) % 1024]));
+            out = self.h2(self.q[(j - 12) % 1024]) ^ self.q[j]
+        }
+        self.ctr += 1;
+        out
+    }
 }
