@@ -25,12 +25,12 @@ impl Default for Hc256 {
 impl Hc256 {
     fn g1(&self, x: u32, y: u32) -> u32 {
         let i = ((x ^ y) as usize) % 1024;
-        (x.rotate_right(10) ^ y.rotate_right(25)).wrapping_add(self.q[i])
+        (x.rotate_right(10) ^ y.rotate_right(23)).wrapping_add(self.q[i])
     }
 
     fn g2(&self, x: u32, y: u32) -> u32 {
         let i = ((x ^ y) as usize) % 1024;
-        (x.rotate_right(10) ^ y.rotate_right(25)).wrapping_add(self.p[i])
+        (x.rotate_right(10) ^ y.rotate_right(23)).wrapping_add(self.p[i])
     }
 
     fn h1(&self, x: u32) -> u32 {
@@ -76,18 +76,34 @@ impl Hc256 {
     fn step(&mut self) -> u32 {
         let j = (self.ctr % 1024) as usize + 1024;
         let out: u32;
-        if self.ctr % 2048 < 1024 {
-            self.p[j] = self.p[j]
+        if self.ctr < 1024 {
+            self.p[j % 1024] = self.p[j % 1024]
                 .wrapping_add(self.p[(j - 10) % 1024])
                 .wrapping_add(self.g1(self.p[(j - 3) % 1024], self.p[(j - 1023) % 1024]));
-            out = self.h1(self.p[(j - 12) % 1024]) ^ self.p[j]
+            out = self.h1(self.p[(j - 12) % 1024]) ^ self.p[j % 1024]
         } else {
-            self.q[j] = self.q[j]
+            self.q[j % 1024] = self.q[j % 1024]
                 .wrapping_add(self.q[(j - 10) % 1024])
                 .wrapping_add(self.g1(self.q[(j - 3) % 1024], self.q[(j - 1023) % 1024]));
-            out = self.h2(self.q[(j - 12) % 1024]) ^ self.q[j]
+            out = self.h2(self.q[(j - 12) % 1024]) ^ self.q[j % 1024]
         }
-        self.ctr += 1;
+        self.ctr = (self.ctr + 1) % 2048;
         out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn keystream() {
+        let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
+        for _ in 0..10 {
+            println!("{:08x?}", cipher.step());
+        }
+        let mut cipher = Hc256::with_key_and_iv_u32([0; 8], [0; 8]);
+        assert_eq!(0x8589075b, cipher.step());
     }
 }
