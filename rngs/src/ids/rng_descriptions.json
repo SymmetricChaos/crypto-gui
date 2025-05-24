@@ -74,7 +74,7 @@
   "Generalized Multiply-with-Carry": {
     "Description": ".",
     "Authors": "Mark Goresky and Andrew Klapper",
-    "Publication": 2003,
+    "Publication": "2003",
     "Traits": [
       "LCG-based"
     ]
@@ -84,6 +84,15 @@
     "Authors": null,
     "Publication": null,
     "Traits": null
+  },
+  "HC-256": {
+    "Description": "HC-256 is a stream cipher submitted to the eSTREAM competition. It accepts both a 256-bit key and a 256-bit nonce. The PRNG uses two 32-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 1024 steps the S-box being updated is switched.",
+    "Authors": "Hongjun Wu",
+    "Publication": "2004",
+    "Traits": [
+      "Cryptographic",
+      "Stream Cipher"
+    ]
   },
   "ISAAC": {
     "Description": "ISAAC (Indirection, Shift, Accumulate, Add, and Count) is a cryptographic PRNG probably best known for its used in the classic roguelike game NetHack.",
@@ -144,7 +153,7 @@
     "Traits": null
   },
   "Multiply-with-Carry": {
-    "Description": ".",
+    "Description": null,
     "Authors": "George Marsaglia",
     "Publication": null,
     "Traits": null
@@ -224,7 +233,7 @@
   "TT800": {
     "Description": "TT800 is a prececessor the Mersenne Twister algorithm.",
     "Authors": " Makoto Matsumoto",
-    "Publication": 1994,
+    "Publication": "1994",
     "Traits": null
   },
   "VMPC-R": {
@@ -236,7 +245,7 @@
   "WELL": {
     "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs",
     "Authors": "François Panneton, Pierre L'Ecuyer, and Makoto Matsumoto",
-    "Publication": 2006,
+    "Publication": "2006",
     "Traits": [
       "LFSR-based"
     ]
@@ -281,7 +290,7 @@
   },
   "Xoroshiro": {
     "Description": "The xoroshiro family of PRNGs",
-    "Authors": "",
+    "Authors": null,
     "Publication": null,
     "Traits": [
       "LFSR-based"

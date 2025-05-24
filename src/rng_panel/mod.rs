@@ -6,6 +6,7 @@ mod chacha_controls;
 mod dual_ec_drbg;
 mod geffe_controls;
 mod halton_controls;
+mod hc256_controls;
 mod isaac_controls;
 mod jsf_controls;
 mod lcg_controls;
@@ -74,6 +75,7 @@ pub struct RngInterface {
     dual_ec_drbg: dual_ec_drbg::DualEcFrame,
     geffe: geffe_controls::GeffeFrame,
     halton: halton_controls::HaltonFrame,
+    hc256: hc256_controls::Hc256Frame,
     jsf: jsf_controls::JsfFrame,
     lcg: lcg_controls::LcgFrame,
     lfg: lfg_controls::LfgFrame,
@@ -140,6 +142,7 @@ impl RngInterface {
                 RngId::ChaCha,
                 RngId::DualEcDrbg,
                 RngId::Geffe,
+                RngId::Hc256,
                 RngId::NaorReingold,
                 RngId::Rabbit,
                 RngId::Salsa20,
@@ -162,6 +165,7 @@ impl RngInterface {
             RngId::DualEcDrbg => &mut self.dual_ec_drbg,
             RngId::Geffe => &mut self.geffe,
             RngId::Halton => &mut self.halton,
+            RngId::Hc256 => &mut self.hc256,
             RngId::Jsf => &mut self.jsf,
             RngId::Lcg => &mut self.lcg,
             RngId::Lfg => &mut self.lfg,

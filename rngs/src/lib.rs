@@ -9,6 +9,7 @@ pub mod errors;
 pub mod geffe;
 pub mod gmwc;
 pub mod halton;
+pub mod hc256;
 pub mod ids;
 pub mod isaac;
 pub mod jsf;
@@ -34,4 +35,5 @@ pub mod vmpcr;
 pub mod well;
 pub mod weyl;
 pub mod xorshift;
+
 pub use traits::ClassicRng;

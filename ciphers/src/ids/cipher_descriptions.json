@@ -506,6 +506,18 @@
       "Transposition"
     ]
   },
+  "HC-256": {
+    "Names": [
+      "HC-256",
+      "HC256"
+    ],
+    "Description": "HC-256 is a stream cipher submitted to the eSTREAM competition. It accepts both a 256-bit key and a 256-bit nonce. The PRNG uses two 32-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 1024 steps the S-box being updated is switched.",
+    "Authors": "Hongjun Wu",
+    "Publication": "2004",
+    "Traits": [
+      "Stream Cipher"
+    ]
+  },
   "Hebern": {
     "Names": [
       "Hebern",
