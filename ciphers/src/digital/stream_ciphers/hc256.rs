@@ -65,7 +65,7 @@ impl Hc256 {
             .wrapping_add(self.p[x3 as usize + 768])
     }
 
-    fn with_key_and_iv_u32(key: [u32; 8], iv: [u32; 8]) -> Self {
+    pub fn with_key_and_iv_u32(key: [u32; 8], iv: [u32; 8]) -> Self {
         let mut w = [0; 2560];
         w[0..8].copy_from_slice(&key);
         w[8..16].copy_from_slice(&iv);

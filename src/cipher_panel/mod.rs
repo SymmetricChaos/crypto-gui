@@ -41,6 +41,8 @@ mod four_square_controls;
 mod general_sub_controls;
 mod gost_controls;
 mod grille_controls;
+mod hc128_controls;
+mod hc256_controls;
 mod hebern_controls;
 mod hutton_controls;
 mod idea_controls;

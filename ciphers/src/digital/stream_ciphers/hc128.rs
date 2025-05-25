@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use utils::byte_formatting::xor_into_bytes;
 
 fn f1(x: u32) -> u32 {
     x.rotate_right(7) ^ x.rotate_right(18) ^ (x >> 3)
@@ -141,72 +141,72 @@ mod tests {
     #[test]
     fn keystream_1() {
         let mut cipher = Hc128::with_key_and_iv_u32([0; 4], [0; 4]);
-        assert_eq!(0x73150082, cipher.next_u32());
-        assert_eq!(0x3bfd03a0, cipher.next_u32());
-        assert_eq!(0xfb2fd77f, cipher.next_u32());
-        assert_eq!(0xaa63af0e, cipher.next_u32());
+        assert_eq!(0x73150082, cipher.step());
+        assert_eq!(0x3bfd03a0, cipher.step());
+        assert_eq!(0xfb2fd77f, cipher.step());
+        assert_eq!(0xaa63af0e, cipher.step());
 
-        assert_eq!(0xde122fc6, cipher.next_u32());
-        assert_eq!(0xa7dc29b6, cipher.next_u32());
-        assert_eq!(0x62a68527, cipher.next_u32());
-        assert_eq!(0x8b75ec68, cipher.next_u32());
+        assert_eq!(0xde122fc6, cipher.step());
+        assert_eq!(0xa7dc29b6, cipher.step());
+        assert_eq!(0x62a68527, cipher.step());
+        assert_eq!(0x8b75ec68, cipher.step());
 
-        assert_eq!(0x9036db1e, cipher.next_u32());
-        assert_eq!(0x81896005, cipher.next_u32());
-        assert_eq!(0x00ade078, cipher.next_u32());
-        assert_eq!(0x491fbf9a, cipher.next_u32());
+        assert_eq!(0x9036db1e, cipher.step());
+        assert_eq!(0x81896005, cipher.step());
+        assert_eq!(0x00ade078, cipher.step());
+        assert_eq!(0x491fbf9a, cipher.step());
 
-        assert_eq!(0x1cdc3013, cipher.next_u32());
-        assert_eq!(0x6c3d6e24, cipher.next_u32());
-        assert_eq!(0x90f664b2, cipher.next_u32());
-        assert_eq!(0x9cd57102, cipher.next_u32());
+        assert_eq!(0x1cdc3013, cipher.step());
+        assert_eq!(0x6c3d6e24, cipher.step());
+        assert_eq!(0x90f664b2, cipher.step());
+        assert_eq!(0x9cd57102, cipher.step());
     }
 
     #[test]
     fn keystream_2() {
         let mut cipher = Hc128::with_key_and_iv_u32([0; 4], [1, 0, 0, 0]);
-        assert_eq!(0xc01893d5, cipher.next_u32());
-        assert_eq!(0xb7dbe958, cipher.next_u32());
-        assert_eq!(0x8f65ec98, cipher.next_u32());
-        assert_eq!(0x64176604, cipher.next_u32());
+        assert_eq!(0xc01893d5, cipher.step());
+        assert_eq!(0xb7dbe958, cipher.step());
+        assert_eq!(0x8f65ec98, cipher.step());
+        assert_eq!(0x64176604, cipher.step());
 
-        assert_eq!(0x36fc6724, cipher.next_u32());
-        assert_eq!(0xc82c6eec, cipher.next_u32());
-        assert_eq!(0x1b1c38a7, cipher.next_u32());
-        assert_eq!(0xc9b42a95, cipher.next_u32());
+        assert_eq!(0x36fc6724, cipher.step());
+        assert_eq!(0xc82c6eec, cipher.step());
+        assert_eq!(0x1b1c38a7, cipher.step());
+        assert_eq!(0xc9b42a95, cipher.step());
 
-        assert_eq!(0x323ef123, cipher.next_u32());
-        assert_eq!(0x0a6a908b, cipher.next_u32());
-        assert_eq!(0xce757b68, cipher.next_u32());
-        assert_eq!(0x9f14f7bb, cipher.next_u32());
+        assert_eq!(0x323ef123, cipher.step());
+        assert_eq!(0x0a6a908b, cipher.step());
+        assert_eq!(0xce757b68, cipher.step());
+        assert_eq!(0x9f14f7bb, cipher.step());
 
-        assert_eq!(0xe4cde011, cipher.next_u32());
-        assert_eq!(0xaeb5173f, cipher.next_u32());
-        assert_eq!(0x89608c94, cipher.next_u32());
-        assert_eq!(0xb5cf46ca, cipher.next_u32());
+        assert_eq!(0xe4cde011, cipher.step());
+        assert_eq!(0xaeb5173f, cipher.step());
+        assert_eq!(0x89608c94, cipher.step());
+        assert_eq!(0xb5cf46ca, cipher.step());
     }
 
     #[test]
     fn keystream_3() {
         let mut cipher = Hc128::with_key_and_iv_u32([0x55, 0, 0, 0], [0; 4]);
-        assert_eq!(0x518251a4, cipher.next_u32());
-        assert_eq!(0x04b4930a, cipher.next_u32());
-        assert_eq!(0xb02af931, cipher.next_u32());
-        assert_eq!(0x0639f032, cipher.next_u32());
+        assert_eq!(0x518251a4, cipher.step());
+        assert_eq!(0x04b4930a, cipher.step());
+        assert_eq!(0xb02af931, cipher.step());
+        assert_eq!(0x0639f032, cipher.step());
 
-        assert_eq!(0xbcb4a47a, cipher.next_u32());
-        assert_eq!(0x5722480b, cipher.next_u32());
-        assert_eq!(0x2bf99f72, cipher.next_u32());
-        assert_eq!(0xcdc0e566, cipher.next_u32());
+        assert_eq!(0xbcb4a47a, cipher.step());
+        assert_eq!(0x5722480b, cipher.step());
+        assert_eq!(0x2bf99f72, cipher.step());
+        assert_eq!(0xcdc0e566, cipher.step());
 
-        assert_eq!(0x310f0c56, cipher.next_u32());
-        assert_eq!(0xd3cc83e8, cipher.next_u32());
-        assert_eq!(0x663db8ef, cipher.next_u32());
-        assert_eq!(0x62dfe07f, cipher.next_u32());
+        assert_eq!(0x310f0c56, cipher.step());
+        assert_eq!(0xd3cc83e8, cipher.step());
+        assert_eq!(0x663db8ef, cipher.step());
+        assert_eq!(0x62dfe07f, cipher.step());
 
-        assert_eq!(0x593e1790, cipher.next_u32());
-        assert_eq!(0xc5ceaa9c, cipher.next_u32());
-        assert_eq!(0xab03806f, cipher.next_u32());
-        assert_eq!(0xc9a6e5a0, cipher.next_u32());
+        assert_eq!(0x593e1790, cipher.step());
+        assert_eq!(0xc5ceaa9c, cipher.step());
+        assert_eq!(0xab03806f, cipher.step());
+        assert_eq!(0xc9a6e5a0, cipher.step());
     }
 }
