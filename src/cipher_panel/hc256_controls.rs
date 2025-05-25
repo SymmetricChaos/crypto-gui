@@ -2,9 +2,12 @@ use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::digital::stream_ciphers::hc256::Hc256;
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 pub struct Hc256Frame {
-    rng: Hc256,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+    cipher: Hc256,
     key: [u32; 8],
     iv: [u32; 8],
 }
@@ -12,7 +15,9 @@ pub struct Hc256Frame {
 impl Default for Hc256Frame {
     fn default() -> Self {
         Self {
-            rng: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            cipher: Default::default(),
             key: [0; 8],
             iv: [0; 8],
         }
@@ -20,7 +25,7 @@ impl Default for Hc256Frame {
 }
 
 impl CipherFrame for Hc256Frame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/stream_ciphers/hc256.rs",
@@ -30,7 +35,7 @@ impl CipherFrame for Hc256Frame {
         ui.subheading("Key");
         for i in 0..8 {
             if ui.u32_hex_edit(&mut self.key[i]).lost_focus() {
-                self.rng = Hc256::with_key_and_iv_u32(self.key, self.iv);
+                self.cipher = Hc256::with_key_and_iv_u32(self.key, self.iv);
             }
         }
 
@@ -38,7 +43,7 @@ impl CipherFrame for Hc256Frame {
         ui.subheading("Nonce");
         for i in 0..8 {
             if ui.u32_hex_edit(&mut self.iv[i]).lost_focus() {
-                self.rng = Hc256::with_key_and_iv_u32(self.key, self.iv);
+                self.cipher = Hc256::with_key_and_iv_u32(self.key, self.iv);
             }
         }
     }
@@ -50,14 +55,19 @@ impl CipherFrame for Hc256Frame {
     }
 
     fn reset(&mut self) {
-        todo!()
+        *self = Self::default()
     }
 
     fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        todo!()
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|e| ciphers::CipherError::Input(e.to_string()))?;
+        self.cipher.encrypt_bytes(&mut bytes);
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        todo!()
+        self.encrypt_string(text)
     }
 }
