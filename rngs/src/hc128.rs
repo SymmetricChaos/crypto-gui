@@ -71,6 +71,7 @@ impl Hc128 {
         out.p.copy_from_slice(&w[256..768]);
         out.q.copy_from_slice(&w[768..1280]);
 
+        // These steps are the same as normal stepping but they XOR the output back into the Sbox
         for i in 0..512 {
             out.p[i] = out.p[i].wrapping_add(g1(
                 out.p[sub!(i, 3)],
