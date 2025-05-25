@@ -1,3 +1,5 @@
+use utils::byte_formatting::xor_into_bytes;
+
 fn f1(n: u32) -> u32 {
     n.rotate_right(7) ^ n.rotate_right(18) ^ (n >> 3)
 }
@@ -13,6 +15,7 @@ macro_rules! sub {
     };
 }
 
+#[derive(Debug, Clone)]
 pub struct Hc256 {
     p: [u32; 1024],
     q: [u32; 1024],
@@ -88,7 +91,7 @@ impl Hc256 {
         out
     }
 
-    fn step(&mut self) -> u32 {
+    pub fn step(&mut self) -> u32 {
         let j = (self.ctr % 1024) as usize;
         let out: u32;
         if self.ctr < 1024 {
@@ -106,22 +109,23 @@ impl Hc256 {
         out
     }
 
-    fn bytes(&mut self) -> [u8; 4] {
-        let j = (self.ctr % 1024) as usize;
-        let out: u32;
-        if self.ctr < 1024 {
-            self.p[j] = self.p[j]
-                .wrapping_add(self.p[sub!(j, 10)])
-                .wrapping_add(self.g1(self.p[sub!(j, 3)], self.p[sub!(j, 1023)]));
-            out = self.h1(self.p[sub!(j, 12)]) ^ self.p[j]
-        } else {
-            self.q[j] = self.q[j]
-                .wrapping_add(self.q[sub!(j, 10)])
-                .wrapping_add(self.g2(self.q[sub!(j, 3)], self.q[sub!(j, 1023)]));
-            out = self.h2(self.q[sub!(j, 12)]) ^ self.q[j]
+    pub fn next_block(&mut self) -> [u8; 4] {
+        self.step().to_be_bytes()
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.clone().encrypt_bytes_mut(bytes);
+    }
+
+    pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
+        let mut keystream: [u8; 4];
+        let mut ptr = 0;
+
+        while ptr < bytes.len() {
+            keystream = self.next_block();
+            xor_into_bytes(&mut bytes[ptr..(ptr + 4)], &keystream);
+            ptr += 4;
         }
-        self.ctr = (self.ctr + 1) % 2048;
-        out.to_be_bytes()
     }
 }
 

@@ -190,7 +190,7 @@ impl Rabbit {
 
         while ptr < bytes.len() {
             keystream = self.next_block();
-            xor_into_bytes(&mut bytes[ptr..], &keystream);
+            xor_into_bytes(&mut bytes[ptr..(ptr + 16)], &keystream);
             ptr += 16;
         }
     }
