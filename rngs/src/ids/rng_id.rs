@@ -36,6 +36,8 @@ rng_ids_and_names!(
     DualEcDrbg, "Dual_EC_DRBG";
     Geffe, "Geffe";
     Gmwc, "Generalized Multiply-with-Carry";
+    Hc128, "HC-128";
+    Hc256, "HC-256";
     Halton, "Halton";
     Isaac, "ISAAC";
     Jsf, "JSF";

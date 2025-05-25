@@ -67,6 +67,8 @@ cipher_ids_and_names!(
     Gift, "GIFT";
     Gost, "GOST 28147-89";
     Grille, "Grille";
+    Hc128, "HC-128";
+    Hc256, "HC-256";
     Hebern, "Hebern";
     Hutton, "Hutton";
     Idea, "IDEA";

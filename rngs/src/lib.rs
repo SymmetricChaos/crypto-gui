@@ -9,6 +9,7 @@ pub mod errors;
 pub mod geffe;
 pub mod gmwc;
 pub mod halton;
+pub mod hc128;
 pub mod hc256;
 pub mod ids;
 pub mod isaac;

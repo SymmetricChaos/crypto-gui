@@ -82,12 +82,26 @@ impl Hc256 {
         out.q.copy_from_slice(&w[1536..2560]);
 
         for _ in 0..4096 {
-            out.next_u32();
+            out.step();
         }
 
         // Because 4096 % 2048 = 0 there is no need to reset the counter to zero
 
         out
+    }
+
+    fn step(&mut self) {
+        let j = (self.ctr % 1024) as usize;
+        if self.ctr < 1024 {
+            self.p[j] = self.p[j]
+                .wrapping_add(self.p[sub!(j, 10)])
+                .wrapping_add(self.g1(self.p[sub!(j, 3)], self.p[sub!(j, 1023)]));
+        } else {
+            self.q[j] = self.q[j]
+                .wrapping_add(self.q[sub!(j, 10)])
+                .wrapping_add(self.g2(self.q[sub!(j, 3)], self.q[sub!(j, 1023)]));
+        }
+        self.ctr = (self.ctr + 1) % 2048;
     }
 }
 

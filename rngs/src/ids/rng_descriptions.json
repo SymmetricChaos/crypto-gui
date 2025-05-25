@@ -85,8 +85,17 @@
     "Publication": null,
     "Traits": null
   },
+  "HC-128": {
+    "Description": "HC-128 is a stream cipher submitted to the eSTREAM competition. It accepts both a 128-bit key and a 128-bit nonce. The PRNG uses two 16-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 512 steps the S-box being updated is switched.",
+    "Authors": "Hongjun Wu",
+    "Publication": "2004",
+    "Traits": [
+      "Cryptographic",
+      "Stream Cipher"
+    ]
+  },
   "HC-256": {
-    "Description": "HC-256 is a stream cipher submitted to the eSTREAM competition. It accepts both a 256-bit key and a 256-bit nonce. The PRNG uses two 32-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 1024 steps the S-box being updated is switched.",
+    "Description": "HC-256 is a stream cipher with twice the state and twice the key size for HC-128. It accepts both a 256-bit key and a 256-bit nonce. The PRNG uses two 32-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 1024 steps the S-box being updated is switched.",
     "Authors": "Hongjun Wu",
     "Publication": "2004",
     "Traits": [
