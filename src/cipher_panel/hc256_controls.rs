@@ -30,6 +30,12 @@ impl CipherFrame for Hc256Frame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/stream_ciphers/hc256.rs",
         );
+        ui.add_space(8.0);
+
+        ui.randomize_reset_cipher(self);
+        ui.add_space(8.0);
+
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(8.0);
         ui.subheading("Key");

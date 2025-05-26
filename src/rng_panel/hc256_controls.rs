@@ -33,6 +33,14 @@ impl ClassicRngFrame for Hc256Frame {
         );
 
         ui.add_space(8.0);
+        if ui.button("Randomize").clicked() {
+            self.randomize()
+        }
+        if ui.button("Reset").clicked() {
+            self.reset()
+        }
+
+        ui.add_space(8.0);
         ui.subheading("Key");
         for i in 0..8 {
             if ui.u32_hex_edit(&mut self.key[i]).lost_focus() {
@@ -59,6 +67,8 @@ impl ClassicRngFrame for Hc256Frame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         rng.fill(&mut self.key);
+        rng.fill(&mut self.iv);
+        self.rng = Hc256::with_key_and_iv_u32(self.key, self.iv);
     }
 
     fn reset(&mut self) {
