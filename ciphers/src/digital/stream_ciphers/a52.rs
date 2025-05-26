@@ -1,4 +1,4 @@
-use super::lfsr_copy::Lfsr32;
+use super::lfsr::Lfsr32;
 use utils::byte_formatting::xor_into_bytes;
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {

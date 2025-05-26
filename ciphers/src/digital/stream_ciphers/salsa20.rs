@@ -14,7 +14,6 @@ impl Default for Salsa20 {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-
             key: [
                 0x04030201, 0x08070605, 0x0c0b0a09, 0x100f0e0d, 0x14131211, 0x18171615, 0x1c1b1a19,
                 0x201f1e1d,
