@@ -60,9 +60,8 @@ impl ClassicRngFrame for LcgFrame {
         );
         ui.add_space(8.0);
 
-        if ui.button("Randomize").clicked() {
-            self.randomize()
-        }
+        ui.add_space(8.0);
+        ui.randomize_reset_rng(self);
 
         ui.add_space(16.0);
         ui.subheading("Calculation");

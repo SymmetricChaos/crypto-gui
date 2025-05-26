@@ -32,6 +32,9 @@ impl ClassicRngFrame for GeffeFrame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
+
         for i in 0..3 {
             let lfsr = &mut self.rng.rngs[i];
 

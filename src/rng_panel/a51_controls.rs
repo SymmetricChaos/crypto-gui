@@ -34,6 +34,9 @@ impl ClassicRngFrame for A51Frame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
+
         ui.subheading("Key (Taken in Big-endian Order)");
         if ui.u64_hex_edit(&mut self.key).changed() {
             self.rng.key = self.key.to_be_bytes();

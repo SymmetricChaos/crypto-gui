@@ -22,14 +22,15 @@ impl Default for AlternatingStepFrame {
     }
 }
 
-impl AlternatingStepFrame {}
-
 impl ClassicRngFrame for AlternatingStepFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/alternating_step.rs",
         );
+        ui.add_space(8.0);
+
+        ui.randomize_reset_rng(self);
         ui.add_space(8.0);
 
         for i in 0..3 {

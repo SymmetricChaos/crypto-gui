@@ -33,12 +33,7 @@ impl ClassicRngFrame for Hc128Frame {
         );
 
         ui.add_space(8.0);
-        if ui.button("Randomize").clicked() {
-            self.randomize()
-        }
-        if ui.button("Reset").clicked() {
-            self.reset()
-        }
+        ui.randomize_reset_rng(self);
 
         ui.add_space(8.0);
         ui.subheading("Key");
