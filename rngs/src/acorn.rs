@@ -1,8 +1,17 @@
 use crate::ClassicRng;
 
 pub struct Acorn60 {
-    seed: u64,
+    state: u64,
     adders: Vec<u64>,
+}
+
+impl Default for Acorn60 {
+    fn default() -> Self {
+        Self {
+            state: Default::default(),
+            adders: Default::default(),
+        }
+    }
 }
 
 impl ClassicRng for Acorn60 {

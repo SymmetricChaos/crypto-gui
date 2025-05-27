@@ -14,6 +14,7 @@ pub mod hc256;
 pub mod ids;
 pub mod isaac;
 pub mod jsf;
+pub mod kiss;
 pub mod lcg;
 pub mod lfg;
 pub mod lfsr;
