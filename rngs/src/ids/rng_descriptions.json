@@ -117,6 +117,12 @@
     "Publication": null,
     "Traits": null
   },
+  "KISS": {
+    "Description": "KISS (Keep It Simple Stupid) is a PRNG created by George Marsaglia, partially in response to the Mersenne Twister algorithm. It combines four simple PRNGs (a pair of 16-bit multiply with carry generator, a 32-bit linear congruential generator, and a 32-bit xorshift) in order to produce an extremely long period. Each of the component generators is stepped independently and their outputs combined. Marsaglia asserts a period of 2^123 but due to a typo in the xorshift generator this is not achieved.",
+    "Authors": "George Marsaglia",
+    "Publication": "1993",
+    "Traits": null
+  },
   "Lagged Fibonacci Generator": {
     "Description": "An LFG uses a generalized Fibonacci sequence to generate pseudorandom numbers. They are similar to a Linear Feedback Shift Register operating on numbers rather than bits and like LFSRs selection of parameters has a very strong influence on the quality of the output. A particular kind of LFG was used as part of the VIC cipher from the Cold War.",
     "Authors": null,

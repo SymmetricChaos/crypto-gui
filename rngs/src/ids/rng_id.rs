@@ -41,6 +41,7 @@ rng_ids_and_names!(
     Halton, "Halton";
     Isaac, "ISAAC";
     Jsf, "JSF";
+    Kiss, "KISS";
     Lcg, "Linear Congruential Generator";
     Lfg, "Lagged Fibonacci Generator";
     Lfsr, "Linear Feedback Shift Register";
