@@ -51,7 +51,10 @@ impl ClassicRngFrame for JsfFrame {
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
-        todo!()
+        match self.big {
+            true => &self.rng64,
+            false => &self.rng32,
+        }
     }
 
     fn randomize(&mut self) {

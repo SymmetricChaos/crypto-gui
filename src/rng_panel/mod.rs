@@ -10,6 +10,7 @@ mod hc128_controls;
 mod hc256_controls;
 mod isaac_controls;
 mod jsf_controls;
+mod kiss_controls;
 mod lcg_controls;
 mod lfg_controls;
 mod lfsr_controls;
@@ -79,6 +80,7 @@ pub struct RngInterface {
     hc128: hc128_controls::Hc128Frame,
     hc256: hc256_controls::Hc256Frame,
     jsf: jsf_controls::JsfFrame,
+    kiss: kiss_controls::KissFrame,
     lcg: lcg_controls::LcgFrame,
     lfg: lfg_controls::LfgFrame,
     lfsr: lfsr_controls::LfsrFrame,
@@ -107,6 +109,7 @@ impl RngInterface {
             &[
                 RngId::AlternatingStep,
                 RngId::Jsf,
+                RngId::Kiss,
                 RngId::Lcg,
                 RngId::Lfg,
                 RngId::Lfsr,
@@ -171,6 +174,7 @@ impl RngInterface {
             RngId::Hc128 => &mut self.hc128,
             RngId::Hc256 => &mut self.hc256,
             RngId::Jsf => &mut self.jsf,
+            RngId::Kiss => &mut self.kiss,
             RngId::Lcg => &mut self.lcg,
             RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
