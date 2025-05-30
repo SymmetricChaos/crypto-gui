@@ -15,6 +15,7 @@ pub mod ids;
 pub mod isaac;
 pub mod jsf;
 pub mod kiss;
+pub mod kiss11;
 pub mod lcg;
 pub mod lfg;
 pub mod lfsr;

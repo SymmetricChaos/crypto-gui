@@ -70,6 +70,57 @@ impl ClassicRng for Kiss99 {
     }
 }
 
+pub struct Kiss11 {
+    pub z: u32,
+    pub w: u32,
+    pub jsr: u32,
+    pub jcong: u32,
+}
+
+impl Default for Kiss11 {
+    fn default() -> Self {
+        Self {
+            z: 362436069,
+            w: 521288629,
+            jsr: 123456789,
+            jcong: 380116160,
+        }
+    }
+}
+
+impl Kiss11 {
+    // Pair of 16 bit multiply with carry generators
+    fn mwc(&mut self) -> u32 {
+        self.z = 36969_u32
+            .wrapping_mul(self.z & MASK16)
+            .wrapping_add(self.z >> 16);
+        self.w = 18000_u32
+            .wrapping_mul(self.w & MASK16)
+            .wrapping_add(self.w >> 16);
+        (self.z << 16).wrapping_add(self.w)
+    }
+
+    // An xorshift generator
+    fn shr3(&mut self) -> u32 {
+        self.jsr ^= self.jsr << 17; // the 17 and 13 should be switched for a maximal length generator, likely a typo as it is corrected in later version
+        self.jsr ^= self.jsr >> 13;
+        self.jsr ^= self.jsr << 5;
+        self.jsr
+    }
+
+    // A linear congruential generator
+    fn cong(&mut self) -> u32 {
+        self.jcong = 69069_u32.wrapping_mul(self.jcong).wrapping_add(1234567);
+        self.jcong
+    }
+}
+
+impl ClassicRng for Kiss11 {
+    fn next_u32(&mut self) -> u32 {
+        (self.mwc() ^ self.cong()).wrapping_add(self.shr3())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
