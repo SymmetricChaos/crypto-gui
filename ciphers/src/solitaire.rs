@@ -15,6 +15,14 @@ impl Card {
             Card::C(_) => false,
         }
     }
+
+    pub fn value(&self) -> u8 {
+        match self {
+            Card::JA => 0,
+            Card::JB => 0,
+            Card::C(n) => *n,
+        }
+    }
 }
 
 impl Display for Card {
@@ -45,7 +53,8 @@ impl Default for Solitaire {
 }
 
 impl Solitaire {
-    fn init(n: usize) -> Self {
+    // Create a deck with n+2 cards (the jokers are added automatically)
+    pub fn init(n: usize) -> Self {
         let mut deck = vec![Card::C(0); n + 2];
         deck[0] = Card::JA;
         deck[1] = Card::JB;
@@ -111,9 +120,46 @@ impl Solitaire {
             (r, m, l)
         };
 
-        r.extend_from_slice(&m);
-        r.extend_from_slice(&l);
+        r.extend(m);
+        r.extend(l);
         self.deck = r;
+    }
+
+    fn count_cut(&mut self) {
+        let last_card = self.deck.pop().unwrap();
+        if last_card.is_joker() {
+            self.deck.push(last_card);
+        } else {
+            let p = last_card.value() as usize;
+            let mut r = self.deck.split_off(p);
+            r.extend_from_slice(&self.deck);
+            r.push(last_card);
+            self.deck = r;
+        }
+    }
+
+    fn output_card(&self) -> Card {
+        let first_card = self.deck[0];
+        if first_card.is_joker() {
+            self.deck.last().unwrap().clone()
+        } else {
+            let value = first_card.value() as usize;
+            self.deck[value + 1]
+        }
+    }
+
+    fn next_value(&mut self) -> u8 {
+        // Retry until a non-joker card is output
+        loop {
+            self.move_a();
+            self.move_b();
+            self.triple_cut();
+            self.count_cut();
+            let out = self.output_card();
+            if !out.is_joker() {
+                return out.value();
+            }
+        }
     }
 }
 
@@ -205,6 +251,47 @@ mod tests {
                 Card::C(1),
                 Card::C(2),
                 Card::C(3),
+            ]
+        );
+    }
+
+    #[test]
+    fn count_cut() {
+        let mut cipher = Solitaire::init(12);
+        cipher.deck = vec![
+            Card::C(7),
+            Card::C(1),
+            Card::C(2),
+            Card::C(3),
+            Card::C(6),
+            Card::JA,
+            Card::JB,
+            Card::C(10),
+            Card::C(4),
+            Card::C(5),
+            Card::C(11),
+            Card::C(12),
+            Card::C(8),
+            Card::C(9),
+        ];
+        cipher.count_cut();
+        assert_eq!(
+            cipher.deck,
+            vec![
+                Card::C(5),
+                Card::C(11),
+                Card::C(12),
+                Card::C(8),
+                Card::C(7),
+                Card::C(1),
+                Card::C(2),
+                Card::C(3),
+                Card::C(6),
+                Card::JA,
+                Card::JB,
+                Card::C(10),
+                Card::C(4),
+                Card::C(9),
             ]
         );
     }
