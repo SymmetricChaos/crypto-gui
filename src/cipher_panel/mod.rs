@@ -77,6 +77,7 @@ mod simon_controls;
 mod slidefair_controls;
 mod sm4_controls;
 mod snow3g_controls;
+mod solitaire_controls;
 mod speck_controls;
 mod tea_controls;
 mod threefish_controls;

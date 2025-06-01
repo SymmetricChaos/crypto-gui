@@ -4,16 +4,24 @@ use itertools::Itertools;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Alphabet {
+    /// ABCDEFGHIJKLMNOPQRSTUVWXYZ
     BasicLatin,
+    /// ABDEFGHIJKLMNOPQRSTUVWXYZ
     BasicLatinNoC,
+    /// ABCDEFGHIKLMNOPQRSTUVWXYZ
     BasicLatinNoJ,
+    /// ABCDEFGHIJKLMNOPRSTUVWXYZ
     BasicLatinNoQ,
+    /// ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
     Alphanumeric,
-    Ascii94,  // The printing ASCII symbols (not including space)
-    Ascii128, // The ASCII symbols with control pictures for non-printing characters except space
-    // AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
-    ClassicalLatin, // Classical Latin lacks J, U, and W
-    Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
+    /// The 94 printing ASCII symbols (not including space)
+    Ascii94,
+    ///  The 128 ASCII symbols with control pictures for non-printing characters
+    Ascii128,
+    /// ABCDEFGHIKLMNOPQRSTVXYZ (lacks J, U, and W)
+    ClassicalLatin,
+    /// ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+    Base64,
 }
 
 impl Alphabet {
@@ -27,7 +35,6 @@ impl Alphabet {
             Alphabet::Alphanumeric => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
-            // Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
             Alphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
             Alphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
         }
