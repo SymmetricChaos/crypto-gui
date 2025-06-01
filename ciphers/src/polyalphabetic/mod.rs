@@ -26,6 +26,9 @@ pub use alberti::Alberti;
 pub mod m94;
 pub use m94::M94;
 
+pub mod solitaire;
+pub use solitaire::Solitaire;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, EnumIter, Display)]
 pub enum PolyMode {
     #[strum(to_string = "Cyclic Key")]

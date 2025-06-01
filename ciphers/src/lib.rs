@@ -3,7 +3,6 @@ pub mod machines;
 pub mod playfair;
 pub mod polyalphabetic;
 pub mod polybius;
-pub mod solitaire;
 pub mod substitution;
 pub mod tactical;
 pub mod transposition;

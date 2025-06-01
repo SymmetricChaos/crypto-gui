@@ -1,5 +1,10 @@
 use std::fmt::Display;
 
+use itertools::Itertools;
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
+
+use crate::{Cipher, CipherError};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Card {
     JA,
@@ -35,33 +40,46 @@ impl Display for Card {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Solitaire {
     pub deck: Vec<Card>,
+    pub alphabet: VecString,
 }
 
 impl Default for Solitaire {
     fn default() -> Self {
-        let mut deck = vec![Card::C(0); 54];
-        deck[0] = Card::JA;
-        deck[1] = Card::JB;
-        for i in 0..52 {
-            deck[i + 2] = Card::C((i + 1) as u8);
-        }
+        let mut deck = Vec::with_capacity(54);
 
-        Self { deck }
+        for i in 0..52 {
+            deck.push(Card::C((i + 1) as u8));
+        }
+        deck.push(Card::JA);
+        deck.push(Card::JB);
+
+        Self {
+            deck,
+            alphabet: VecString::from(Alphabet::BasicLatin),
+        }
     }
 }
 
 impl Solitaire {
     // Create a deck with n+2 cards (the jokers are added automatically)
     pub fn init(n: usize) -> Self {
-        let mut deck = vec![Card::C(0); n + 2];
-        deck[0] = Card::JA;
-        deck[1] = Card::JB;
+        let mut deck = Vec::with_capacity(n + 2);
         for i in 0..n {
-            deck[i + 2] = Card::C((i + 1) as u8);
+            deck.push(Card::C((i + 1) as u8));
         }
-        Self { deck }
+        deck.push(Card::JA);
+        deck.push(Card::JB);
+        Self {
+            deck,
+            alphabet: VecString::from(Alphabet::BasicLatin),
+        }
+    }
+
+    pub fn as_string(&self) -> String {
+        self.deck.iter().map(|c| c.to_string()).join(" ")
     }
 
     fn len(&self) -> usize {
@@ -76,31 +94,30 @@ impl Solitaire {
         self.deck.iter().position(|x| *x == Card::JB).unwrap()
     }
 
-    fn move_a(&mut self) {
+    fn move_jokers(&mut self) {
         let n = self.len();
-        let p = self.position_a();
-        if p == (n - 1) {
+
+        let a = self.position_a();
+        if a == (n - 1) {
             self.deck.swap(n - 1, 0);
             self.deck.swap(0, 1);
         } else {
-            self.deck.swap(p, p + 1);
+            self.deck.swap(a, a + 1);
         }
-    }
 
-    fn move_b(&mut self) {
-        let n = self.len();
-        let p = self.position_b();
-        if p == (n - 1) {
+        let b = self.position_b();
+        if b == (n - 1) {
             self.deck.swap(n - 1, 0);
             self.deck.swap(0, 1);
             self.deck.swap(1, 2);
-        } else if p == (n - 2) {
-            self.deck.swap(p, p + 1);
-            self.deck.swap(n - 1, 0);
-            self.deck.swap(0, 1);
+        } else if b == (n - 2) {
+            println!("here");
+            self.deck.swap(b, b + 1);
+            let j = self.deck.pop().unwrap();
+            self.deck.insert(1, j);
         } else {
-            self.deck.swap(p, p + 1);
-            self.deck.swap(p + 1, p + 2);
+            self.deck.swap(b, b + 1);
+            self.deck.swap(b + 1, b + 2);
         }
     }
 
@@ -144,15 +161,14 @@ impl Solitaire {
             self.deck.last().unwrap().clone()
         } else {
             let value = first_card.value() as usize;
-            self.deck[value + 1]
+            self.deck[value]
         }
     }
 
     fn next_value(&mut self) -> u8 {
         // Retry until a non-joker card is output
         loop {
-            self.move_a();
-            self.move_b();
+            self.move_jokers();
             self.triple_cut();
             self.count_cut();
             let out = self.output_card();
@@ -160,6 +176,51 @@ impl Solitaire {
                 return out.value();
             }
         }
+    }
+
+    fn key_stream(&self, n: usize) -> Vec<u8> {
+        let mut rng = self.clone();
+        let mut out = Vec::with_capacity(n);
+        for _ in 0..n {
+            out.push(rng.next_value());
+        }
+        out
+    }
+
+    fn encrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, k as i32).unwrap())
+    }
+
+    fn decrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, -(k as i32)).unwrap())
+    }
+}
+
+impl Cipher for Solitaire {
+    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        let key_steam = self.key_stream(text.chars().count());
+        let mut out = String::with_capacity(text.len());
+        for (c, n) in text.chars().zip(key_steam) {
+            out.push(self.encrypt_char(c, n as usize)?)
+        }
+        Ok(out)
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        let key_steam = self.key_stream(text.chars().count());
+        let mut out = String::with_capacity(text.len());
+        for (c, n) in text.chars().zip(key_steam) {
+            out.push(self.decrypt_char(c, n as usize)?)
+        }
+        Ok(out)
     }
 }
 
@@ -171,8 +232,7 @@ mod tests {
     fn move_test(v1: Vec<Card>, v2: Vec<Card>) {
         let mut cipher = Solitaire::init(v1.len());
         cipher.deck = v1;
-        cipher.move_a();
-        cipher.move_b();
+        cipher.move_jokers();
         assert_eq!(cipher.deck, v2)
     }
 
@@ -294,5 +354,26 @@ mod tests {
                 Card::C(9),
             ]
         );
+    }
+
+    #[test]
+    fn keystream() {
+        let mut cipher = Solitaire::default();
+        assert_eq!(4, cipher.next_value());
+        assert_eq!(49, cipher.next_value());
+        assert_eq!(10, cipher.next_value());
+        assert_eq!(24, cipher.next_value());
+        assert_eq!(8, cipher.next_value());
+        assert_eq!(51, cipher.next_value());
+        assert_eq!(44, cipher.next_value());
+        assert_eq!(6, cipher.next_value());
+        assert_eq!(4, cipher.next_value());
+        assert_eq!(33, cipher.next_value());
+    }
+
+    #[test]
+    fn test_encrypt() {
+        let cipher = Solitaire::default();
+        assert_eq!("EXKYIZSGEH", cipher.encrypt("AAAAAAAAAA").unwrap());
     }
 }
