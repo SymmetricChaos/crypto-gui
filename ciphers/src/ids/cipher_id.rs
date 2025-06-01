@@ -108,6 +108,7 @@ cipher_ids_and_names!(
     Simon, "Simon";
     Skipjack, "Skipjack";
     Slidefair, "Slidefair";
+    Solitaire, "Solitaire";
     Sm4, "SM4";
     Snow3G, "Snow 3G";
     Speck, "Speck";

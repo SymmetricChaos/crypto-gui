@@ -1048,6 +1048,18 @@
       "Stream Cipher"
     ]
   },
+  "Solitaire": {
+    "Names": [
+      "Solitaire"
+    ],
+    "Description": "Solitaire is a hand operated cipher designed by Bruce Schneier for the novel Cryptonomicon by Neal Stephenson. It uses only a standard deck of playing cards including two distinguishable jokers as materials. It uses the same principle as a Vigenère cipher but generates a long keystream by moving the jokers and performing cuts of the deck.",
+    "Authors": "Bruce Schneier",
+    "Publication": "1999",
+    "Traits": [
+      "Substitution",
+      "Polyalphabetic"
+    ]
+  },
   "Speck": {
     "Names": [
       "Speck",
