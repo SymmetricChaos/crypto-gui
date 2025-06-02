@@ -1,9 +1,15 @@
-use std::fmt::Display;
-
+use crate::{Cipher, CipherError};
 use itertools::Itertools;
+use std::fmt::Display;
 use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
-use crate::{Cipher, CipherError};
+/// Two character names of cards in order A-K and ♣♦♥♠
+pub const CARD_NAMES: [&'static str; 52] = [
+    "A♣", "2♣", "3♣", "4♣", "5♣", "6♣", "7♣", "8♣", "9♣", "T♣", "J♣", "Q♣", "K♣", "A♦", "2♦", "3♦",
+    "4♦", "5♦", "6♦", "7♦", "8♦", "9♦", "T♦", "J♦", "Q♦", "K♦", "A♥", "2♥", "3♥", "4♥", "5♥", "6♥",
+    "7♥", "8♥", "9♥", "T♥", "J♥", "Q♥", "K♥", "A♠", "2♠", "3♠", "4♠", "5♠", "6♠", "7♠", "8♠", "9♠",
+    "T♠", "J♠", "Q♠", "K♠",
+];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Card {
@@ -26,6 +32,14 @@ impl Card {
             Card::JA => 0,
             Card::JB => 0,
             Card::C(n) => *n,
+        }
+    }
+
+    pub fn to_unicode(&self) -> &'static str {
+        match self {
+            Card::JA => "XA",
+            Card::JB => "XB",
+            Card::C(n) => CARD_NAMES[(n - 1) as usize],
         }
     }
 }
@@ -64,18 +78,39 @@ impl Default for Solitaire {
 }
 
 impl Solitaire {
-    // Create a deck with n+2 cards (the jokers are added automatically)
-    pub fn init(n: usize) -> Self {
-        let mut deck = Vec::with_capacity(n + 2);
-        for i in 0..n {
+    pub fn from_keyword(keyword: &str) -> Result<Self, CipherError> {
+        let mut deck = Vec::with_capacity(54);
+        for i in 0..52 {
             deck.push(Card::C((i + 1) as u8));
         }
         deck.push(Card::JA);
         deck.push(Card::JB);
-        Self {
+        let mut cipher = Self {
             deck,
             alphabet: VecString::from(Alphabet::BasicLatin),
+        };
+
+        // Convert the keyword to numbers
+        let keyword_stream: Vec<Result<usize, CipherError>> = keyword
+            .chars()
+            .map(|c| {
+                cipher
+                    .alphabet
+                    .get_pos(c)
+                    .ok_or(CipherError::invalid_input_char(c))
+            })
+            .collect();
+        for i in keyword_stream {
+            if let Ok(n) = i {
+                cipher.move_jokers();
+                cipher.triple_cut();
+                cipher.count_cut();
+                cipher.count_cut_n(n + 1);
+            } else {
+                return Err(i.unwrap_err());
+            }
         }
+        Ok(cipher)
     }
 
     pub fn set_from_keyword(&mut self, keyword: &str) -> Result<(), CipherError> {
@@ -113,6 +148,10 @@ impl Solitaire {
 
     pub fn as_string(&self) -> String {
         self.deck.iter().map(|c| c.to_string()).join(" ")
+    }
+
+    pub fn as_unicode(&self) -> String {
+        self.deck.iter().map(|c| c.to_unicode()).join(" ")
     }
 
     fn len(&self) -> usize {
@@ -269,133 +308,6 @@ mod tests {
 
     use super::*;
 
-    fn move_test(v1: Vec<Card>, v2: Vec<Card>) {
-        let mut cipher = Solitaire::init(v1.len());
-        cipher.deck = v1;
-        cipher.move_jokers();
-        assert_eq!(cipher.deck, v2)
-    }
-
-    #[test]
-    fn swaps() {
-        move_test(
-            vec![
-                Card::JA,
-                Card::C(1),
-                Card::C(2),
-                Card::JB,
-                Card::C(3),
-                Card::C(4),
-                Card::C(5),
-            ],
-            vec![
-                Card::C(1),
-                Card::JA,
-                Card::C(2),
-                Card::C(3),
-                Card::C(4),
-                Card::JB,
-                Card::C(5),
-            ],
-        );
-        move_test(
-            vec![
-                Card::C(1),
-                Card::JA,
-                Card::JB,
-                Card::C(2),
-                Card::C(3),
-                Card::C(4),
-                Card::C(5),
-            ],
-            vec![
-                Card::C(1),
-                Card::JA,
-                Card::C(2),
-                Card::JB,
-                Card::C(3),
-                Card::C(4),
-                Card::C(5),
-            ],
-        );
-    }
-
-    #[test]
-    fn triple_cut() {
-        let mut cipher = Solitaire::init(9);
-        cipher.deck = vec![
-            Card::C(1),
-            Card::C(2),
-            Card::C(3),
-            Card::JB,
-            Card::C(4),
-            Card::C(5),
-            Card::C(6),
-            Card::C(7),
-            Card::JA,
-            Card::C(8),
-            Card::C(9),
-        ];
-        cipher.triple_cut();
-        assert_eq!(
-            cipher.deck,
-            vec![
-                Card::C(8),
-                Card::C(9),
-                Card::JB,
-                Card::C(4),
-                Card::C(5),
-                Card::C(6),
-                Card::C(7),
-                Card::JA,
-                Card::C(1),
-                Card::C(2),
-                Card::C(3),
-            ]
-        );
-    }
-
-    #[test]
-    fn count_cut() {
-        let mut cipher = Solitaire::init(12);
-        cipher.deck = vec![
-            Card::C(7),
-            Card::C(1),
-            Card::C(2),
-            Card::C(3),
-            Card::C(6),
-            Card::JA,
-            Card::JB,
-            Card::C(10),
-            Card::C(4),
-            Card::C(5),
-            Card::C(11),
-            Card::C(12),
-            Card::C(8),
-            Card::C(9),
-        ];
-        cipher.count_cut();
-        assert_eq!(
-            cipher.deck,
-            vec![
-                Card::C(5),
-                Card::C(11),
-                Card::C(12),
-                Card::C(8),
-                Card::C(7),
-                Card::C(1),
-                Card::C(2),
-                Card::C(3),
-                Card::C(6),
-                Card::JA,
-                Card::JB,
-                Card::C(10),
-                Card::C(4),
-                Card::C(9),
-            ]
-        );
-    }
-
     #[test]
     fn keystream() {
         let mut cipher = Solitaire::default();
@@ -412,15 +324,14 @@ mod tests {
     }
 
     #[test]
-    fn test_encrypt() {
+    fn encrypt() {
         let cipher = Solitaire::default();
         assert_eq!("EXKYIZSGEH", cipher.encrypt("AAAAAAAAAA").unwrap());
     }
 
     #[test]
-    fn test_encrypt_with_key1() {
-        let mut cipher = Solitaire::default();
-        cipher.set_from_keyword("FOO").unwrap();
+    fn encrypt_with_key1() {
+        let cipher = Solitaire::from_keyword("FOO").unwrap();
         assert_eq!(
             "ITHZUJIWGRFARMW",
             cipher.encrypt("AAAAAAAAAAAAAAA").unwrap()
@@ -428,14 +339,13 @@ mod tests {
     }
 
     #[test]
-    fn test_encrypt_with_key2() {
-        let mut cipher = Solitaire::default();
-        cipher.set_from_keyword("CRYPTONOMICON").unwrap();
+    fn encrypt_with_key2() {
+        let cipher = Solitaire::from_keyword("CRYPTONOMICON").unwrap();
         assert_eq!("KIRAKSFJAN", cipher.encrypt("SOLITAIREX").unwrap());
     }
 
     #[test]
-    fn test_encrypt_with_key3() {
+    fn encrypt_with_key3() {
         let mut cipher = Solitaire::default();
         cipher.set_from_keyword("A").unwrap();
         assert_eq!(

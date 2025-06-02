@@ -268,6 +268,7 @@ pub struct CipherInterface {
     m94: m94_controls::M94Frame,
     porta: porta_controls::PortaFrame,
     quagmire: quagmire_controls::QuagmireFrame,
+    solitaire: solitaire_controls::SolitaireFrame,
     vigenere: vigenere_controls::VigenereFrame,
 
     // Playfair Based
@@ -392,6 +393,7 @@ impl CipherInterface {
                 CipherId::M94,
                 CipherId::Porta,
                 CipherId::Quagmire,
+                CipherId::Solitaire,
                 CipherId::Vigenere,
             ],
             active_cipher,
@@ -603,6 +605,7 @@ impl CipherInterface {
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Sm4 => &mut self.sm4,
             CipherId::Snow3G => &mut self.snow3g,
+            CipherId::Solitaire => &mut self.solitaire,
             CipherId::Speck => &mut self.speck,
             CipherId::Substitution => &mut self.gen_sub,
             CipherId::Tea => &mut self.tea,

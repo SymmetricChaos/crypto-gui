@@ -1,9 +1,8 @@
-use crate::ui_elements::UiElements;
-
 use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{polyalphabetic::Solitaire, Cipher};
+use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
-use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct SolitaireFrame {
     cipher: Solitaire,
@@ -30,7 +29,53 @@ impl CipherFrame for SolitaireFrame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
-        todo!()
+        if ui.control_string(&mut self.keyword).lost_focus() {
+            self.keyword = self
+                .keyword
+                .chars()
+                .filter(|c| c.is_ascii_uppercase())
+                .collect();
+            let _ = self.cipher.set_from_keyword(&self.keyword);
+        }
+
+        ui.collapsing("Deck", |ui| {
+            ui.label(
+                self.cipher.deck[0..9]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+            ui.label(
+                self.cipher.deck[9..18]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+            ui.label(
+                self.cipher.deck[18..27]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+            ui.label(
+                self.cipher.deck[27..36]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+            ui.label(
+                self.cipher.deck[36..45]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+            ui.label(
+                self.cipher.deck[45..54]
+                    .iter()
+                    .map(|c| c.to_unicode())
+                    .join(" "),
+            );
+        });
     }
 
     fn randomize(&mut self) {
