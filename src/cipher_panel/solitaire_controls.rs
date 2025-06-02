@@ -12,8 +12,8 @@ pub struct SolitaireFrame {
 impl Default for SolitaireFrame {
     fn default() -> Self {
         Self {
-            cipher: Default::default(),
-            keyword: String::from("Solitaire"),
+            cipher: Solitaire::from_keyword("CRYPTONOMICON").unwrap(),
+            keyword: String::from("CRYPTONOMICON"),
         }
     }
 }
@@ -26,9 +26,13 @@ impl CipherFrame for SolitaireFrame {
         );
         ui.add_space(8.0);
 
-        ui.randomize_reset_cipher(self);
+        if ui.button("Reset").clicked() {
+            self.reset()
+        }
+
         ui.add_space(16.0);
 
+        ui.subheading("Keyword");
         if ui.control_string(&mut self.keyword).lost_focus() {
             self.keyword = self
                 .keyword
@@ -38,46 +42,48 @@ impl CipherFrame for SolitaireFrame {
             let _ = self.cipher.set_from_keyword(&self.keyword);
         }
 
-        ui.collapsing("Deck", |ui| {
-            ui.label(
-                self.cipher.deck[0..9]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-            ui.label(
-                self.cipher.deck[9..18]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-            ui.label(
-                self.cipher.deck[18..27]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-            ui.label(
-                self.cipher.deck[27..36]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-            ui.label(
-                self.cipher.deck[36..45]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-            ui.label(
-                self.cipher.deck[45..54]
-                    .iter()
-                    .map(|c| c.to_unicode())
-                    .join(" "),
-            );
-        });
+        ui.subheading("Order of the Deck");
+        ui.label("(jokers are XA and XB)");
+        ui.add_space(4.0);
+        ui.monospace(
+            self.cipher.deck[0..9]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
+        ui.monospace(
+            self.cipher.deck[9..18]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
+        ui.monospace(
+            self.cipher.deck[18..27]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
+        ui.monospace(
+            self.cipher.deck[27..36]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
+        ui.monospace(
+            self.cipher.deck[36..45]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
+        ui.monospace(
+            self.cipher.deck[45..54]
+                .iter()
+                .map(|c| c.to_unicode())
+                .join(" "),
+        );
     }
 
+    // Unused
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.deck.shuffle(&mut rng);
