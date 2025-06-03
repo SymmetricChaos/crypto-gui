@@ -2,10 +2,10 @@ use crate::ui_elements::{generate_randoms_box, UiElements};
 
 use super::ClassicRngFrame;
 use rand::{thread_rng, Rng};
-use rngs::kiss::Kiss99;
+use rngs::kiss::Kiss;
 
 pub struct KissFrame {
-    rng: Kiss99,
+    rng: Kiss,
     randoms: String,
     n_random: usize,
 }
@@ -31,7 +31,13 @@ impl ClassicRngFrame for KissFrame {
         ui.randomize_reset_rng(self);
 
         ui.add_space(8.0);
-        ui.subheading("MWC State Variables");
+        ui.checkbox(
+            &mut self.rng.corrected,
+            "Use Corrected Multipliy-with-Carry",
+        );
+
+        ui.add_space(8.0);
+        ui.subheading("Multipliy-with-Carry State Variables");
         ui.label("w");
         ui.u32_hex_edit(&mut self.rng.w);
 

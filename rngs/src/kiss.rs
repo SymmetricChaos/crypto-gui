@@ -19,25 +19,27 @@ Lines: 301
 #define KISS  ((MWC^CONG)+SHR3)
  */
 
-pub struct Kiss99 {
+pub struct Kiss {
     pub z: u32,
     pub w: u32,
     pub jsr: u32,
     pub jcong: u32,
+    pub corrected: bool,
 }
 
-impl Default for Kiss99 {
+impl Default for Kiss {
     fn default() -> Self {
         Self {
             z: 362436069,
             w: 521288629,
             jsr: 123456789,
             jcong: 380116160,
+            corrected: false,
         }
     }
 }
 
-impl Kiss99 {
+impl Kiss {
     // Pair of 16 bit multiply with carry generators
     fn mwc(&mut self) -> u32 {
         self.z = 36969_u32
@@ -51,62 +53,18 @@ impl Kiss99 {
 
     // An xorshift generator
     fn shr3(&mut self) -> u32 {
-        self.jsr ^= self.jsr << 17; // the 17 and 13 should be switched for a maximal length generator, likely a typo as it is corrected in later version
-        self.jsr ^= self.jsr >> 13;
-        self.jsr ^= self.jsr << 5;
-        self.jsr
-    }
-
-    // A linear congruential generator
-    fn cong(&mut self) -> u32 {
-        self.jcong = 69069_u32.wrapping_mul(self.jcong).wrapping_add(1234567);
-        self.jcong
-    }
-}
-
-impl ClassicRng for Kiss99 {
-    fn next_u32(&mut self) -> u32 {
-        (self.mwc() ^ self.cong()).wrapping_add(self.shr3())
-    }
-}
-
-pub struct Kiss11 {
-    pub z: u32,
-    pub w: u32,
-    pub jsr: u32,
-    pub jcong: u32,
-}
-
-impl Default for Kiss11 {
-    fn default() -> Self {
-        Self {
-            z: 362436069,
-            w: 521288629,
-            jsr: 123456789,
-            jcong: 380116160,
+        if self.corrected {
+            self.jsr ^= self.jsr << 13;
+            self.jsr ^= self.jsr >> 17;
+            self.jsr ^= self.jsr << 5;
+            self.jsr
+        } else {
+            self.jsr ^= self.jsr << 17; // the 17 and 13 should be switched for a maximal length generator, likely a typo as it is corrected in later version
+            self.jsr ^= self.jsr >> 13;
+            self.jsr ^= self.jsr << 5;
+            self.jsr
         }
     }
-}
-
-impl Kiss11 {
-    // Pair of 16 bit multiply with carry generators
-    fn mwc(&mut self) -> u32 {
-        self.z = 36969_u32
-            .wrapping_mul(self.z & MASK16)
-            .wrapping_add(self.z >> 16);
-        self.w = 18000_u32
-            .wrapping_mul(self.w & MASK16)
-            .wrapping_add(self.w >> 16);
-        (self.z << 16).wrapping_add(self.w)
-    }
-
-    // An xorshift generator
-    fn shr3(&mut self) -> u32 {
-        self.jsr ^= self.jsr << 17; // the 17 and 13 should be switched for a maximal length generator, likely a typo as it is corrected in later version
-        self.jsr ^= self.jsr >> 13;
-        self.jsr ^= self.jsr << 5;
-        self.jsr
-    }
 
     // A linear congruential generator
     fn cong(&mut self) -> u32 {
@@ -115,7 +73,7 @@ impl Kiss11 {
     }
 }
 
-impl ClassicRng for Kiss11 {
+impl ClassicRng for Kiss {
     fn next_u32(&mut self) -> u32 {
         (self.mwc() ^ self.cong()).wrapping_add(self.shr3())
     }
@@ -127,7 +85,7 @@ mod tests {
 
     #[test]
     fn outputs() {
-        let mut rng = Kiss99::default();
+        let mut rng = Kiss::default();
 
         // Test values generated from the C code with the word size defined as uint32_t
         assert_eq!(0x2ddccfe0, rng.next_u32());
