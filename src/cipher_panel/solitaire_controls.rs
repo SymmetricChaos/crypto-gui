@@ -37,7 +37,7 @@ impl CipherFrame for SolitaireFrame {
             self.keyword = self
                 .keyword
                 .chars()
-                .filter(|c| c.is_ascii_uppercase())
+                .filter(|c| self.cipher.alphabet.contains(*c)) // in case the option to change the alphabet is introduced
                 .collect();
             let _ = self.cipher.set_from_keyword(&self.keyword);
         }

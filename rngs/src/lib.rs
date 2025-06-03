@@ -27,6 +27,7 @@ pub mod mwc;
 pub mod naor_reingold;
 pub mod pcg;
 pub mod rabbit;
+pub mod randu;
 pub mod rc4;
 pub mod rule30;
 pub mod salsa20;

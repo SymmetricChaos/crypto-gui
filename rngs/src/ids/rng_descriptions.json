@@ -204,6 +204,14 @@
       "Cryptographic"
     ]
   },
+  "RANDU": {
+    "Description": "RANDU is a linear congruential generator famous for being among the worst random number generator to ever see widespread use. The state function consists of multiplication by 65539 reduced modulo 2^31 and nothing else. It produces only odd numbers and in some statistical tests is significaly worse than expected even for LCGs.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "LCG-based"
+    ]
+  },
   "RC4": {
     "Description": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
     "Authors": "Rivest",

@@ -53,6 +53,7 @@ rng_ids_and_names!(
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
     Rabbit, "Rabbit";
+    Randu, "RANDU";
     Rc4, "RC4";
     Rule30, "Rule 30";
     Salsa20, "Salsa20";
