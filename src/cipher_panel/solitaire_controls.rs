@@ -61,8 +61,10 @@ impl CipherFrame for SolitaireFrame {
             self.reset()
         }
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.unicode_names, "Unicode Card Names");
 
+        ui.add_space(8.0);
         ui.subheading("Keyword");
         if ui.control_string(&mut self.keyword).lost_focus() {
             self.keyword = self
@@ -78,6 +80,7 @@ impl CipherFrame for SolitaireFrame {
         ui.add_space(4.0);
         self.display_deck(ui, &self.cipher.deck);
 
+        ui.add_space(16.0);
         ui.collapsing("Example Operations", |ui| {
             ui.subheading("Keyword");
             if ui.control_string(&mut self.example_keyword).lost_focus() {
@@ -118,6 +121,8 @@ impl CipherFrame for SolitaireFrame {
             });
 
         });
+
+        ui.add_space(16.0);
     }
 
     // Unused because I'm not sure how to reverse the keyword
