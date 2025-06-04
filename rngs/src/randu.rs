@@ -1,7 +1,7 @@
 use crate::ClassicRng;
 
 pub struct Randu {
-    state: u32,
+    pub state: u32,
 }
 
 impl Default for Randu {
