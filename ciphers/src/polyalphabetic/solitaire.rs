@@ -4,11 +4,18 @@ use std::fmt::Display;
 use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 /// Two character names of cards in order A-K and ♣♦♥♠
-pub const CARD_NAMES: [&'static str; 52] = [
+pub const UNICODE_CARD_NAMES: [&'static str; 52] = [
     "A♣", "2♣", "3♣", "4♣", "5♣", "6♣", "7♣", "8♣", "9♣", "T♣", "J♣", "Q♣", "K♣", "A♦", "2♦", "3♦",
     "4♦", "5♦", "6♦", "7♦", "8♦", "9♦", "T♦", "J♦", "Q♦", "K♦", "A♥", "2♥", "3♥", "4♥", "5♥", "6♥",
     "7♥", "8♥", "9♥", "T♥", "J♥", "Q♥", "K♥", "A♠", "2♠", "3♠", "4♠", "5♠", "6♠", "7♠", "8♠", "9♠",
     "T♠", "J♠", "Q♠", "K♠",
+];
+
+pub const ASCII_CARD_NAMES: [&'static str; 52] = [
+    "AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC", "AD", "2D", "3D",
+    "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD", "AH", "2H", "3H", "4H", "5H", "6H",
+    "7H", "8H", "9H", "TH", "JH", "QH", "KH", "AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S",
+    "TS", "JS", "QS", "KS",
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,7 +46,15 @@ impl Card {
         match self {
             Card::JA => "XA",
             Card::JB => "XB",
-            Card::C(n) => CARD_NAMES[(n - 1) as usize],
+            Card::C(n) => UNICODE_CARD_NAMES[(n - 1) as usize],
+        }
+    }
+
+    pub fn to_ascii(&self) -> &'static str {
+        match self {
+            Card::JA => "XA",
+            Card::JB => "XB",
+            Card::C(n) => ASCII_CARD_NAMES[(n - 1) as usize],
         }
     }
 }
@@ -154,6 +169,10 @@ impl Solitaire {
         self.deck.iter().map(|c| c.to_unicode()).join(" ")
     }
 
+    pub fn as_ascii(&self) -> String {
+        self.deck.iter().map(|c| c.to_ascii()).join(" ")
+    }
+
     fn len(&self) -> usize {
         self.deck.len()
     }
@@ -166,7 +185,7 @@ impl Solitaire {
         self.deck.iter().position(|x| *x == Card::JB).unwrap()
     }
 
-    fn move_jokers(&mut self) {
+    pub fn move_jokers(&mut self) {
         let n = self.len();
 
         let a = self.position_a();
@@ -192,7 +211,7 @@ impl Solitaire {
         }
     }
 
-    fn triple_cut(&mut self) {
+    pub fn triple_cut(&mut self) {
         let pa = self.position_a();
         let pb = self.position_b();
 
@@ -213,20 +232,19 @@ impl Solitaire {
         self.deck = r;
     }
 
-    fn count_cut(&mut self) {
+    pub fn count_cut(&mut self) {
         let last_card = self.deck.pop().unwrap();
-        if last_card.is_joker() {
-            self.deck.push(last_card);
-        } else {
-            let p = last_card.value() as usize;
-            let mut r = self.deck.split_off(p);
-            r.extend_from_slice(&self.deck);
-            r.push(last_card);
-            self.deck = r;
-        }
+        let p = match last_card.is_joker() {
+            true => self.len() - 1,
+            false => last_card.value() as usize,
+        };
+        let mut r = self.deck.split_off(p);
+        r.extend_from_slice(&self.deck);
+        r.push(last_card);
+        self.deck = r;
     }
 
-    fn count_cut_n(&mut self, n: usize) {
+    pub fn count_cut_n(&mut self, n: usize) {
         let last_card = self.deck.pop().unwrap();
         let mut r = self.deck.split_off(n);
         r.extend_from_slice(&self.deck);
@@ -234,7 +252,7 @@ impl Solitaire {
         self.deck = r;
     }
 
-    fn output_card(&self) -> Card {
+    pub fn output_card(&self) -> Card {
         let first_card = self.deck[0];
         if first_card.is_joker() {
             self.deck.last().unwrap().clone()
