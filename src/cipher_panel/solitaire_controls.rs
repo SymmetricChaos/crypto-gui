@@ -4,15 +4,23 @@ use ciphers::{
     polyalphabetic::{solitaire::Card, Solitaire},
     Cipher,
 };
-use itertools::Itertools;
-use rand::{seq::SliceRandom, thread_rng};
+use egui::{FontId, RichText};
+use rand::{thread_rng, Rng};
+use utils::preset_alphabet::Alphabet;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CardFormat {
+    Unicode,
+    Ascii,
+    Number,
+}
 
 pub struct SolitaireFrame {
     cipher: Solitaire,
     keyword: String,
     example_cipher: Solitaire,
     example_keyword: String,
-    unicode_names: bool,
+    card_format: CardFormat,
     nth: usize,
 }
 
@@ -21,9 +29,9 @@ impl Default for SolitaireFrame {
         Self {
             cipher: Solitaire::from_keyword("CRYPTONOMICON").unwrap(),
             keyword: String::from("CRYPTONOMICON"),
-            example_cipher: Solitaire::from_keyword("EXAMPLE").unwrap(),
-            example_keyword: String::from("EXAMPLE"),
-            unicode_names: false,
+            example_cipher: Solitaire::from_keyword("").unwrap(),
+            example_keyword: String::from(""),
+            card_format: CardFormat::Ascii,
             nth: 1,
         }
     }
@@ -31,20 +39,79 @@ impl Default for SolitaireFrame {
 
 impl SolitaireFrame {
     fn display_deck(&self, ui: &mut egui::Ui, deck: &Vec<Card>) {
-        if self.unicode_names {
-            ui.label(deck[0..9].iter().map(|c| c.to_unicode()).join(" "));
-            ui.label(deck[9..18].iter().map(|c| c.to_unicode()).join(" "));
-            ui.label(deck[18..27].iter().map(|c| c.to_unicode()).join(" "));
-            ui.label(deck[27..36].iter().map(|c| c.to_unicode()).join(" "));
-            ui.label(deck[36..45].iter().map(|c| c.to_unicode()).join(" "));
-            ui.label(deck[45..54].iter().map(|c| c.to_unicode()).join(" "));
-        } else {
-            ui.monospace(deck[0..9].iter().map(|c| c.to_ascii()).join(" "));
-            ui.monospace(deck[9..18].iter().map(|c| c.to_ascii()).join(" "));
-            ui.monospace(deck[18..27].iter().map(|c| c.to_ascii()).join(" "));
-            ui.monospace(deck[27..36].iter().map(|c| c.to_ascii()).join(" "));
-            ui.monospace(deck[36..45].iter().map(|c| c.to_ascii()).join(" "));
-            ui.monospace(deck[45..54].iter().map(|c| c.to_ascii()).join(" "));
+        match self.card_format {
+            CardFormat::Unicode => {
+                egui::Grid::new("solitaire_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in deck.iter().enumerate() {
+                            if n % 9 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            if b.is_joker() {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_unicode()))
+                                        .font(FontId::monospace(15.0))
+                                        .strong(),
+                                );
+                            } else {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_unicode()))
+                                        .font(FontId::monospace(15.0)),
+                                );
+                            }
+                        }
+                    });
+            }
+            CardFormat::Ascii => {
+                egui::Grid::new("solitaire_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in deck.iter().enumerate() {
+                            if n % 9 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            if b.is_joker() {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_ascii()))
+                                        .font(FontId::monospace(15.0))
+                                        .strong(),
+                                );
+                            } else {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_ascii()))
+                                        .font(FontId::monospace(15.0)),
+                                );
+                            }
+                        }
+                    });
+            }
+            CardFormat::Number => {
+                egui::Grid::new("solitaire_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in deck.iter().enumerate() {
+                            if n % 9 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            if b.is_joker() {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_string()))
+                                        .font(FontId::monospace(15.0))
+                                        .strong(),
+                                );
+                            } else {
+                                ui.label(
+                                    RichText::from(format!("{}", b.to_string()))
+                                        .font(FontId::monospace(15.0)),
+                                );
+                            }
+                        }
+                    });
+            }
         }
     }
 }
@@ -57,12 +124,16 @@ impl CipherFrame for SolitaireFrame {
         );
         ui.add_space(8.0);
 
-        if ui.button("Reset").clicked() {
-            self.reset()
-        }
+        ui.randomize_reset_cipher(self);
 
         ui.add_space(8.0);
-        ui.checkbox(&mut self.unicode_names, "Unicode Card Names");
+        ui.selectable_value(&mut self.card_format, CardFormat::Ascii, "ASCII Cards");
+        ui.selectable_value(&mut self.card_format, CardFormat::Unicode, "Unicode Cards");
+        ui.selectable_value(
+            &mut self.card_format,
+            CardFormat::Number,
+            "Card Numeric Values",
+        );
 
         ui.add_space(8.0);
         ui.subheading("Keyword");
@@ -97,7 +168,7 @@ impl CipherFrame for SolitaireFrame {
             self.display_deck(ui, &self.example_cipher.deck);
 
             ui.add_space(8.0);
-            ui.label("To move the jokers first Joker A is moved one position to the right and then Joker B is moved two positions to the right.");
+            ui.label("To move the jokers first Joker A is moved one position to the right (skipping the first position) and then Joker B is moved two positions to the right (skipping the first position).");
             if ui.button("Move Jokers").clicked() {
                 self.example_cipher.move_jokers();
             }
@@ -112,7 +183,7 @@ impl CipherFrame for SolitaireFrame {
                 self.example_cipher.count_cut();
             }
             ui.add_space(2.0);
-            ui.label("To perform an nth count cut a cut is made at the nth position, though the last card is kept as the last card.");
+            ui.label("To perform an nth count cut a count cut is made at the nth position rather than selecting it from the last card. This is used only to arrange the deck from a keyword.s");
             ui.horizontal(|ui| {
                 if ui.button("Nth Count Cut").clicked() {
                     self.example_cipher.count_cut_n(self.nth);
@@ -125,10 +196,15 @@ impl CipherFrame for SolitaireFrame {
         ui.add_space(16.0);
     }
 
-    // Unused because I'm not sure how to reverse the keyword
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.cipher.deck.shuffle(&mut rng);
+        self.keyword.clear();
+        for _ in 0..12 {
+            let n = rng.gen_range(0..26);
+            self.keyword
+                .push(Alphabet::BasicLatin.chars().nth(n).unwrap());
+        }
+        let _ = self.cipher.set_from_keyword(&self.keyword);
     }
 
     fn reset(&mut self) {
