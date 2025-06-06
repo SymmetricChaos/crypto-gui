@@ -99,13 +99,13 @@ impl SolitaireFrame {
                             }
                             if b.is_joker() {
                                 ui.label(
-                                    RichText::from(format!("{}", b.to_string()))
+                                    RichText::from(format!("{:>2}", b.to_string()))
                                         .font(FontId::monospace(15.0))
                                         .strong(),
                                 );
                             } else {
                                 ui.label(
-                                    RichText::from(format!("{}", b.to_string()))
+                                    RichText::from(format!("{:>2}", b.to_string()))
                                         .font(FontId::monospace(15.0)),
                                 );
                             }
