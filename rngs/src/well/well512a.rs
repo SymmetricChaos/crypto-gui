@@ -121,7 +121,7 @@ mod tests {
 
     use super::*;
 
-    // Calculated from the C code above with uint32_t words
+    // Test values calculated from the C code above with uint32_t words
     #[test]
     fn stream() {
         let mut rng = Well512a::default();

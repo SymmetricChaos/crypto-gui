@@ -29,7 +29,7 @@
   },
   "Blum-Blum-Shub": {
     "Description": "The Blum-Blum-Shub algorithm uses a simple recurrence to produce cryptographic quality pseudorandom numbers. The state is advanced by squaring it and reducing the result modulo a large semiprime. The parity of the state is used to produce a single bit, as a result the algorithm runs much more slowly than other PRNGs. Speed can be increased by using other techniques to extract more bits but at the cost of making it easier to determine the state.",
-    "Authors": "Lenore Blum, Manuel Blum, and Michael Shub",
+    "Authors": "Lenore Blum, Manuel Blum, Michael Shub",
     "Publication": "1986",
     "Traits": [
       "Cryptographic"
@@ -155,7 +155,7 @@
   },
   "Mersenne Twister": {
     "Description": "The Mersenne Twister (MT19937) algorithm was created in 1997 by Makoto Matsumoto and Takuji Nishimura with the goal of correcting the shortcomings of then popular PRNGs and was quickly achieved widespread adoption. In particular it is equidistributed in 623 dimensions and has a period of 2^19937-1. The major limitation of MT19937 is its enormous state of 8448 bits, modern PRNGs of comprable quality commonly use 256 bits or less of state. This huge state means that MT19937 cannot be run on small devices and is more difficult to run in parallel. The state size also makes initialization difficult, requiring either a complex key scheduling algorithm to make a key from a single word or a few words or providing 8448 bits. Because the tempering function applied on output (used to achieve equidistribution in high dimensions) is invertible and fixed it is trivial to recover the entire state, making MT19937 inappropriate for cryptographic purposes. A variant MT19937-64 was created for 64-bit computers, it uses the same structure but with slightly different constants.",
-    "Authors": "Matsumoto and Nishimura",
+    "Authors": "Makoto Matsumoto and Takuji Nishimura",
     "Publication": "1997",
     "Traits": [
       "LFSR-based"
@@ -163,7 +163,7 @@
   },
   "Middle Square": {
     "Description": "The middle square method produces random numbers of a given width, padded on the left with zeroes, by squaring a value and then taking the middle digits as the next value. The quality of these sequences is very low and often falls quickly into short repeating sequences.",
-    "Authors": "von Neumann",
+    "Authors": "John von Neumann",
     "Publication": "1949",
     "Traits": null
   },
@@ -189,7 +189,7 @@
   },
   "Permuted Congruential Generator": {
     "Description": "A PCG is a linear congruential generator combined with some non-linear transformation of the state before it is output. In principle many LCGs and transformations are possible but the ones here are suggested by the original PCG paper. For the same reason the state is always 64 bits and the output is always 32 bits, consequently the increment of the underyling LCG must always be odd.",
-    "Authors": "O'Neill",
+    "Authors": "Melissa O'Neill",
     "Publication": "2014",
     "Traits": [
       "LCG-based"
@@ -214,7 +214,7 @@
   },
   "RC4": {
     "Description": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
-    "Authors": "Rivest",
+    "Authors": "Ron Rivest",
     "Publication": null,
     "Traits": [
       "Stream Cipher",
@@ -230,7 +230,7 @@
   },
   "Salsa20": {
     "Description": "Salsa20 is a family of stream ciphers. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well. Currently Salsa20 has been obsoleted by the ChaCha family of stream ciphers.",
-    "Authors": "Bernstein",
+    "Authors": "Daniel Bernstein",
     "Publication": null,
     "Traits": [
       "Stream Cipher",
@@ -261,7 +261,7 @@
   },
   "TT800": {
     "Description": "TT800 is a prececessor the Mersenne Twister algorithm.",
-    "Authors": " Makoto Matsumoto",
+    "Authors": "Makoto Matsumoto",
     "Publication": "1994",
     "Traits": null
   },
@@ -272,8 +272,8 @@
     "Traits": null
   },
   "WELL": {
-    "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs",
-    "Authors": "François Panneton, Pierre L'Ecuyer, and Makoto Matsumoto",
+    "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs use a GLFSR with a large state, similar to the Mersenne Twister ",
+    "Authors": "François Panneton, Pierre L'Ecuyer, Makoto Matsumoto",
     "Publication": "2006",
     "Traits": [
       "LFSR-based"
