@@ -36,6 +36,22 @@ const M1: usize = 13;
 const M2: usize = 9;
 const M3: usize = 5;
 
+fn matopos(t: i32, v: u32) -> u32 {
+    v ^ (v >> t)
+}
+
+fn mat0neg(t: i32, v: u32) -> u32 {
+    v ^ (v << (-t))
+}
+
+fn mat3neg(t: i32, v: u32) -> u32 {
+    v << (-t)
+}
+
+fn mat4neg(t: i32, b: u32, v: u32) -> u32 {
+    v ^ ((v << (-t)) & b)
+}
+
 pub struct Well512a {
     state: [u32; 16],
     idx: usize,
@@ -57,15 +73,44 @@ impl Well512a {
             idx: 0,
         }
     }
+
+    fn v0(&self) -> u32 {
+        self.state[self.idx & 0xF]
+    }
+
+    fn vm1(&self) -> u32 {
+        self.state[(self.idx + M1) & 0xF]
+    }
+
+    fn vm2(&self) -> u32 {
+        self.state[(self.idx + M2) & 0xF]
+    }
+
+    fn vm3(&self) -> u32 {
+        self.state[(self.idx + M3) & 0xF]
+    }
+
+    fn vrm1(&self) -> u32 {
+        self.state[(self.idx + 15) & 0xF]
+    }
+
+    fn vrm2(&self) -> u32 {
+        self.state[(self.idx + 14) & 0xF]
+    }
 }
 
-// impl ClassicRng for Well512a {
-//     fn next_u32(&mut self) -> u32 {
-//         let v0 = self.state[(self.idx + 15) % 0xf];
-//         let v1 = self.state[];
-//         let v2 = self.state[];
+impl ClassicRng for Well512a {
+    fn next_u32(&mut self) -> u32 {
+        let z0 = self.vrm1();
+        let z1 = mat0neg(-16, self.v0()) ^ mat0neg(-15, self.vm1());
+        let z2 = matopos(11, self.vm2());
+        self.state[self.idx] = z1 ^ z2;
+        self.state[(self.idx + 15) & 0xf] = mat0neg(-2, z0)
+            ^ mat0neg(-18, z1)
+            ^ mat3neg(-28, z2)
+            ^ mat4neg(-5, 0xda442d24, self.state[self.idx]);
 
-//         self.idx = (self.idx + 15) % 0xf;
-//         self.state[self.idx]
-//     }
-// }
+        self.idx = (self.idx + 15) & 0xf;
+        self.state[self.idx]
+    }
+}
