@@ -36,20 +36,20 @@ const M1: usize = 13;
 const M2: usize = 9;
 const M3: usize = 5;
 
-fn matopos(t: i32, v: u32) -> u32 {
+fn mat0pos(t: i32, v: u32) -> u32 {
     v ^ (v >> t)
 }
 
 fn mat0neg(t: i32, v: u32) -> u32 {
-    v ^ (v << (-t))
+    v ^ (v << t)
 }
 
 fn mat3neg(t: i32, v: u32) -> u32 {
-    v << (-t)
+    v << t
 }
 
 fn mat4neg(t: i32, b: u32, v: u32) -> u32 {
-    v ^ ((v << (-t)) & b)
+    v ^ ((v << t) & b)
 }
 
 pub struct Well512a {
@@ -60,7 +60,7 @@ pub struct Well512a {
 impl Default for Well512a {
     fn default() -> Self {
         Self {
-            state: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+            state: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
             idx: 0,
         }
     }
@@ -86,31 +86,59 @@ impl Well512a {
         self.state[(self.idx + M2) & 0xF]
     }
 
-    fn vm3(&self) -> u32 {
-        self.state[(self.idx + M3) & 0xF]
-    }
+    // fn vm3(&self) -> u32 {
+    //     self.state[(self.idx + M3) & 0xF]
+    // }
 
     fn vrm1(&self) -> u32 {
         self.state[(self.idx + 15) & 0xF]
     }
 
-    fn vrm2(&self) -> u32 {
-        self.state[(self.idx + 14) & 0xF]
-    }
+    // fn vrm2(&self) -> u32 {
+    //     self.state[(self.idx + 14) & 0xF]
+    // }
 }
 
 impl ClassicRng for Well512a {
     fn next_u32(&mut self) -> u32 {
         let z0 = self.vrm1();
-        let z1 = mat0neg(-16, self.v0()) ^ mat0neg(-15, self.vm1());
-        let z2 = matopos(11, self.vm2());
+        let z1 = mat0neg(16, self.v0()) ^ mat0neg(15, self.vm1());
+        let z2 = mat0pos(11, self.vm2());
         self.state[self.idx] = z1 ^ z2;
-        self.state[(self.idx + 15) & 0xf] = mat0neg(-2, z0)
-            ^ mat0neg(-18, z1)
-            ^ mat3neg(-28, z2)
-            ^ mat4neg(-5, 0xda442d24, self.state[self.idx]);
+        self.state[(self.idx + 15) & 0xf] = mat0neg(2, z0)
+            ^ mat0neg(18, z1)
+            ^ mat3neg(28, z2)
+            ^ mat4neg(5, 0xda442d24, self.state[self.idx]);
 
         self.idx = (self.idx + 15) & 0xf;
         self.state[self.idx]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn stream() {
+        let mut rng = Well512a::default();
+        assert_eq!(0x9074003a, rng.next_u32());
+        assert_eq!(0x88d8053e, rng.next_u32());
+        assert_eq!(0xfc94243e, rng.next_u32());
+        assert_eq!(0xe094043a, rng.next_u32());
+        assert_eq!(0xd08c0422, rng.next_u32());
+        assert_eq!(0xc0e80526, rng.next_u32());
+        assert_eq!(0xbc84242e, rng.next_u32());
+        assert_eq!(0xa0a4052a, rng.next_u32());
+        assert_eq!(0x94bc251a, rng.next_u32());
+        assert_eq!(0xc43aa9ca, rng.next_u32());
+        assert_eq!(0x473a050f, rng.next_u32());
+        assert_eq!(0x61823076, rng.next_u32());
+        assert_eq!(0x716815f9, rng.next_u32());
+        assert_eq!(0xd302104c, rng.next_u32());
+        assert_eq!(0xa578b06b, rng.next_u32());
+        assert_eq!(0xe2ad95a6, rng.next_u32());
+        assert_eq!(0xefc230c8, rng.next_u32());
     }
 }
