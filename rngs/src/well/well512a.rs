@@ -34,7 +34,7 @@ use crate::ClassicRng;
 
 const M1: usize = 13;
 const M2: usize = 9;
-const M3: usize = 5;
+// const M3: usize = 5;
 
 fn mat0pos(t: i32, v: u32) -> u32 {
     v ^ (v >> t)
@@ -67,9 +67,10 @@ impl Default for Well512a {
 }
 
 impl Well512a {
-    pub fn from_u32(seed: u32) -> Self {
-        Self {
-            state: [seed; 16],
+    pub fn from_array(arr: &[u32]) -> Self {
+        assert!(arr.len() == 16);
+        Well512a {
+            state: arr.try_into().unwrap(),
             idx: 0,
         }
     }
@@ -120,6 +121,7 @@ mod tests {
 
     use super::*;
 
+    // Calculated from the C code above with uint32_t words
     #[test]
     fn stream() {
         let mut rng = Well512a::default();
