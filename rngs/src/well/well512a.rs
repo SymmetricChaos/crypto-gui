@@ -53,8 +53,8 @@ fn mat4neg(t: i32, b: u32, v: u32) -> u32 {
 }
 
 pub struct Well512a {
-    state: [u32; 16],
-    idx: usize,
+    pub state: [u32; 16],
+    pub idx: usize,
 }
 
 impl Default for Well512a {
