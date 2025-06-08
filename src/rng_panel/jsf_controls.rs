@@ -50,10 +50,10 @@ impl ClassicRngFrame for JsfFrame {
         }
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
         match self.big {
-            true => &self.rng64,
-            false => &self.rng32,
+            true => &mut self.rng64,
+            false => &mut self.rng32,
         }
     }
 

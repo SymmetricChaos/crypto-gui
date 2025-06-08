@@ -98,8 +98,8 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
         }
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
-        &self.rng
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+        &mut self.rng
     }
 
     fn randomize(&mut self) {

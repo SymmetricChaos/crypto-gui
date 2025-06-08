@@ -29,6 +29,7 @@ mod shrinking_generator_controls;
 mod splitmix_controls;
 mod tt800_controls;
 mod vmpcr_controls;
+mod well_controls;
 mod weyl_controls;
 mod xorshift64_controls;
 mod xoshiro_controls;
@@ -42,7 +43,7 @@ use rngs::{
 
 pub trait ClassicRngFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn rng(&self) -> &dyn ClassicRng;
+    fn rng(&mut self) -> &mut dyn ClassicRng;
     fn randomize(&mut self);
     fn reset(&mut self);
 }

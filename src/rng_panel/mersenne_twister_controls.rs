@@ -195,10 +195,10 @@ impl ClassicRngFrame for MTFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
         match self.mt64 {
-            true => &self.rng_64,
-            false => &self.rng_32,
+            true => &mut self.rng_64,
+            false => &mut self.rng_32,
         }
     }
 

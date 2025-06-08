@@ -285,11 +285,11 @@ impl ClassicRngFrame for IsaacFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
         match self.selector {
-            IsaacSelector::Isaac => &self.isaac,
-            IsaacSelector::Ia => &self.ia,
-            IsaacSelector::Ibaa => &self.ibaa,
+            IsaacSelector::Isaac => &mut self.isaac,
+            IsaacSelector::Ia => &mut self.ia,
+            IsaacSelector::Ibaa => &mut self.ibaa,
         }
     }
 

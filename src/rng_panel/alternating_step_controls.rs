@@ -48,8 +48,8 @@ impl ClassicRngFrame for AlternatingStepFrame {
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
-        &self.rng
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+        &mut self.rng
     }
 
     fn randomize(&mut self) {

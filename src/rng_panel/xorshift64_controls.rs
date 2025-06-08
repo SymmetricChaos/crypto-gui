@@ -174,8 +174,8 @@ impl ClassicRngFrame for Xorshift64Frame {
         ui.add_space(16.0);
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
-        &self.rng
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+        &mut self.rng
     }
 
     fn randomize(&mut self) {

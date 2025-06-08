@@ -132,8 +132,8 @@ impl ClassicRngFrame for DualEcFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&self) -> &dyn ClassicRng {
-        &self.rng
+    fn rng(&mut self) -> &mut dyn ClassicRng {
+        &mut self.rng
     }
 
     fn randomize(&mut self) {

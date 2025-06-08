@@ -82,8 +82,8 @@ impl ClassicRngFrame for HaltonFrame {
         ui.text_edit_multiline(&mut self.randoms);
     }
 
-    fn rng(&self) -> &dyn rngs::ClassicRng {
-        &self.rng
+    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+        &mut self.rng
     }
 
     fn randomize(&mut self) {
