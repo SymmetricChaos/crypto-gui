@@ -272,7 +272,7 @@
     "Traits": null
   },
   "WELL": {
-    "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs use a GLFSR with a large state, similar to the Mersenne Twister ",
+    "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs use a GLFSR with a large state, similar to the Mersenne Twister. Numerous variants of WELL were defined but WELL512a and WELL1024a (presented below) are the simplest as they use only full 32-bit words.",
     "Authors": "François Panneton, Pierre L'Ecuyer, Makoto Matsumoto",
     "Publication": "2006",
     "Traits": [

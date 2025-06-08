@@ -41,6 +41,10 @@ impl ClassicRngFrame for WellFrame {
         );
         ui.add_space(8.0);
 
+        ui.subheading("Variant");
+        ui.selectable_value(&mut self.variant, Variant::Well512a, "Well512a");
+        ui.selectable_value(&mut self.variant, Variant::Well1024a, "Well1024a");
+
         ui.subheading("State");
         match self.variant {
             Variant::Well512a => {
