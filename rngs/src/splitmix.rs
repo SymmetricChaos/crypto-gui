@@ -10,6 +10,12 @@ impl Default for Splitmix {
     }
 }
 
+impl Splitmix {
+    fn split(self) -> (Splitmix, Splitmix) {
+        todo!()
+    }
+}
+
 impl ClassicRng for Splitmix {
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32

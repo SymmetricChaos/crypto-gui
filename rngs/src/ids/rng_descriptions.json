@@ -50,7 +50,7 @@
     "Publication": "2012",
     "Traits": [
       "Cryptographic",
-      "Compromised,"
+      "Compromised"
     ]
   },
   "Geffe": {
@@ -81,9 +81,11 @@
   },
   "Halton Sequence": {
     "Description": "The Halton sequence produces tuples of rational numbers between 0 and 1 distributed across any number of dimensions.",
-    "Authors": null,
-    "Publication": null,
-    "Traits": null
+    "Authors": "John Halton",
+    "Publication": "1964",
+    "Traits": [
+      "Low-Discrepancy"
+    ]
   },
   "HC-128": {
     "Description": "HC-128 is a stream cipher submitted to the eSTREAM competition. It accepts both a 128-bit key and a 128-bit nonce. The PRNG uses two 16-kilobyte S-boxes. At each step one S-box is updated and then a value is produced, after 512 steps the S-box being updated is switched.",
@@ -254,9 +256,9 @@
     ]
   },
   "Splitmix64": {
-    "Description": "Splitmix64 is the default PRNG for the Java programming language. It is simple and passes many statistical test but is not considered a strong PRNG in and of itself. It is commonly used as a keying function for other PRNGS when they are likely to be given a seed with low entropy such as a single 64 bit integer. In particular Splitmix64 can accept a seed of zero, whereas certain high speed PRNGs cannot.",
-    "Authors": null,
-    "Publication": null,
+    "Description": "Splitmix64 is the default PRNG for the Java programming language. It is simple and passes many statistical test but is not considered a strong PRNG in and of itself. It is commonly used as a keying function for other PRNGS when they are likely to be given a seed with low entropy such as a single 64 bit integer. In particular Splitmix64 can accept a seed of zero, whereas certain high speed PRNGs cannot. Splitmix is named for its \"split\" function which creates two seemingly independent PRNGs.",
+    "Authors": "Guy L. Steele, Jr., Doug Lea, Christine H. Flood",
+    "Publication": "2014",
     "Traits": null
   },
   "TT800": {
@@ -267,8 +269,8 @@
   },
   "VMPC-R": {
     "Description": "The Variably Modified Permutation Composition RNG is based on RC4 cipher but with a more complex key schedule and an output based on the permutation composition function it is named for.",
-    "Authors": null,
-    "Publication": null,
+    "Authors": "Bartosz Żółtak",
+    "Publication": "2004",
     "Traits": null
   },
   "WELL": {
