@@ -24,26 +24,36 @@ impl WichmannHill {
         ((self.s1 as f32) / 30269.0 + (self.s2 as f32) / 30307.0 + (self.s3 as f32) / 30323.0)
             .fract()
     }
-}
 
-impl ClassicRng for WichmannHill {
-    fn next_u32(&mut self) -> u32 {
+    /// Actually closer to 15 bits
+    pub fn next_u16(&mut self) -> u16 {
         self.s1 = (self.s1 * 171) % 30269;
         self.s2 = (self.s2 * 172) % 30307;
         self.s3 = (self.s3 * 170) % 30323;
-        self.s1 + self.s2 + self.s3
+        (self.s1 + self.s2 + self.s3) as u16
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn first_five() {
-        let mut rng = WichmannHill::default();
-        for i in 0..10 {
-            println!("{}", rng.next_f32());
-        }
+impl ClassicRng for WichmannHill {
+    /// Closer to 31 bits of entropy
+    fn next_u32(&mut self) -> u32 {
+        let mut out = 0;
+        self.s1 = (self.s1 * 171) % 30269;
+        self.s2 = (self.s2 * 172) % 30307;
+        self.s3 = (self.s3 * 170) % 30323;
+        out += (self.s1 + self.s2 + self.s3) << 16;
+        self.s1 = (self.s1 * 171) % 30269;
+        self.s2 = (self.s2 * 172) % 30307;
+        self.s3 = (self.s3 * 170) % 30323;
+        out = out.wrapping_add(self.s1 + self.s2 + self.s3);
+        out
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn test_vector() {}
+// }
