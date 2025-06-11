@@ -1,18 +1,59 @@
 use crate::traits::ClassicRng;
 
+fn mix64(mut t: u64) -> u64 {
+    t ^= t >> 33;
+    t = t.wrapping_mul(0xbf58476d1ce4e5b9);
+    t ^= t >> 33;
+    t = t.wrapping_mul(0x94d049bb133111eb);
+    t ^ (t >> 33)
+}
+
+// This seem to be the most widely used mixing function
+fn mix64_variant_13(mut t: u64) -> u64 {
+    t ^= t >> 30;
+    t = t.wrapping_mul(0xbf58476d1ce4e5b9);
+    t ^= t >> 27;
+    t = t.wrapping_mul(0x94d049bb133111eb);
+    t ^ (t >> 31)
+}
+
+fn mix_gamma(mut t: u64) -> u64 {
+    t = mix64_variant_13(t) | 1;
+    let a = (t ^ (t >> 1)).count_ones();
+    if a >= 24 {
+        t
+    } else {
+        !t
+    }
+}
+
 pub struct Splitmix {
+    pub gamma: u64,
     pub state: u64,
 }
 
 impl Default for Splitmix {
     fn default() -> Self {
-        Self { state: 0 }
+        Self {
+            gamma: 0x9e3779b97f4a7c15,
+            state: 0,
+        }
     }
 }
 
 impl Splitmix {
-    fn split(self) -> (Splitmix, Splitmix) {
-        todo!()
+    fn next_state(&mut self) -> u64 {
+        self.state = self.state.wrapping_add(self.gamma);
+        self.state
+    }
+
+    pub fn split(&mut self) -> Splitmix {
+        let new_state = mix64(self.next_state());
+        let new_gamma = mix_gamma(self.next_state());
+        Splitmix {
+            gamma: new_gamma,
+            state: new_state,
+        }
     }
 }
 
@@ -22,18 +63,13 @@ impl ClassicRng for Splitmix {
     }
 
     fn next_u64(&mut self) -> u64 {
-        self.state = self.state.wrapping_add(0x9e3779b97f4a7c15);
-        let mut t = self.state;
-        t ^= t >> 30;
-        t = t.wrapping_mul(0xbf58476d1ce4e5b9);
-        t ^= t >> 27;
-        t = t.wrapping_mul(0x94d049bb133111eb);
-        t ^ (t >> 31)
+        self.next_state();
+        mix64_variant_13(self.state)
     }
 }
 
 #[cfg(test)]
-mod splitmix_tests {
+mod tests {
     use super::*;
 
     #[test]
