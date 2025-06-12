@@ -17,6 +17,7 @@ impl Default for WichmannHill {
 }
 
 impl WichmannHill {
+    /// In the range 0..1
     pub fn next_f32(&mut self) -> f32 {
         self.s1 = (self.s1 * 171) % 30269;
         self.s2 = (self.s2 * 172) % 30307;

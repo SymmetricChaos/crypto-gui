@@ -31,6 +31,7 @@ mod tt800_controls;
 mod vmpcr_controls;
 mod well_controls;
 mod weyl_controls;
+mod wichmann_hill;
 mod xorshift64_controls;
 mod xoshiro_controls;
 

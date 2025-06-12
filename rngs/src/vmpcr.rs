@@ -139,7 +139,7 @@ impl ClassicRng for Vmpcr {
 }
 
 #[cfg(test)]
-mod vmpcr_tests {
+mod tests {
 
     use super::*;
 
