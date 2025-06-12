@@ -27,7 +27,7 @@ impl Default for WichmannHillFrame {
 }
 
 impl ClassicRngFrame for WichmannHillFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/wichmann_hill.rs",

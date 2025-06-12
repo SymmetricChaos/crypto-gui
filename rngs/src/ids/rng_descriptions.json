@@ -287,6 +287,14 @@
     "Publication": null,
     "Traits": null
   },
+  "Wichmann-Hill": {
+    "Description": "The Wichmann-Hill generator uses three linear congruential generators summed together to produce values. The range of outputs is fairly narrow making the generator relatively weak even for its intended purpose of producing floating point values in the unit invterval.",
+    "Authors": "Brian Wichmann and David Hill",
+    "Publication": "1982",
+    "Traits": [
+      "LCG-based"
+    ]
+  },
   "Xorshift64": {
     "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there. The model xorshift here has just 64 bits of state for simplicity, larger state is needed for most purposes.",
     "Authors": "George Marsaglia and Sebastiano Vigna",

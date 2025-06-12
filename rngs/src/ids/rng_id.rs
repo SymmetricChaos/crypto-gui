@@ -64,6 +64,7 @@ rng_ids_and_names!(
     Vmpcr, "VMPC-R";
     Well, "WELL";
     Weyl, "Weyl";
+    WichmannHill, "Wichmann-Hill";
     Xorshift64, "Xorshift64";
     Xoroshiro, "Xoroshiro";
     Xoshiro, "Xoshiro";
