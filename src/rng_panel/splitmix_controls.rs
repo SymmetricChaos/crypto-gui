@@ -34,25 +34,47 @@ impl ClassicRngFrame for SplitmixFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Seed Value");
+            ui.subheading("State Value");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
-                self.randomize();
+                let mut rng = thread_rng();
+                self.rng.state = rng.gen::<u64>();
             }
         });
+        ui.label("The 64-bit word that changes each time Splitmix is called.");
         ui.u64_hex_edit(&mut self.rng.state);
 
-        ui.add_space(16.0);
-        ui.subheading("Internal State");
-        ui.label(format!("{:016X}", self.rng.state));
+        ui.horizontal(|ui| {
+            ui.subheading("Gamma Value");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.rng.gamma = rng.gen::<u64>();
+            }
+        });
+        ui.label("The 64-bit word that is added to the state each time Splitmix is called.");
+        ui.u64_hex_edit(&mut self.rng.gamma);
 
         ui.add_space(16.0);
+        ui.label("Call Splitmix once, advancing the state without producing a value.");
         if ui.button("step").clicked() {
             self.rng.next_u64();
         }
+
+        ui.add_space(16.0);
+        ui.label("Produce a new Splitmix instance from the existing one. This generates both a new state and a new value of gamma. With high probability the values produce by the new Splitmix will appear unrelated to the original. In actual usage the original Splitmix is still available, only changed by having stepped twice without producing an output, causing the PRNG to \"split\" in the way it is named for.");
+        if ui.button("split").clicked() {
+            self.rng = self.rng.split();
+        }
+
+        ui.add_space(16.0);
         ui.collapsing("calculations", |ui| {
+
+            ui.subheading("Internal State");
+            ui.label(format!("{:016X}", self.rng.state));
+
             ui.monospace(format!(
-                "{:016X}  +  9e3779b97f4a7c15  =  {:016X}    (a constant is added to the state)",
+                "{:016X}  +  {:016X}  =  {:016X}    (the constant value \"gamma\" is added to the state, producing a simple Weyl sequence)",
                 self.rng.state,
+                self.rng.gamma,
                 self.rng.state.wrapping_add(0x9e3779b97f4a7c15)
             ));
             let mut t = self.rng.state.wrapping_add(0x9e3779b97f4a7c15);
@@ -97,7 +119,6 @@ impl ClassicRngFrame for SplitmixFrame {
                 t >> 31,
                 t ^ (t>>31)
             ));
-
         });
 
         ui.add_space(16.0);
@@ -112,6 +133,7 @@ impl ClassicRngFrame for SplitmixFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.rng.state = rng.gen::<u64>();
+        self.rng.gamma = rng.gen::<u64>();
     }
 
     fn reset(&mut self) {
