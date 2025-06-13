@@ -104,6 +104,7 @@ pub struct RngInterface {
     vmpcr: vmpcr_controls::VmpcrFrame,
     well: well_controls::WellFrame,
     weyl: weyl_controls::WeylSequenceFrame,
+    wichmann_hill: wichmann_hill::WichmannHillFrame,
     xorshift64: xorshift64_controls::Xorshift64Frame,
     xoshiro: xoshiro_controls::XoshiroFrame,
 }
@@ -130,6 +131,7 @@ impl RngInterface {
                 RngId::Splitmix,
                 RngId::Tt800,
                 RngId::Well,
+                RngId::WichmannHill,
                 RngId::Vmpcr,
                 RngId::Xorshift64,
                 RngId::Xoshiro,
@@ -202,6 +204,7 @@ impl RngInterface {
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Well => &mut self.well,
             RngId::Weyl => &mut self.weyl,
+            RngId::WichmannHill => &mut self.wichmann_hill,
             RngId::Xorshift64 => &mut self.xorshift64,
             RngId::Xoshiro => &mut self.xoshiro,
             _ => todo!("<<<RNG NOT FOUND>>>"),
