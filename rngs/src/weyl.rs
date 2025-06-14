@@ -21,6 +21,11 @@ impl ClassicRng for WeylSequence {
         self.state = (self.state + self.increment) % self.modulus;
         self.state as u32
     }
+
+    fn next_u64(&mut self) -> u64 {
+        self.state = (self.state + self.increment) % self.modulus;
+        self.state
+    }
 }
 
 pub struct WeylSequence32 {

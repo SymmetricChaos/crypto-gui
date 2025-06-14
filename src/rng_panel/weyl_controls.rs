@@ -100,6 +100,9 @@ impl ClassicRngFrame for WeylSequenceFrame {
             );
             ui.label(RichText::new(calc).size(16.0));
         } else if self.variant == Variant::W32 {
+            ui.label("On 32-bit hardware wrapping addition at the word size will occur automatically, making it very fast to set the modulus to be 4294967296. The only requirement for the increment is that it be odd.");
+            ui.add_space(4.0);
+
             ui.horizontal(|ui| {
                 ui.subheading("State");
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
@@ -117,6 +120,9 @@ impl ClassicRngFrame for WeylSequenceFrame {
                 self.rng32.increment |= 1
             }
         } else if self.variant == Variant::W64 {
+            ui.label("On 64-bit hardware wrapping addition at the word size will occur automatically, making it very fast to set the modulus to be 18446744073709551616. The only requirement for the increment is that it be odd.");
+            ui.add_space(4.0);
+
             ui.horizontal(|ui| {
                 ui.subheading("State");
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
