@@ -22,3 +22,50 @@ impl ClassicRng for WeylSequence {
         self.state
     }
 }
+
+pub struct WeylSequence32 {
+    pub state: u32,
+    pub increment: u32,
+}
+
+impl Default for WeylSequence32 {
+    fn default() -> Self {
+        Self {
+            state: 0,
+            increment: 3211,
+        }
+    }
+}
+
+impl ClassicRng for WeylSequence32 {
+    fn next_u32(&mut self) -> u32 {
+        self.state = self.state.wrapping_add(self.increment);
+        self.state
+    }
+}
+
+pub struct WeylSequence64 {
+    pub state: u64,
+    pub increment: u64,
+}
+
+impl Default for WeylSequence64 {
+    fn default() -> Self {
+        Self {
+            state: 0,
+            increment: 3211,
+        }
+    }
+}
+
+impl ClassicRng for WeylSequence64 {
+    fn next_u32(&mut self) -> u32 {
+        self.state = self.state.wrapping_add(self.increment);
+        self.state as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        self.state = self.state.wrapping_add(self.increment);
+        self.state
+    }
+}
