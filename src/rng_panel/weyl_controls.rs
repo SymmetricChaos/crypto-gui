@@ -62,17 +62,19 @@ impl ClassicRngFrame for WeylSequenceFrame {
                 ui.subheading("State");
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
                     let mut rng = thread_rng();
-                    self.rng.state = rng.gen_range(0..(1 << 20));
+                    self.rng.state = rng.gen_range(0..(1 << 31));
                 }
             });
-            ui.u64_drag_value_dec(&mut self.rng.state);
+            if ui.u64_drag_value_dec(&mut self.rng.state).lost_focus() {
+                self.rng.state = self.rng.state & 0xffffffff;
+            }
 
             ui.add_space(8.0);
             ui.horizontal(|ui| {
                 ui.subheading("Modulus");
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
                     let mut rng = thread_rng();
-                    self.rng.state = rng.gen_range(0..(1 << 20));
+                    self.rng.state = rng.gen_range(0..(1 << 63));
                 }
             });
             ui.u64_drag_value_dec(&mut self.rng.modulus);
@@ -176,7 +178,7 @@ impl ClassicRngFrame for WeylSequenceFrame {
         let mut rng = thread_rng();
 
         if self.variant == Variant::W {
-            self.rng.modulus = rng.gen_range(0..(1 << 20));
+            self.rng.modulus = rng.gen_range(0..(1 << 63));
             self.rng.state = rng.gen_range(0..(self.rng.modulus - 1));
             self.incr_err = true;
 
