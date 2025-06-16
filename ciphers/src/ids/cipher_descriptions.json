@@ -618,6 +618,18 @@
       "Block Cipher"
     ]
   },
+  "Lorenz": {
+    "Names": [
+      "Lorenz",
+      "Tunny"
+    ],
+    "Description": "The Lorenz cipher m-achine (called Tunny by codebreakers at Bletchly Park). Although less known than its contemporary Enigma it operated on principles much more similar to modern stream ciphers. It encrypted and decrypted by XORing a stream of bits with the message.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Electromechanical"
+    ]
+  },
   "Lucifer": {
     "Names": [
       "Lucifer",
