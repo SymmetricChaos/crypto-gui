@@ -19,6 +19,14 @@ impl Wheel {
         Self { pins, position: 0 }
     }
 
+    pub fn step(&mut self) {
+        self.position = (self.position + 1) % self.pins.len()
+    }
+
+    pub fn bit(&self) -> bool {
+        self.pins[self.position]
+    }
+
     pub fn print_pins(&self) -> String {
         self.pins
             .iter()
@@ -115,5 +123,31 @@ impl Lorenz {
             Wheel::new("x.x.x..xx...xx..x.xxx..x.x"),
             Wheel::new(".x..xxxx...x.xxx....x.x"),
         ]
+    }
+
+    pub fn step_sz40(&mut self) {
+        // Step all of the Chi wheels once
+        self.wheels[7].step();
+        self.wheels[8].step();
+        self.wheels[9].step();
+        self.wheels[10].step();
+        self.wheels[11].step();
+
+        // Step Mu61 once
+        self.wheels[6].step();
+
+        // Step Mu37 once, if and only if Mu61 is set to an active pin
+        if self.wheels[6].bit() {
+            self.wheels[5].step();
+        }
+
+        // Step all of the Psi wheel once, if and only if M37 is set to an active pin
+        if self.wheels[5].bit() {
+            self.wheels[4].step();
+            self.wheels[3].step();
+            self.wheels[2].step();
+            self.wheels[1].step();
+            self.wheels[0].step();
+        }
     }
 }
