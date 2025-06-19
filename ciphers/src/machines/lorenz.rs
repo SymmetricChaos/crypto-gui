@@ -1,3 +1,5 @@
+use crate::{Cipher, CipherError};
+
 #[derive(Clone, Debug)]
 pub struct Wheel {
     pub pins: Vec<bool>,
@@ -5,7 +7,7 @@ pub struct Wheel {
 }
 
 impl Wheel {
-    pub fn new(string: &str) -> Self {
+    pub fn new(string: &str) -> Result<Self, CipherError> {
         let mut pins = Vec::with_capacity(string.len());
         for c in string.chars() {
             if c == '.' {
@@ -13,14 +15,20 @@ impl Wheel {
             } else if c == 'x' {
                 pins.push(true);
             } else {
-                panic!("only the characters '.' and 'x' are used for setting the pins")
+                return Err(CipherError::input(
+                    "only the characters '.' and 'x' are used for setting the pins",
+                ));
             }
         }
-        Self { pins, position: 0 }
+        Ok(Self { pins, position: 0 })
     }
 
     pub fn step(&mut self) {
         self.position = (self.position + 1) % self.pins.len()
+    }
+
+    pub fn step_back(&mut self) {
+        self.position = (self.position + self.pins.len() - 1) % self.pins.len()
     }
 
     pub fn bit(&self) -> bool {
@@ -45,20 +53,21 @@ impl Default for Lorenz {
         Self {
             wheels: [
                 // Psi Wheels
-                Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x"),
-                Wheel::new(".xx.x.xxx..x.x.x..x.xx.x.xxx.x....x.xx.x.x.x..x"),
-                Wheel::new(".x.x.x..xxx....x.x.xx.x.x.x..xxx.x.x..x.x.xx..x.x.x"),
-                Wheel::new(".xx...xxxxx.x.x.xx...x.xx.x.x..x.x.xx.x..x.x.x.x.x.x."),
-                Wheel::new("xx...xx.x..x.xx.x...x.x.x.x.x.x.x.x.xx..xxxx.x.x...xx.x..x."),
+                Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x").unwrap(),
+                Wheel::new(".xx.x.xxx..x.x.x..x.xx.x.xxx.x....x.xx.x.x.x..x").unwrap(),
+                Wheel::new(".x.x.x..xxx....x.x.xx.x.x.x..xxx.x.x..x.x.xx..x.x.x").unwrap(),
+                Wheel::new(".xx...xxxxx.x.x.xx...x.xx.x.x..x.x.xx.x..x.x.x.x.x.x.").unwrap(),
+                Wheel::new("xx...xx.x..x.xx.x...x.x.x.x.x.x.x.x.xx..xxxx.x.x...xx.x..x.").unwrap(),
                 // Mu Wheels
-                Wheel::new("x.x.x.x.x.x...x.x.x...x.x.x...x.x...."),
-                Wheel::new(".xxxx.xxxx.xxx.xxxx.xx....xxx.xxxx.xxxx.xxxx.xxxx.xxx.xxxx..."),
+                Wheel::new("x.x.x.x.x.x...x.x.x...x.x.x...x.x....").unwrap(),
+                Wheel::new(".xxxx.xxxx.xxx.xxxx.xx....xxx.xxxx.xxxx.xxxx.xxxx.xxx.xxxx...")
+                    .unwrap(),
                 // Chi Wheels
-                Wheel::new(".x...xxx.x.xxxx.x...x.x..xxx....xx.xxxx.."),
-                Wheel::new("x..xxx...x.xxxx..xx..x..xx.xx.."),
-                Wheel::new("..xx..x.xxx...xx...xx..xx.xx."),
-                Wheel::new("xx..x..xxxx..xx.xxx....x.."),
-                Wheel::new("xx..xx....xxxx.x..x.x.."),
+                Wheel::new(".x...xxx.x.xxxx.x...x.x..xxx....xx.xxxx..").unwrap(),
+                Wheel::new("x..xxx...x.xxxx..xx..x..xx.xx..").unwrap(),
+                Wheel::new("..xx..x.xxx...xx...xx..xx.xx.").unwrap(),
+                Wheel::new("xx..x..xxxx..xx.xxx....x..").unwrap(),
+                Wheel::new("xx..xx....xxxx.x..x.x..").unwrap(),
             ],
         }
     }
@@ -68,70 +77,71 @@ impl Lorenz {
     pub fn kh_setting(&mut self) {
         self.wheels = [
             // Psi Wheels
-            Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x"),
-            Wheel::new(".xx.x.xxx..x.x.x..x.xx.x.xxx.x....x.xx.x.x.x..x"),
-            Wheel::new(".x.x.x..xxx....x.x.xx.x.x.x..xxx.x.x..x.x.xx..x.x.x"),
-            Wheel::new(".xx...xxxxx.x.x.xx...x.xx.x.x..x.x.xx.x..x.x.x.x.x.x."),
-            Wheel::new("xx...xx.x..x.xx.x...x.x.x.x.x.x.x.x.xx..xxxx.x.x...xx.x..x."),
+            Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x").unwrap(),
+            Wheel::new(".xx.x.xxx..x.x.x..x.xx.x.xxx.x....x.xx.x.x.x..x").unwrap(),
+            Wheel::new(".x.x.x..xxx....x.x.xx.x.x.x..xxx.x.x..x.x.xx..x.x.x").unwrap(),
+            Wheel::new(".xx...xxxxx.x.x.xx...x.xx.x.x..x.x.xx.x..x.x.x.x.x.x.").unwrap(),
+            Wheel::new("xx...xx.x..x.xx.x...x.x.x.x.x.x.x.x.xx..xxxx.x.x...xx.x..x.").unwrap(),
             // Mu Wheels
-            Wheel::new("x.x.x.x.x.x...x.x.x...x.x.x...x.x...."),
-            Wheel::new(".xxxx.xxxx.xxx.xxxx.xx....xxx.xxxx.xxxx.xxxx.xxxx.xxx.xxxx..."),
+            Wheel::new("x.x.x.x.x.x...x.x.x...x.x.x...x.x....").unwrap(),
+            Wheel::new(".xxxx.xxxx.xxx.xxxx.xx....xxx.xxxx.xxxx.xxxx.xxxx.xxx.xxxx...").unwrap(),
             // Chi Wheels
-            Wheel::new(".x...xxx.x.xxxx.x...x.x..xxx....xx.xxxx.."),
-            Wheel::new("x..xxx...x.xxxx..xx..x..xx.xx.."),
-            Wheel::new("..xx..x.xxx...xx...xx..xx.xx."),
-            Wheel::new("xx..x..xxxx..xx.xxx....x.."),
-            Wheel::new("xx..xx....xxxx.x..x.x.."),
+            Wheel::new(".x...xxx.x.xxxx.x...x.x..xxx....xx.xxxx..").unwrap(),
+            Wheel::new("x..xxx...x.xxxx..xx..x..xx.xx..").unwrap(),
+            Wheel::new("..xx..x.xxx...xx...xx..xx.xx.").unwrap(),
+            Wheel::new("xx..x..xxxx..xx.xxx....x..").unwrap(),
+            Wheel::new("xx..xx....xxxx.x..x.x..").unwrap(),
         ]
     }
 
     pub fn bream_setting(&mut self) {
         self.wheels = [
             // Psi Wheels
-            Wheel::new("...xxx..xxx.xx..x.x.xx.xx.x..x..x.x.x.x.x.."),
-            Wheel::new("xx.x..xxx.....xxxx.x..x.xx..xx.x.x.x.x.x.xx.x.."),
-            Wheel::new("x..x..xx.xxx...xxx....xxxx.x.x.xx..x..x.x.x.x.x.x.x"),
-            Wheel::new(".x....x..x.xxxxx.xx..xx..xx....x.xx.x.x.x.x.x.xx..x.x"),
-            Wheel::new("x.x.x..xx..xx.xx..x...x....x.xx.xxxx.xxx..x.x...xx.x.x.x.x."),
+            Wheel::new("...xxx..xxx.xx..x.x.xx.xx.x..x..x.x.x.x.x..").unwrap(),
+            Wheel::new("xx.x..xxx.....xxxx.x..x.xx..xx.x.x.x.x.x.xx.x..").unwrap(),
+            Wheel::new("x..x..xx.xxx...xxx....xxxx.x.x.xx..x..x.x.x.x.x.x.x").unwrap(),
+            Wheel::new(".x....x..x.xxxxx.xx..xx..xx....x.xx.x.x.x.x.x.xx..x.x").unwrap(),
+            Wheel::new("x.x.x..xx..xx.xx..x...x....x.xx.xxxx.xxx..x.x...xx.x.x.x.x.").unwrap(),
             // Mu Wheels
-            Wheel::new(".x.x.x.x.x.x.x.xxx.x.x..x.x.x.x.xxx.x"),
-            Wheel::new("x....xx...xx..xx.xxxx....xx...xx.xx.x.xxxx...xx..xx..xx.x.xxx"),
+            Wheel::new(".x.x.x.x.x.x.x.xxx.x.x..x.x.x.x.xxx.x").unwrap(),
+            Wheel::new("x....xx...xx..xx.xxxx....xx...xx.xx.x.xxxx...xx..xx..xx.x.xxx").unwrap(),
             // Chi Wheels
-            Wheel::new(".xxxx.x.xx.x.xx..x..xx.x....xx....xxxx..."),
-            Wheel::new(".xxx....x...xx.x.x...xx.xxx..xx"),
-            Wheel::new("xx..xx.xx..xxx....x..xx.xxx.."),
-            Wheel::new("xxxx..x..xx..x..xx.x..xx.."),
-            Wheel::new(".xxx.xxx...x..xx.x...x."),
+            Wheel::new(".xxxx.x.xx.x.xx..x..xx.x....xx....xxxx...").unwrap(),
+            Wheel::new(".xxx....x...xx.x.x...xx.xxx..xx").unwrap(),
+            Wheel::new("xx..xx.xx..xxx....x..xx.xxx..").unwrap(),
+            Wheel::new("xxxx..x..xx..x..xx.x..xx..").unwrap(),
+            Wheel::new(".xxx.xxx...x..xx.x...x.").unwrap(),
         ]
     }
 
     pub fn zmug_setting(&mut self) {
         self.wheels = [
             // Psi Wheels
-            Wheel::new("xx.x..xx...xxx..xx...xx...xxxx..xxx..xxx..."),
-            Wheel::new("...x...xxx..xx..xxx...xxxx...xx..xxx..xxx..x.xx"),
-            Wheel::new(".x..xx..xxx..xxx..x...xxxx...x...xxx...xx...xx..xxx"),
-            Wheel::new("..xxx..xx..xxx..xxxx...x...xx..xxx..x..xx...xx..xxx.x"),
-            Wheel::new("x..xxx...x...xxxx..xxx..x..xxxx...xx..xxx..xx..xxx..x...xx."),
+            Wheel::new("xx.x..xx...xxx..xx...xx...xxxx..xxx..xxx...").unwrap(),
+            Wheel::new("...x...xxx..xx..xxx...xxxx...xx..xxx..xxx..x.xx").unwrap(),
+            Wheel::new(".x..xx..xxx..xxx..x...xxxx...x...xxx...xx...xx..xxx").unwrap(),
+            Wheel::new("..xxx..xx..xxx..xxxx...x...xx..xxx..x..xx...xx..xxx.x").unwrap(),
+            Wheel::new("x..xxx...x...xxxx..xxx..x..xxxx...xx..xxx..xx..xxx..x...xx.").unwrap(),
             // Mu Wheels
-            Wheel::new(".x.x.xx.x.xx.xxx.xxx.xx.x.xxx.xxx.xxx"),
-            Wheel::new("x.xx.x.xxx.xxx.x.x.xxx.xx.xx.xx.xx.xxx.xxx.xxx.x.x.xxxx.x.x.x"),
+            Wheel::new(".x.x.xx.x.xx.xxx.xxx.xx.x.xxx.xxx.xxx").unwrap(),
+            Wheel::new("x.xx.x.xxx.xxx.x.x.xxx.xx.xx.xx.xx.xxx.xxx.xxx.x.x.xxxx.x.x.x").unwrap(),
             // Chi Wheels
-            Wheel::new(".xx.xx...xx.xx..x....xxx..xxx....xxx..xx."),
-            Wheel::new("xx.xx....xxx.xxxx.x...xx..xx..."),
-            Wheel::new("..x..xx...xx...xxx...xx.xxxx."),
-            Wheel::new("x.x.x..xx...xx..x.xxx..x.x"),
-            Wheel::new(".x..xxxx...x.xxx....x.x"),
+            Wheel::new(".xx.xx...xx.xx..x....xxx..xxx....xxx..xx.").unwrap(),
+            Wheel::new("xx.xx....xxx.xxxx.x...xx..xx...").unwrap(),
+            Wheel::new("..x..xx...xx...xxx...xx.xxxx.").unwrap(),
+            Wheel::new("x.x.x..xx...xx..x.xxx..x.x").unwrap(),
+            Wheel::new(".x..xxxx...x.xxx....x.x").unwrap(),
         ]
     }
 
     pub fn step_sz40(&mut self) {
         // Step all of the Chi wheels once
-        self.wheels[7].step();
-        self.wheels[8].step();
-        self.wheels[9].step();
-        self.wheels[10].step();
+
         self.wheels[11].step();
+        self.wheels[10].step();
+        self.wheels[9].step();
+        self.wheels[8].step();
+        self.wheels[7].step();
 
         // Step Mu61 once
         self.wheels[6].step();
@@ -149,5 +159,15 @@ impl Lorenz {
             self.wheels[1].step();
             self.wheels[0].step();
         }
+    }
+}
+
+impl Cipher for Lorenz {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        todo!()
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        todo!()
     }
 }
