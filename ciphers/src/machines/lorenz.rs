@@ -1,14 +1,90 @@
 use crate::{Cipher, CipherError};
+use bimap::BiMap;
+use utils::text_functions::string_chunks;
 
-pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
-pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+const WIDTH: usize = 5;
 
-pub const CODES: [&'static str; 32] = [
+const LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
+const FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+
+const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
     "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011",
     "10100", "10101", "10110", "10111", "11000", "11001", "11010", "11011", "11100", "11101",
     "11110", "11111",
 ];
+
+static LETTER_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
+    std::sync::LazyLock::new(|| {
+        utils::text_functions::bimap_from_iter(LETTERS.chars().zip(CODES.into_iter()))
+    });
+static FIGURE_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
+    std::sync::LazyLock::new(|| {
+        utils::text_functions::bimap_from_iter(FIGURES.chars().zip(CODES.into_iter()))
+    });
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum Mode {
+    Letters,
+    Figures,
+}
+
+fn map(k: &char, mode: Mode) -> Option<&str> {
+    let map = match mode {
+        Mode::Letters => &LETTER_MAP,
+        Mode::Figures => &FIGURE_MAP,
+    };
+    map.get_by_left(k).cloned()
+}
+
+fn map_inv(k: &str, mode: Mode) -> Option<char> {
+    let map = match mode {
+        Mode::Letters => &LETTER_MAP,
+        Mode::Figures => &FIGURE_MAP,
+    };
+    map.get_by_right(k).cloned()
+}
+
+pub fn encode(text: &str) -> Result<String, CipherError> {
+    let mut mode = Mode::Letters;
+    let mut out = String::with_capacity(text.len() * WIDTH);
+    for s in text.chars() {
+        match map(&s, mode) {
+            Some(code_group) => out.push_str(code_group),
+            None => return Err(CipherError::invalid_input_char(s)),
+        }
+        match s {
+            '␎' => mode = Mode::Figures,
+            '␏' => mode = Mode::Letters,
+            _ => (),
+        };
+    }
+    Ok(out)
+}
+
+pub fn decode(text: &str) -> Result<String, CipherError> {
+    let mut mode = Mode::Letters;
+
+    let mut out = String::with_capacity(text.len() / WIDTH);
+    for group in string_chunks(&text.replace(' ', ""), WIDTH) {
+        match map_inv(&group, mode) {
+            Some(code_group) => out.push(code_group),
+            None => {
+                return Err(CipherError::Input(format!(
+                    "The code group `{}` is not valid",
+                    group
+                )))
+            }
+        }
+        match group.as_str() {
+            "11011" => mode = Mode::Figures,
+            "11111" => mode = Mode::Letters,
+            _ => (),
+        };
+    }
+
+    Ok(out)
+}
 
 #[derive(Clone, Debug)]
 pub struct Wheel {
@@ -173,6 +249,7 @@ impl Lorenz {
 
 impl Cipher for Lorenz {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let bits = encode(text)?;
         todo!()
     }
 
