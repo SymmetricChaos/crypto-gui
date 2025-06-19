@@ -129,6 +129,7 @@ impl Wheel {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Lorenz {
     pub wheels: [Wheel; 12],
 }
@@ -245,15 +246,64 @@ impl Lorenz {
             self.wheels[0].step();
         }
     }
+
+    fn encrypt_group(&self, group: &str, out: &mut Vec<bool>) {
+        for (n, bit) in group
+            .chars()
+            .map(|c| if c == '0' { false } else { true })
+            .enumerate()
+        {
+            out.push(bit ^ self.wheels[7 + n].bit() ^ self.wheels[n].bit())
+        }
+    }
+
+    fn encrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
+        let bits = encode(text)?;
+        let mut out = Vec::new();
+        for group in string_chunks(&bits, WIDTH) {
+            self.encrypt_group(&group, &mut out);
+            self.step_sz40();
+        }
+        Ok(out
+            .into_iter()
+            .map(|b| if b == false { '0' } else { '1' })
+            .collect())
+    }
+
+    fn decrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
+        let mut out = Vec::new();
+        if text.replace(" ", "").chars().count() % 5 != 0 {
+            return Err(CipherError::input("input must be groups of five bits"));
+        }
+        if text.chars().any(|c| c != '0' && c != '1' && c != ' ') {
+            return Err(CipherError::input("invalid bit found"));
+        }
+        for group in string_chunks(&text.replace(" ", ""), WIDTH) {
+            for (n, bit) in group
+                .chars()
+                .map(|c| if c == '0' { false } else { true })
+                .enumerate()
+            {
+                out.push(bit ^ self.wheels[7 + n].bit() ^ self.wheels[n].bit())
+            }
+            self.step_sz40();
+        }
+        decode(
+            &out.into_iter()
+                .map(|b| if b == false { '0' } else { '1' })
+                .collect::<String>(),
+        )
+    }
 }
 
 impl Cipher for Lorenz {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bits = encode(text)?;
-        todo!()
+        let mut cipher = self.clone();
+        cipher.encrypt_mut(text)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+        let mut cipher = self.clone();
+        cipher.decrypt_mut(text)
     }
 }
