@@ -5,6 +5,7 @@ use utils::text_functions::string_chunks;
 
 const WIDTH: usize = 5;
 
+// const LETTERS: &'static str = "␀E3A9SIU4DRJNFCKTZLWHYPQOBG9MXV9";
 const LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
 const FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
 
@@ -66,15 +67,27 @@ fn map_inv(k: &str, mode: Mode) -> Option<char> {
     map.get_by_right(k).cloned()
 }
 
-pub fn encode(text: &str) -> Result<String, CipherError> {
+/// Uses doubled codes for figure and letter shift
+pub fn encode_ita2(text: &str) -> Result<String, CipherError> {
     let mut mode = Mode::Letters;
     let mut out = String::with_capacity(text.len() * WIDTH);
     for s in text.chars() {
         if s == '␎' {
+            out.push_str("11011");
+            out.push_str("11011");
             mode = Mode::Figures;
             continue;
         }
         if s == '␏' {
+            out.push_str("11111");
+            out.push_str("11111");
+            mode = Mode::Letters;
+            continue;
+        }
+        if mode == Mode::Figures && s == ' ' {
+            out.push_str("11111");
+            out.push_str("11111");
+            out.push_str("00100");
             mode = Mode::Letters;
             continue;
         }
@@ -82,6 +95,7 @@ pub fn encode(text: &str) -> Result<String, CipherError> {
             Some(code_group) => out.push_str(code_group),
             None => match map(&s, !mode) {
                 Some(code_group) => {
+                    out.push_str(mode.shift());
                     out.push_str(mode.shift());
                     out.push_str(code_group);
                     mode = !mode;
@@ -93,10 +107,11 @@ pub fn encode(text: &str) -> Result<String, CipherError> {
     Ok(out)
 }
 
-pub fn decode(text: &str) -> Result<String, CipherError> {
+pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
     let mut mode = Mode::Letters;
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(&text.replace(' ', ""), WIDTH) {
+        // Note that repeated shifts of the same kind are the same as a single shift
         if group == "11011" {
             mode = Mode::Figures;
             continue;
@@ -106,6 +121,49 @@ pub fn decode(text: &str) -> Result<String, CipherError> {
             continue;
         }
         match map_inv(&group, mode) {
+            Some(code_group) => out.push(code_group),
+            None => {
+                return Err(CipherError::Input(format!(
+                    "The code group `{}` is not valid in ITA2",
+                    group
+                )))
+            }
+        }
+    }
+
+    Ok(out)
+}
+
+pub fn decode_ita2_gchq(text: &str) -> Result<String, CipherError> {
+    let mut out = String::with_capacity(text.len() / WIDTH);
+    for group in string_chunks(&text.replace(' ', ""), WIDTH) {
+        if group == "00000" {
+            out.push('/');
+            continue;
+        }
+        if group == "00010" {
+            out.push('3');
+            continue;
+        }
+        if group == "01000" {
+            out.push('4');
+            continue;
+        }
+        if group == "11011" {
+            // mode = Mode::Figures;
+            out.push_str("5"); // out.push_str("++"");
+            continue;
+        }
+        if group == "11111" {
+            // mode = Mode::Letters;
+            out.push_str("8"); // out.push_str("--"");
+            continue;
+        }
+        if group == "00100" {
+            out.push('9'); // out.push('.');
+            continue;
+        }
+        match map_inv(&group, Mode::Letters) {
             Some(code_group) => out.push(code_group),
             None => {
                 return Err(CipherError::Input(format!(
@@ -171,7 +229,12 @@ pub struct Lorenz {
 
 impl Default for Lorenz {
     fn default() -> Self {
-        // Equivalent to the KH setting
+        Self::new_kh()
+    }
+}
+
+impl Lorenz {
+    pub fn new_kh() -> Self {
         Self {
             psi: [
                 Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x").unwrap(),
@@ -194,71 +257,56 @@ impl Default for Lorenz {
             ],
         }
     }
-}
 
-impl Lorenz {
-    // pub fn kh_setting(&mut self) {
-    //     self.wheels = [
-    //         // Psi Wheels
-    //         Wheel::new(".x...xx.x.x..xxx.x.x.xxxx.x.x.x.x.x..x.xx.x").unwrap(),
-    //         Wheel::new(".xx.x.xxx..x.x.x..x.xx.x.xxx.x....x.xx.x.x.x..x").unwrap(),
-    //         Wheel::new(".x.x.x..xxx....x.x.xx.x.x.x..xxx.x.x..x.x.xx..x.x.x").unwrap(),
-    //         Wheel::new(".xx...xxxxx.x.x.xx...x.xx.x.x..x.x.xx.x..x.x.x.x.x.x.").unwrap(),
-    //         Wheel::new("xx...xx.x..x.xx.x...x.x.x.x.x.x.x.x.xx..xxxx.x.x...xx.x..x.").unwrap(),
-    //         // Mu Wheels
-    //         Wheel::new("x.x.x.x.x.x...x.x.x...x.x.x...x.x....").unwrap(),
-    //         Wheel::new(".xxxx.xxxx.xxx.xxxx.xx....xxx.xxxx.xxxx.xxxx.xxxx.xxx.xxxx...").unwrap(),
-    //         // Chi Wheels
-    //         Wheel::new(".x...xxx.x.xxxx.x...x.x..xxx....xx.xxxx..").unwrap(),
-    //         Wheel::new("x..xxx...x.xxxx..xx..x..xx.xx..").unwrap(),
-    //         Wheel::new("..xx..x.xxx...xx...xx..xx.xx.").unwrap(),
-    //         Wheel::new("xx..x..xxxx..xx.xxx....x..").unwrap(),
-    //         Wheel::new("xx..xx....xxxx.x..x.x..").unwrap(),
-    //     ]
-    // }
-
-    // pub fn bream_setting(&mut self) {
-    //     self.wheels = [
-    //         // Psi Wheels
-    //         Wheel::new("...xxx..xxx.xx..x.x.xx.xx.x..x..x.x.x.x.x..").unwrap(),
-    //         Wheel::new("xx.x..xxx.....xxxx.x..x.xx..xx.x.x.x.x.x.xx.x..").unwrap(),
-    //         Wheel::new("x..x..xx.xxx...xxx....xxxx.x.x.xx..x..x.x.x.x.x.x.x").unwrap(),
-    //         Wheel::new(".x....x..x.xxxxx.xx..xx..xx....x.xx.x.x.x.x.x.xx..x.x").unwrap(),
-    //         Wheel::new("x.x.x..xx..xx.xx..x...x....x.xx.xxxx.xxx..x.x...xx.x.x.x.x.").unwrap(),
-    //         // Mu Wheels
-    //         Wheel::new(".x.x.x.x.x.x.x.xxx.x.x..x.x.x.x.xxx.x").unwrap(),
-    //         Wheel::new("x....xx...xx..xx.xxxx....xx...xx.xx.x.xxxx...xx..xx..xx.x.xxx").unwrap(),
-    //         // Chi Wheels
-    //         Wheel::new(".xxxx.x.xx.x.xx..x..xx.x....xx....xxxx...").unwrap(),
-    //         Wheel::new(".xxx....x...xx.x.x...xx.xxx..xx").unwrap(),
-    //         Wheel::new("xx..xx.xx..xxx....x..xx.xxx..").unwrap(),
-    //         Wheel::new("xxxx..x..xx..x..xx.x..xx..").unwrap(),
-    //         Wheel::new(".xxx.xxx...x..xx.x...x.").unwrap(),
-    //     ]
-    // }
-
-    pub fn zmug_setting(&mut self) {
-        self.psi = [
-            Wheel::new("xx.x..xx...xxx..xx...xx...xxxx..xxx..xxx...").unwrap(),
-            Wheel::new("...x...xxx..xx..xxx...xxxx...xx..xxx..xxx..x.xx").unwrap(),
-            Wheel::new(".x..xx..xxx..xxx..x...xxxx...x...xxx...xx...xx..xxx").unwrap(),
-            Wheel::new("..xxx..xx..xxx..xxxx...x...xx..xxx..x..xx...xx..xxx.x").unwrap(),
-            Wheel::new("x..xxx...x...xxxx..xxx..x..xxxx...xx..xxx..xx..xxx..x...xx.").unwrap(),
-        ];
-        self.mu = [
-            Wheel::new(".x.x.xx.x.xx.xxx.xxx.xx.x.xxx.xxx.xxx").unwrap(),
-            Wheel::new("x.xx.x.xxx.xxx.x.x.xxx.xx.xx.xx.xx.xxx.xxx.xxx.x.x.xxxx.x.x.x").unwrap(),
-        ];
-        self.chi = [
-            Wheel::new(".xx.xx...xx.xx..x....xxx..xxx....xxx..xx.").unwrap(),
-            Wheel::new("xx.xx....xxx.xxxx.x...xx..xx...").unwrap(),
-            Wheel::new("..x..xx...xx...xxx...xx.xxxx.").unwrap(),
-            Wheel::new("x.x.x..xx...xx..x.xxx..x.x").unwrap(),
-            Wheel::new(".x..xxxx...x.xxx....x.x").unwrap(),
-        ];
+    pub fn new_bream() -> Self {
+        Self {
+            psi: [
+                Wheel::new("...xxx..xxx.xx..x.x.xx.xx.x..x..x.x.x.x.x..").unwrap(),
+                Wheel::new("xx.x..xxx.....xxxx.x..x.xx..xx.x.x.x.x.x.xx.x..").unwrap(),
+                Wheel::new("x..x..xx.xxx...xxx....xxxx.x.x.xx..x..x.x.x.x.x.x.x").unwrap(),
+                Wheel::new(".x....x..x.xxxxx.xx..xx..xx....x.xx.x.x.x.x.x.xx..x.x").unwrap(),
+                Wheel::new("x.x.x..xx..xx.xx..x...x....x.xx.xxxx.xxx..x.x...xx.x.x.x.x.").unwrap(),
+            ],
+            mu: [
+                Wheel::new(".x.x.x.x.x.x.x.xxx.x.x..x.x.x.x.xxx.x").unwrap(),
+                Wheel::new("x....xx...xx..xx.xxxx....xx...xx.xx.x.xxxx...xx..xx..xx.x.xxx")
+                    .unwrap(),
+            ],
+            chi: [
+                Wheel::new(".xxxx.x.xx.x.xx..x..xx.x....xx....xxxx...").unwrap(),
+                Wheel::new(".xxx....x...xx.x.x...xx.xxx..xx").unwrap(),
+                Wheel::new("xx..xx.xx..xxx....x..xx.xxx..").unwrap(),
+                Wheel::new("xxxx..x..xx..x..xx.x..xx..").unwrap(),
+                Wheel::new(".xxx.xxx...x..xx.x...x.").unwrap(),
+            ],
+        }
     }
 
-    pub fn zmug_setting2(&mut self) {
+    pub fn new_zmug() -> Self {
+        Self {
+            psi: [
+                Wheel::new("xx.x..xx...xxx..xx...xx...xxxx..xxx..xxx...").unwrap(),
+                Wheel::new("...x...xxx..xx..xxx...xxxx...xx..xxx..xxx..x.xx").unwrap(),
+                Wheel::new(".x..xx..xxx..xxx..x...xxxx...x...xxx...xx...xx..xxx").unwrap(),
+                Wheel::new("..xxx..xx..xxx..xxxx...x...xx..xxx..x..xx...xx..xxx.x").unwrap(),
+                Wheel::new("x..xxx...x...xxxx..xxx..x..xxxx...xx..xxx..xx..xxx..x...xx.").unwrap(),
+            ],
+            mu: [
+                Wheel::new(".x.x.xx.x.xx.xxx.xxx.xx.x.xxx.xxx.xxx").unwrap(),
+                Wheel::new("x.xx.x.xxx.xxx.x.x.xxx.xx.xx.xx.xx.xxx.xxx.xxx.x.x.xxxx.x.x.x")
+                    .unwrap(),
+            ],
+            chi: [
+                Wheel::new(".xx.xx...xx.xx..x....xxx..xxx....xxx..xx.").unwrap(),
+                Wheel::new("xx.xx....xxx.xxxx.x...xx..xx...").unwrap(),
+                Wheel::new("..x..xx...xx...xxx...xx.xxxx.").unwrap(),
+                Wheel::new("x.x.x..xx...xx..x.xxx..x.x").unwrap(),
+                Wheel::new(".x..xxxx...x.xxx....x.x").unwrap(),
+            ],
+        }
+    }
+
+    pub fn _zmug_setting2(&mut self) {
         self.psi = [
             Wheel::new("x...xxx..xxx..xxxx...xx...xx..xxx...xx..x.x").unwrap(),
             Wheel::new(".xx.x..xxx..xxx..xx...xxxx...xxx..xx..xxx...x..").unwrap(),
@@ -301,23 +349,28 @@ impl Lorenz {
         }
     }
 
-    // pub fn print_masks(&self) {
-    //     println!(
-    //         "{}{}{}{}{} ^ {}{}{}{}{}",
-    //         self.chi[4].bit() as u32,
-    //         self.chi[3].bit() as u32,
-    //         self.chi[2].bit() as u32,
-    //         self.chi[1].bit() as u32,
-    //         self.chi[0].bit() as u32,
-    //         self.psi[4].bit() as u32,
-    //         self.psi[3].bit() as u32,
-    //         self.psi[2].bit() as u32,
-    //         self.psi[1].bit() as u32,
-    //         self.psi[0].bit() as u32
-    //     )
-    // }
+    // Used during testing for settings provided in reverse order
+    pub fn step_sz40_reverse(&mut self) {
+        // Step all of the Chi wheels once
+        for w in self.chi.iter_mut() {
+            w.step();
+        }
 
-    // fn keystream()
+        // Step Mu61 once
+        self.mu[1].step();
+
+        // Step all of the Psi wheels once, if and only if M37 is set to an active pin
+        if self.mu[0].bit() {
+            for w in self.psi.iter_mut() {
+                w.step();
+            }
+        }
+
+        // Step Mu37 once, if and only if Mu61 is set to an active pin
+        if self.mu[1].bit() {
+            self.mu[0].step();
+        }
+    }
 
     fn encrypt_group(&self, group: &str, out: &mut Vec<bool>) {
         for (n, bit) in group
@@ -330,7 +383,7 @@ impl Lorenz {
     }
 
     fn encrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
-        let bits = encode(text)?;
+        let bits = encode_ita2(text)?;
         let mut out = Vec::new();
         for group in string_chunks(&bits, WIDTH) {
             self.encrypt_group(&group, &mut out);
@@ -360,7 +413,7 @@ impl Lorenz {
             }
             self.step_sz40();
         }
-        decode(
+        decode_ita2(
             &out.into_iter()
                 .map(|b| if b == false { '0' } else { '1' })
                 .collect::<String>(),
@@ -390,26 +443,11 @@ mod tests {
         let plaintext = "TEST";
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        println!("{ciphertext}");
-        println!("{}", decode(&ciphertext).unwrap());
-        assert_eq!("GIBR", decode(&ciphertext).unwrap());
+        assert_eq!("GIBR", decode_ita2(&ciphertext).unwrap());
     }
 
     #[test]
-    fn test_long() {
-        let plaintext = "THIS IS A TEST TRANSMISSION FROM A LORENZ SZ";
-        let cipher = Lorenz::default();
-        let ciphertext = cipher.encrypt(plaintext).unwrap();
-        println!("{ciphertext}");
-        println!("{}", decode(&ciphertext).unwrap());
-        assert_eq!(
-            "GWG8NUPFZ4VKAKD8DCCXXWKOL3NLZ9VYZTUC4JZVCQ44",
-            decode(&ciphertext).unwrap()
-        );
-    }
-
-    #[test]
-    fn test_encrypt_decrypt_short() {
+    fn test_short_encrypt_decrypt() {
         let plaintext = "TEST";
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
@@ -417,11 +455,45 @@ mod tests {
     }
 
     #[test]
-    fn test_auto_baudot_shift() {
-        println!("{}", encode("ABC123DEF.").unwrap());
-        println!(
-            "{}",
-            decode("00011110010111011011101111001100001111110100100001011011101111100").unwrap()
+    fn test_long_kh() {
+        let plaintext =
+            "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
+        let cipher = Lorenz::new_kh();
+        let ciphertext = cipher.encrypt(plaintext).unwrap();
+        assert_eq!("GWG8NUPLCXGGPGXJXQWTT9ODEPY5ONQXY9JB5OWPFHAMLSGAOJAKKVNYUDOGTSN9KDAHYBP5U8MIYPMSAFTHWFGZJXTM5SR4L", decode_ita2_gchq(&ciphertext).unwrap());
+    }
+
+    #[test]
+    fn test_long_zmug() {
+        let plaintext =
+            "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
+        let cipher = Lorenz::new_zmug();
+        let ciphertext = cipher.encrypt(plaintext).unwrap();
+        assert_eq!("JXFCVJS/YWVJ5Y44FUBLHYCHY8LS/MLUPWHTVNCGFG38MLYAG4BLUJATPTV9/EPGYVHTOE5ECZOLB4YOAVKUXD/9YVRLYSARP", decode_ita2_gchq(&ciphertext).unwrap());
+    }
+
+    #[test]
+    fn test_long_bream() {
+        let plaintext =
+            "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
+        let cipher = Lorenz::new_bream();
+        let ciphertext = cipher.encrypt(plaintext).unwrap();
+        assert_eq!("R/OSBCINF9QQBHHFPXQ9XYQPLXXOWXD8AXFYEQXWZBDLIMRUSMBP5WAWOMC8XZGPOU4MKW4MBBRKLRFTTKLL3UWQNE4UY8PIC", decode_ita2_gchq(&ciphertext).unwrap());
+    }
+
+    #[test]
+    fn test_baudot_encode_decode() {
+        assert_eq!(
+            "ABC123DEF.",
+            decode_ita2(&encode_ita2("ABC123DEF.").unwrap()).unwrap()
+        );
+        assert_eq!(
+            "ABC55QWE88DEF55M",
+            decode_ita2_gchq(&encode_ita2("ABC123DEF.").unwrap()).unwrap()
+        );
+        assert_eq!(
+            "THIS9IS9A9TEST9TRANSMISSION55N889FROM9A9LORENZ9SZ55RW889CIPHER9ATTACHMENT55N889USING9CYBERCHEF55M",
+            decode_ita2_gchq(&encode_ita2("THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.").unwrap()).unwrap()
         );
     }
 
