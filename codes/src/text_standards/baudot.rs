@@ -1,13 +1,15 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use std::sync::LazyLock;
+use std::ops::Not;
 use utils::text_functions::{chunk_and_join, string_chunks};
+
+const WIDTH: usize = 5;
 
 // pub const ITA1_EU_LETTERS: &'static str = "␀AEÉYUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
 // pub const ITA1_EU_FIGURES: &'static str = "␀12⅟34";
+// pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
 pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
 pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
-pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
 
 pub const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
@@ -19,15 +21,7 @@ pub const CODES: [&'static str; 32] = [
 crate::lazy_bimap!(
     ITA2_LETTER_MAP: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES.into_iter());
     ITA2_FIGURE_MAP: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES.into_iter());
-    US_TTY_FIGURE_MAP: BiMap<char, &'static str> = US_TTY_FIGURES.chars().zip(CODES.into_iter());
 );
-
-// pub const GRAY_CODES: [&'static str; 32] = [
-//     "00000", "00001", "00011", "00010", "00110", "00111", "00101", "00100", "01100", "01101",
-//     "01111", "01110", "01010", "01011", "01001", "01000", "11000", "11001", "11011", "11010",
-//     "11110", "11111", "11101", "11100", "10100", "10101", "10111", "10110", "10010", "10011",
-//     "10001", "10000",
-// ];
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BaudotMode {
@@ -35,22 +29,140 @@ pub enum BaudotMode {
     Figures,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum BaudotVersion {
-    // Ita1,
-    Ita2,
-    UsTty,
+impl Not for BaudotMode {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            BaudotMode::Letters => BaudotMode::Figures,
+            BaudotMode::Figures => BaudotMode::Letters,
+        }
+    }
+}
+
+impl BaudotMode {
+    /// Change from Letters to Figures or from Figure to Letters
+    fn toggle(&mut self) {
+        *self = !*self;
+    }
+
+    fn to_figures(&mut self) {
+        *self = BaudotMode::Figures;
+    }
+
+    fn to_letters(&mut self) {
+        *self = BaudotMode::Letters;
+    }
+
+    fn is_figures(&self) -> bool {
+        *self == BaudotMode::Figures
+    }
+
+    fn is_letters(&self) -> bool {
+        *self == BaudotMode::Letters
+    }
+
+    /// For whatever mode is chosen return to code that indicates a switch to the other
+    fn shift_from_code(&self) -> &str {
+        match self {
+            BaudotMode::Letters => "11011",
+            BaudotMode::Figures => "11111",
+        }
+    }
+}
+
+fn map(k: &char, mode: BaudotMode) -> Option<&str> {
+    let map = match mode {
+        BaudotMode::Letters => &ITA2_LETTER_MAP,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP,
+    };
+    map.get_by_left(k).cloned()
+}
+
+fn map_inv(k: &str, mode: BaudotMode) -> Option<char> {
+    let map = match mode {
+        BaudotMode::Letters => &ITA2_LETTER_MAP,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP,
+    };
+    map.get_by_right(k).cloned()
+}
+
+pub fn encode_ita2(text: &str) -> Result<String, CodeError> {
+    let mut mode = BaudotMode::Letters;
+    let mut out = String::with_capacity(text.len() * WIDTH);
+    for s in text.chars() {
+        // Handle explicit use of the Shift Out Unicode symbol
+        if s == '␎' {
+            out.push_str("11011");
+            mode.to_figures();
+            continue;
+        }
+        // Handle explicit use of the Shift In Unicode symbol
+        if s == '␏' {
+            out.push_str("11111");
+            mode.to_letters();
+            continue;
+        }
+        // Based on implementation from GCHQ the space is always coded as a letter
+        if mode == BaudotMode::Figures && s == ' ' {
+            out.push_str("11111");
+            out.push_str("00100");
+            mode.to_letters();
+            continue;
+        }
+        match map(&s, mode) {
+            Some(code_group) => out.push_str(code_group),
+            None => match map(&s, !mode) {
+                Some(code_group) => {
+                    out.push_str(mode.shift_from_code());
+                    out.push_str(code_group);
+                    mode = !mode;
+                }
+                None => return Err(CodeError::invalid_input_char(s)),
+            },
+        }
+    }
+    Ok(out)
+}
+
+pub fn decode_ita2(text: &str) -> Result<String, CodeError> {
+    let mut mode = BaudotMode::Letters;
+    let mut out = String::with_capacity(text.len() / WIDTH);
+    for group in string_chunks(
+        &text
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .collect::<String>(),
+        WIDTH,
+    ) {
+        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correct is handled correctly by thi
+        if group == "11011" {
+            mode.to_figures();
+            continue;
+        }
+        if group == "11111" {
+            mode.to_letters();
+            continue;
+        }
+        match map_inv(&group, mode) {
+            Some(code_group) => out.push(code_group),
+            None => {
+                return Err(CodeError::Input(format!(
+                    "The code group `{}` is not valid in ITA2",
+                    group
+                )))
+            }
+        }
+    }
+
+    Ok(out)
 }
 
 pub struct Baudot {
-    pub version: BaudotVersion,
     pub spaced: bool,
 }
 
 impl Baudot {
-    // Baudot codes are always five bits
-    const WIDTH: usize = 5;
-
     // pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
     //     Box::new(
     //         ITA2_LETTERS
@@ -73,103 +185,33 @@ impl Baudot {
                 code,
                 format!(
                     "{} {}",
-                    self.letter_map().get_by_right(code).unwrap(),
-                    self.figure_map().get_by_right(code).unwrap()
+                    ITA2_LETTER_MAP.get_by_right(code).unwrap(),
+                    ITA2_FIGURE_MAP.get_by_right(code).unwrap()
                 ),
             )
         }))
-    }
-
-    pub fn figure_map(&self) -> &LazyLock<BiMap<char, &'static str>> {
-        match self.version {
-            // BaudotVersion::Ita1 => &ITA1_FIGURE_MAP,
-            BaudotVersion::Ita2 => &ITA2_FIGURE_MAP,
-            BaudotVersion::UsTty => &US_TTY_FIGURE_MAP,
-        }
-    }
-
-    pub fn letter_map(&self) -> &LazyLock<BiMap<char, &'static str>> {
-        match self.version {
-            // BaudotVersion::Ita1 => &ITA1_LETTER_MAP,
-            BaudotVersion::Ita2 => &ITA2_LETTER_MAP,
-            BaudotVersion::UsTty => &ITA2_LETTER_MAP,
-        }
-    }
-
-    pub fn map(&self, k: &char, mode: &BaudotMode) -> Option<&str> {
-        let map = match mode {
-            BaudotMode::Letters => self.letter_map(),
-            BaudotMode::Figures => self.figure_map(),
-        };
-        map.get_by_left(k).cloned()
-    }
-
-    pub fn map_inv(&self, k: &str, mode: &BaudotMode) -> Option<char> {
-        let map = match mode {
-            BaudotMode::Letters => self.letter_map(),
-            BaudotMode::Figures => self.figure_map(),
-        };
-        map.get_by_right(k).cloned()
     }
 }
 
 impl Default for Baudot {
     fn default() -> Self {
-        Baudot {
-            version: BaudotVersion::Ita2,
-            spaced: false,
-        }
+        Baudot { spaced: false }
     }
 }
 
 impl Code for Baudot {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        // Always start in letter mode
-        let mut mode = BaudotMode::Letters;
-
-        let mut out = String::with_capacity(text.len() * Self::WIDTH);
-        for s in text.chars() {
-            match self.map(&s, &mode) {
-                Some(code_group) => out.push_str(code_group),
-                None => return Err(CodeError::invalid_input_char(s)),
-            }
-            match s {
-                '␎' => mode = BaudotMode::Figures,
-                '␏' => mode = BaudotMode::Letters,
-                _ => (),
-            };
-        }
+        let out = encode_ita2(text)?;
 
         if self.spaced {
-            Ok(chunk_and_join(&out, Self::WIDTH, ' '))
+            Ok(chunk_and_join(&out, WIDTH, ' '))
         } else {
             Ok(out)
         }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // Always start in letter mode
-        let mut mode = BaudotMode::Letters;
-
-        let mut out = String::with_capacity(text.len() / Self::WIDTH);
-        for group in string_chunks(&text.replace(' ', ""), Self::WIDTH) {
-            match self.map_inv(&group, &mode) {
-                Some(code_group) => out.push(code_group),
-                None => {
-                    return Err(CodeError::Input(format!(
-                        "The code group `{}` is not valid",
-                        group
-                    )))
-                }
-            }
-            match group.as_str() {
-                "11011" => mode = BaudotMode::Figures,
-                "11111" => mode = BaudotMode::Letters,
-                _ => (),
-            };
-        }
-
-        Ok(out)
+        Ok(decode_ita2(text)?)
     }
 }
 
@@ -177,7 +219,7 @@ impl Code for Baudot {
 mod baudot_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS£572WHILEONSALE";
     const CODETEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
 
     #[test]
