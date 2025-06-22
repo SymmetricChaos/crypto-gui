@@ -5,9 +5,9 @@ use utils::text_functions::string_chunks;
 
 const WIDTH: usize = 5;
 
-// const LETTERS: &'static str = "␀E3A9SIU4DRJNFCKTZLWHYPQOBG9MXV9";
-const LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
-const FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+const LETTERS: &'static str = "\0E\nA SIU\rDRJNFCKTZLWHYPQOBG␎MXV␏";
+const FIGURES: &'static str = "\03\n- '87\r␅4␇,!:(5+)2£6019?&␎./=␏";
+const GCHQ: &'static str = "/E3A9SIU4DRJNFCKTZLWHYPQOBG5MXV8"; // I only know of this mapping from the GCHQ code chef
 
 const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
@@ -16,12 +16,12 @@ const CODES: [&'static str; 32] = [
     "11110", "11111",
 ];
 
-const CODES_INV: [&'static str; 32] = [
-    "00000", "10000", "01000", "11000", "00100", "10100", "01100", "11100", "00010", "10010",
-    "01010", "11010", "00110", "10110", "01110", "11110", "00001", "10001", "01001", "11001",
-    "00101", "10101", "01101", "11101", "00011", "10011", "01011", "11011", "00111", "10111",
-    "01111", "11111",
-];
+// const CODES_INV: [&'static str; 32] = [
+//     "00000", "10000", "01000", "11000", "00100", "10100", "01100", "11100", "00010", "10010",
+//     "01010", "11010", "00110", "10110", "01110", "11110", "00001", "10001", "01001", "11001",
+//     "00101", "10101", "01101", "11101", "00011", "10011", "01011", "11011", "00111", "10111",
+//     "01111", "11111",
+// ];
 
 static LETTER_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
     std::sync::LazyLock::new(|| {
@@ -31,6 +31,9 @@ static FIGURE_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
     std::sync::LazyLock::new(|| {
         utils::text_functions::bimap_from_iter(FIGURES.chars().zip(CODES.into_iter()))
     });
+static GCHQ_MAP: std::sync::LazyLock<BiMap<char, &'static str>> = std::sync::LazyLock::new(|| {
+    utils::text_functions::bimap_from_iter(GCHQ.chars().zip(CODES.into_iter()))
+});
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 enum Mode {
@@ -72,6 +75,10 @@ fn map_inv(k: &str, mode: Mode) -> Option<char> {
         Mode::Figures => &FIGURE_MAP,
     };
     map.get_by_right(k).cloned()
+}
+
+fn map_inv_alt(k: &str) -> Option<char> {
+    GCHQ_MAP.get_by_right(k).cloned()
 }
 
 /// Uses doubled codes for figure and letter shift
@@ -144,33 +151,7 @@ pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
 pub fn decode_ita2_gchq(text: &str) -> Result<String, CipherError> {
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(&text.replace(' ', ""), WIDTH) {
-        if group == "00000" {
-            out.push('/');
-            continue;
-        }
-        if group == "00010" {
-            out.push('3');
-            continue;
-        }
-        if group == "01000" {
-            out.push('4');
-            continue;
-        }
-        if group == "11011" {
-            // mode = Mode::Figures;
-            out.push_str("5"); // out.push_str("++"");
-            continue;
-        }
-        if group == "11111" {
-            // mode = Mode::Letters;
-            out.push_str("8"); // out.push_str("--"");
-            continue;
-        }
-        if group == "00100" {
-            out.push('9'); // out.push('.');
-            continue;
-        }
-        match map_inv(&group, Mode::Letters) {
+        match map_inv_alt(&group) {
             Some(code_group) => out.push(code_group),
             None => {
                 return Err(CipherError::Input(format!(

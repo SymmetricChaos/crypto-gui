@@ -10,6 +10,7 @@ const WIDTH: usize = 5;
 // pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
 pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
 pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+pub const GCHQ: &'static str = "/E3A9SIU4DRJNFCKTZLWHYPQOBG5MXV8"; // I only know of this mapping from the GCHQ code chef
 
 pub const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
@@ -21,6 +22,7 @@ pub const CODES: [&'static str; 32] = [
 crate::lazy_bimap!(
     ITA2_LETTER_MAP: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES.into_iter());
     ITA2_FIGURE_MAP: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES.into_iter());
+    GCHQ_MAP: BiMap<char, &'static str> = GCHQ.chars().zip(CODES.into_iter());
 );
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -42,28 +44,28 @@ impl Not for BaudotMode {
 
 impl BaudotMode {
     /// Change from Letters to Figures or from Figure to Letters
-    fn toggle(&mut self) {
+    pub fn toggle(&mut self) {
         *self = !*self;
     }
 
-    fn to_figures(&mut self) {
+    pub fn to_figures(&mut self) {
         *self = BaudotMode::Figures;
     }
 
-    fn to_letters(&mut self) {
+    pub fn to_letters(&mut self) {
         *self = BaudotMode::Letters;
     }
 
-    fn is_figures(&self) -> bool {
+    pub fn is_figures(&self) -> bool {
         *self == BaudotMode::Figures
     }
 
-    fn is_letters(&self) -> bool {
+    pub fn is_letters(&self) -> bool {
         *self == BaudotMode::Letters
     }
 
     /// For whatever mode is chosen return to code that indicates a switch to the other
-    fn shift_from_code(&self) -> &str {
+    pub fn shift_from_code(&self) -> &str {
         match self {
             BaudotMode::Letters => "11011",
             BaudotMode::Figures => "11111",
@@ -85,6 +87,10 @@ fn map_inv(k: &str, mode: BaudotMode) -> Option<char> {
         BaudotMode::Figures => &ITA2_FIGURE_MAP,
     };
     map.get_by_right(k).cloned()
+}
+
+fn map_inv_gchq(k: &str) -> Option<char> {
+    GCHQ_MAP.get_by_right(k).cloned()
 }
 
 pub fn encode_ita2(text: &str) -> Result<String, CodeError> {
@@ -158,27 +164,45 @@ pub fn decode_ita2(text: &str) -> Result<String, CodeError> {
     Ok(out)
 }
 
+fn decode_ita2_gchq(text: &str) -> Result<String, CodeError> {
+    let mut mode = BaudotMode::Letters;
+    let mut out = String::with_capacity(text.len() / WIDTH);
+    for group in string_chunks(
+        &text
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .collect::<String>(),
+        WIDTH,
+    ) {
+        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correct is handled correctly by thi
+        if group == "11011" {
+            mode.to_figures();
+            continue;
+        }
+        if group == "11111" {
+            mode.to_letters();
+            continue;
+        }
+        match map_inv_gchq(&group) {
+            Some(code_group) => out.push(code_group),
+            None => {
+                return Err(CodeError::Input(format!(
+                    "The code group `{}` is not valid in ITA2",
+                    group
+                )))
+            }
+        }
+    }
+
+    Ok(out)
+}
+
 pub struct Baudot {
     pub spaced: bool,
+    pub alt_decode: bool,
 }
 
 impl Baudot {
-    // pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-    //     Box::new(
-    //         ITA2_LETTERS
-    //             .chars()
-    //             .map(|x| (x, ITA2_LETTER_MAP.get_by_left(&x).unwrap())),
-    //     )
-    // }
-
-    // pub fn figures_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-    //     Box::new(
-    //         ITA2_FIGURES
-    //             .chars()
-    //             .map(|x| (x, ITA2_FIGURE_MAP.get_by_left(&x).unwrap())),
-    //     )
-    // }
-
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&str, String)> + '_> {
         Box::new(CODES.into_iter().map(|code| {
             (
@@ -195,7 +219,10 @@ impl Baudot {
 
 impl Default for Baudot {
     fn default() -> Self {
-        Baudot { spaced: false }
+        Baudot {
+            spaced: false,
+            alt_decode: false,
+        }
     }
 }
 
@@ -211,7 +238,11 @@ impl Code for Baudot {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        Ok(decode_ita2(text)?)
+        if self.alt_decode {
+            Ok(decode_ita2_gchq(text)?)
+        } else {
+            Ok(decode_ita2(text)?)
+        }
     }
 }
 
