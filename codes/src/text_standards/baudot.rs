@@ -89,8 +89,8 @@ fn map_inv(k: &str, mode: BaudotMode) -> Option<char> {
     map.get_by_right(k).cloned()
 }
 
-fn map_inv_gchq(k: &str) -> Option<char> {
-    GCHQ_MAP.get_by_right(k).cloned()
+fn map_inv_gchq(k: &str) -> Option<&char> {
+    GCHQ_MAP.get_by_right(k)
 }
 
 pub fn encode_ita2(text: &str) -> Result<String, CodeError> {
@@ -141,7 +141,7 @@ pub fn decode_ita2(text: &str) -> Result<String, CodeError> {
             .collect::<String>(),
         WIDTH,
     ) {
-        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correct is handled correctly by thi
+        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correction is handled correctly
         if group == "11011" {
             mode.to_figures();
             continue;
@@ -174,7 +174,7 @@ fn decode_ita2_gchq(text: &str) -> Result<String, CodeError> {
             .collect::<String>(),
         WIDTH,
     ) {
-        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correct is handled correctly by thi
+        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correction is handled correctly
         if group == "11011" {
             mode.to_figures();
             continue;
@@ -184,7 +184,7 @@ fn decode_ita2_gchq(text: &str) -> Result<String, CodeError> {
             continue;
         }
         match map_inv_gchq(&group) {
-            Some(code_group) => out.push(code_group),
+            Some(code_group) => out.push(*code_group),
             None => {
                 return Err(CodeError::Input(format!(
                     "The code group `{}` is not valid in ITA2",
