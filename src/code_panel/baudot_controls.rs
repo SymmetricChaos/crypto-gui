@@ -22,7 +22,11 @@ impl CodeFrame for BaudotFrame {
         );
         ui.add_space(8.0);
 
-        ui.checkbox(&mut self.code.spaced, "Print as Groups of Five");
+        ui.label("An alternate decoding scheme replaces all figures and control characters with letters and numbers, making it easier to print.");
+        ui.checkbox(&mut self.code.alt_decode, "Alternate Decoding");
+        ui.add_space(8.0);
+
+        ui.checkbox(&mut self.code.spaced, "Print Bits as Groups of Five");
         ui.add_space(8.0);
 
         ui.fill_code_columns(16, 4, self.code.codes_chars());
