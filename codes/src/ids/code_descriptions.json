@@ -74,14 +74,6 @@
       "Binary-to-Text"
     ]
   },
-  "Base16": {
-    "Description": "Hexcode (also called Base16) is one of the most common ways to display bytes of binary data using the digits 0 through 9 and the letters A through F, ignoring case, to convert them to hexadecimal numbers. Each byte is encoded as exactly two hexadecimal digits. This is inefficient for storage and transmission but is easy for a human reader to interpret. Because of how ubiqutous it is there are no variation on hexcode like there are for its relatives Base32 and Base64. Some software or hardware will use a phrase in hexcode to mark it as important, most famously when early IBM computers freed a region of memory it would be overwritten with DEADBEEF to indicate to a programmer observing the memory that whatever had been there was gone.",
-    "Authors": null,
-    "Publication": null,
-    "Traits": [
-      "Binary-to-Text"
-    ]
-  },
   "Base32": {
     "Description": "Base32 works similarly to the more popular Base64 encoding but operates on groups of five bits. This introduces more overhead than Base64 but the smaller character set makes it possible to remove characters that might be confused, important if the string must be copied by a person, or even to make forming words impossible, which may be a requirement if stored on a system that forbids profanity or other kinds of text.",
     "Authors": null,
@@ -243,6 +235,14 @@
     "Publication": null,
     "Traits": [
       "Error Correction"
+    ]
+  },
+  "Hexadecimal": {
+    "Description": "Hexadecimal (also called Base16) is one of the most common ways to display bytes of binary data using the digits 0 through 9 and the letters A through F, ignoring case, to convert them to hexadecimal numbers. Each byte is encoded as exactly two hexadecimal digits. This is inefficient for storage and transmission but is easy for a human reader to interpret. Because of how ubiqutous it is there are no variation on hexcode like there are for its relatives Base32 and Base64. Some software or hardware will use a phrase in hexcode to mark it as important, most famously when early IBM computers freed a region of memory it would be overwritten with DEADBEEF to indicate to a programmer observing the memory that whatever had been there was gone.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Binary-to-Text"
     ]
   },
   "ICS Flags": {

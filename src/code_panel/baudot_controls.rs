@@ -1,8 +1,6 @@
-use codes::text_standards::baudot::Baudot;
-
-use crate::ui_elements::UiElements;
-
 use super::CodeFrame;
+use crate::ui_elements::UiElements;
+use codes::text_standards::baudot::Baudot;
 
 pub struct BaudotFrame {
     code: Baudot,
@@ -24,8 +22,6 @@ impl CodeFrame for BaudotFrame {
         );
         ui.add_space(8.0);
 
-        ui.label("The second International Telegraphy Alphabet (ITA2) was based on work by Baudot and Murray. It became a widely used standard that made ITA1 obsolete. This variant is still in minor usage and is the origin of the 'baud' as a five-bit unit of information.");
-        ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Print as Groups of Five");
         ui.add_space(8.0);
 

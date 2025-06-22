@@ -1,9 +1,9 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::binary_to_text::base16::Base16;
+use codes::binary_to_text::hexadecimal::Hexadecimal;
 
 pub struct Base16Frame {
-    code: Base16,
+    code: Hexadecimal,
 }
 
 impl Default for Base16Frame {

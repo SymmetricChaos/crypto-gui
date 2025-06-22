@@ -25,11 +25,15 @@ impl CodeFrame for AsciiFrame {
         ui.group(|ui| {
             ui.subheading("Representation");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.code.mode, DisplayMode::EightBit, "8-Bit");
+                ui.selectable_value(&mut self.code.mode, DisplayMode::EightBit, "8-Bit (common)");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::SevenBit, "7-Bit");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Octal, "Octal");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Decimal, "Decimal");
-                ui.selectable_value(&mut self.code.mode, DisplayMode::Hex, "Hexadecimal");
+                ui.selectable_value(
+                    &mut self.code.mode,
+                    DisplayMode::Hex,
+                    "Hexadecimal (common)",
+                );
             });
         });
         ui.add_space(8.0);

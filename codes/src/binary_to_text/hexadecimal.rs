@@ -5,12 +5,12 @@ use utils::byte_formatting::ByteFormat;
 
 crate::lazy_regex!(IS_BASE16, r"^([0-9A-F][0-9A-F])*$");
 
-pub struct Base16 {
+pub struct Hexadecimal {
     pub mode: ByteFormat,
     pub upper: bool,
 }
 
-impl Default for Base16 {
+impl Default for Hexadecimal {
     fn default() -> Self {
         Self {
             mode: ByteFormat::Utf8,
@@ -19,7 +19,7 @@ impl Default for Base16 {
     }
 }
 
-impl BinaryToText for Base16 {
+impl BinaryToText for Hexadecimal {
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
         if self.upper {
             Ok(bytes.iter().map(|b| format!("{b:02X}")).collect())
@@ -29,7 +29,7 @@ impl BinaryToText for Base16 {
     }
 }
 
-impl Code for Base16 {
+impl Code for Hexadecimal {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
@@ -75,7 +75,7 @@ mod base32_tests {
 
     #[test]
     fn encode_test() {
-        let code = Base16::default();
+        let code = Hexadecimal::default();
         assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0);
         assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1);
         assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2);
@@ -85,7 +85,7 @@ mod base32_tests {
 
     #[test]
     fn decode_test() {
-        let code = Base16::default();
+        let code = Hexadecimal::default();
         assert_eq!(code.decode(CODETEXT0).unwrap(), PLAINTEXT0);
         assert_eq!(code.decode(CODETEXT1).unwrap(), PLAINTEXT1);
         assert_eq!(code.decode(CODETEXT2).unwrap(), PLAINTEXT2);

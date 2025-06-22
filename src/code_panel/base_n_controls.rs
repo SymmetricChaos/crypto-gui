@@ -30,7 +30,10 @@ impl CodeFrame for BaseNFrame {
         ui.add(Slider::new(&mut self.code.radix, 2..=36));
         ui.add_space(16.0);
 
-        ui.label(format!("The first 32 equivalences between standard base-10 numbers and their representation in base-{}",self.code.radix));
+        ui.label(format!(
+            "The integers from 0 to 31 represented in base-{}",
+            self.code.radix
+        ));
         let pairs = (0..32).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap()));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 

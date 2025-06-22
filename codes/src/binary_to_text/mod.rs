@@ -1,9 +1,9 @@
 pub mod ascii85;
-pub mod base16;
 pub mod base32;
 pub mod base64;
 pub mod basex;
 pub mod bytewords;
+pub mod hexadecimal;
 pub mod intel_hex;
 pub mod numeric;
 pub mod pgp_words;

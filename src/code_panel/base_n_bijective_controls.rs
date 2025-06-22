@@ -30,7 +30,10 @@ impl CodeFrame for BaseNBijectiveFrame {
         ui.add(Slider::new(&mut self.code.radix, 1..=35));
         ui.add_space(16.0);
 
-        ui.label(format!("The first 32 equivalences between standard base-10 numbers and their representation in bijetive base-{}",self.code.radix));
+        ui.label(format!(
+            "The integers from 1 to 32 represented in bijetive base-{}",
+            self.code.radix
+        ));
         let pairs = (1..33).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap()));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 

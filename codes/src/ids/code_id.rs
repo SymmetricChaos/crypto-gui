@@ -35,7 +35,7 @@ code_ids_and_names!(
     BaseNegativeTwo, "Base Negative 2";
     BaseNBijective, "Bijective Base-N";
     BaseX, "BaseX";
-    Base16, "Base16";
+    Hexadecimal, "Hexadecimal";
     Base32, "Base32";
     Base64, "Base64";
     Baudot, "Baudot";

@@ -22,7 +22,7 @@ impl CodeFrame for BalancedTernaryFrame {
         );
         ui.add_space(8.0);
 
-        ui.label("Convert between \"standard\" base-10 numbers and their representation in balanced ternary. The encodings from -15 to 16 appear below.");
+        ui.label("Convert between \"standard\" base-10 numbers and their representation in balanced ternary. Example encodings from -15 to 16 appear below.");
         let pairs = (-15..=16).map(|n| (n.to_string(), encode_i32(n).unwrap()));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 

@@ -12,7 +12,6 @@ mod ascii_controls;
 mod bacon_contols;
 mod balanced_ternary_controls;
 mod barbier_controls;
-mod base16_controls;
 mod base32_controls;
 mod base64_controls;
 mod base_n_bijective_controls;
@@ -35,6 +34,7 @@ mod godel_controls;
 mod golomb_controls;
 mod gray_controls;
 mod hamming_controls;
+mod hexadecimal_controls;
 mod ics_flags_controls;
 mod intel_hex_controls;
 mod isbn_contols;
@@ -127,7 +127,7 @@ pub struct CodeInterface {
 
     // Binary to Text
     ascii85: ascii85_controls::Ascii85Frame,
-    base16: base16_controls::Base16Frame,
+    hex: hexadecimal_controls::Base16Frame,
     base32: base32_controls::Base32Frame,
     base64: base64_controls::Base64Frame,
     basex: basex_controls::BaseXFrame,
@@ -221,6 +221,7 @@ impl CodeInterface {
                 CodeId::ByteAsNum,
                 CodeId::Bytewords,
                 CodeId::CcsidBinary,
+                CodeId::Hexadecimal,
                 CodeId::IntelHex,
                 CodeId::Pgp,
                 CodeId::Skey,
@@ -317,7 +318,6 @@ impl CodeInterface {
             CodeId::BaseN => &mut self.base_n,
             CodeId::BaseNBijective => &mut self.base_n_bij,
             CodeId::BaseX => &mut self.basex,
-            CodeId::Base16 => &mut self.base16,
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
@@ -341,6 +341,7 @@ impl CodeInterface {
             CodeId::Golomb => &mut self.golomb,
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
+            CodeId::Hexadecimal => &mut self.hex,
             CodeId::IcsFlags => &mut self.ics_flags,
             CodeId::IntelHex => &mut self.intel_hex,
             CodeId::Isbn => &mut self.isbn,
