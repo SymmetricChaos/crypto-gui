@@ -41,7 +41,7 @@ impl Code for Hexadecimal {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         if !IS_BASE16.is_match(&text.to_uppercase()) {
-            return Err(CodeError::input("provided text is not valid Base16"));
+            return Err(CodeError::input("provided text is not valid Hexadecimal"));
         }
 
         let out = text

@@ -16,6 +16,13 @@ const CODES: [&'static str; 32] = [
     "11110", "11111",
 ];
 
+const CODES_INV: [&'static str; 32] = [
+    "00000", "10000", "01000", "11000", "00100", "10100", "01100", "11100", "00010", "10010",
+    "01010", "11010", "00110", "10110", "01110", "11110", "00001", "10001", "01001", "11001",
+    "00101", "10101", "01101", "11101", "00011", "10011", "01011", "11011", "00111", "10111",
+    "01111", "11111",
+];
+
 static LETTER_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
     std::sync::LazyLock::new(|| {
         utils::text_functions::bimap_from_iter(LETTERS.chars().zip(CODES.into_iter()))
@@ -329,8 +336,8 @@ impl Lorenz {
 
     pub fn step_sz40(&mut self) {
         // Step all of the Chi wheels once
-        for w in self.chi.iter_mut() {
-            w.step_back();
+        for c in self.chi.iter_mut() {
+            c.step_back();
         }
 
         // Step Mu61 once
@@ -338,8 +345,8 @@ impl Lorenz {
 
         // Step all of the Psi wheels once, if and only if M37 is set to an active pin
         if self.mu[0].bit() {
-            for w in self.psi.iter_mut() {
-                w.step_back();
+            for p in self.psi.iter_mut() {
+                p.step_back();
             }
         }
 
@@ -349,28 +356,28 @@ impl Lorenz {
         }
     }
 
-    // Used during testing for settings provided in reverse order
-    pub fn step_sz40_reverse(&mut self) {
-        // Step all of the Chi wheels once
-        for w in self.chi.iter_mut() {
-            w.step();
-        }
+    // // Used during testing for settings provided in reverse order
+    // pub fn step_sz40_reverse(&mut self) {
+    //     // Step all of the Chi wheels once
+    //     for w in self.chi.iter_mut() {
+    //         w.step();
+    //     }
 
-        // Step Mu61 once
-        self.mu[1].step();
+    //     // Step Mu61 once
+    //     self.mu[1].step();
 
-        // Step all of the Psi wheels once, if and only if M37 is set to an active pin
-        if self.mu[0].bit() {
-            for w in self.psi.iter_mut() {
-                w.step();
-            }
-        }
+    //     // Step all of the Psi wheels once, if and only if M37 is set to an active pin
+    //     if self.mu[0].bit() {
+    //         for w in self.psi.iter_mut() {
+    //             w.step();
+    //         }
+    //     }
 
-        // Step Mu37 once, if and only if Mu61 is set to an active pin
-        if self.mu[1].bit() {
-            self.mu[0].step();
-        }
-    }
+    //     // Step Mu37 once, if and only if Mu61 is set to an active pin
+    //     if self.mu[1].bit() {
+    //         self.mu[0].step();
+    //     }
+    // }
 
     fn encrypt_group(&self, group: &str, out: &mut Vec<bool>) {
         for (n, bit) in group
@@ -404,13 +411,7 @@ impl Lorenz {
             return Err(CipherError::input("invalid bit found"));
         }
         for group in string_chunks(&text.replace(" ", ""), WIDTH) {
-            for (n, bit) in group
-                .chars()
-                .map(|c| if c == '0' { false } else { true })
-                .enumerate()
-            {
-                out.push(bit ^ self.chi[4 - n].bit() ^ self.psi[4 - n].bit())
-            }
+            self.encrypt_group(&group, &mut out);
             self.step_sz40();
         }
         decode_ita2(
@@ -443,7 +444,7 @@ mod tests {
         let plaintext = "TEST";
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("GIBR", decode_ita2(&ciphertext).unwrap());
+        assert_eq!("GIBR", decode_ita2_gchq(&ciphertext).unwrap());
     }
 
     #[test]
@@ -452,6 +453,19 @@ mod tests {
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
         assert_eq!(plaintext, cipher.decrypt(&ciphertext).unwrap())
+    }
+
+    #[test]
+    fn test_a() {
+        // Why does this show such a high rate of matching characters?
+        let plaintext =
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        let cipher = Lorenz::default();
+        let ciphertext = cipher.encrypt(plaintext).unwrap();
+        assert_eq!(
+            "D98BJ4TYCGDOTDGOHQMPKEVK9FGA/AJELR4498WZMKRVXQXSRW5I84TLRNFFLNJ9MGAB4IHHHU9DDR5E",
+            decode_ita2_gchq(&ciphertext).unwrap()
+        );
     }
 
     #[test]
@@ -495,6 +509,13 @@ mod tests {
             "THIS9IS9A9TEST9TRANSMISSION55N889FROM9A9LORENZ9SZ55RW889CIPHER9ATTACHMENT55N889USING9CYBERCHEF55M",
             decode_ita2_gchq(&encode_ita2("THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.").unwrap()).unwrap()
         );
+    }
+
+    #[test]
+    fn print_pairs() {
+        for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars() {
+            println!("{}: {}", c, LETTER_MAP.get_by_left(&c).unwrap())
+        }
     }
 
     // #[test]
