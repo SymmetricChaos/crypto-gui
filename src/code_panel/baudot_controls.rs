@@ -1,6 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::text_standards::baudot::Baudot;
+use codes::text_standards::baudot::{Baudot, BitOrder};
 
 pub struct BaudotFrame {
     code: Baudot,
@@ -22,9 +22,25 @@ impl CodeFrame for BaudotFrame {
         );
         ui.add_space(8.0);
 
+        ui.group(|ui| {
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.code.bit_order,
+                    BitOrder::LsbL,
+                    "Least Significant Bit Left",
+                );
+                ui.selectable_value(
+                    &mut self.code.bit_order,
+                    BitOrder::LsbR,
+                    "Least Significant Bit Right",
+                );
+            });
+        });
+        ui.add_space(8.0);
+
         ui.label("An alternate decoding scheme replaces all figures and control characters with letters and numbers, making it easier to print.");
         ui.checkbox(&mut self.code.alt_decode, "Alternate Decoding");
-        ui.add_space(8.0);
+        ui.add_space(12.0);
 
         ui.checkbox(&mut self.code.spaced, "Print Bits as Groups of Five");
         ui.add_space(8.0);

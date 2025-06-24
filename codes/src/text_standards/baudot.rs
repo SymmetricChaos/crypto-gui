@@ -12,17 +12,35 @@ pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV�
 pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
 pub const GCHQ: &'static str = "/E3A9SIU4DRJNFCKTZLWHYPQOBG5MXV8"; // I only know of this mapping from the GCHQ code chef
 
-pub const CODES: [&'static str; 32] = [
+/// LSB right
+pub const CODES_R: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
     "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011",
     "10100", "10101", "10110", "10111", "11000", "11001", "11010", "11011", "11100", "11101",
     "11110", "11111",
 ];
 
+/// LSB left
+const CODES_L: [&'static str; 32] = [
+    "00000", "10000", "01000", "11000", "00100", "10100", "01100", "11100", "00010", "10010",
+    "01010", "11010", "00110", "10110", "01110", "11110", "00001", "10001", "01001", "11001",
+    "00101", "10101", "01101", "11101", "00011", "10011", "01011", "11011", "00111", "10111",
+    "01111", "11111",
+];
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum BitOrder {
+    LsbR,
+    LsbL,
+}
+
 crate::lazy_bimap!(
-    ITA2_LETTER_MAP: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES.into_iter());
-    ITA2_FIGURE_MAP: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES.into_iter());
-    GCHQ_MAP: BiMap<char, &'static str> = GCHQ.chars().zip(CODES.into_iter());
+    ITA2_LETTER_MAP_R: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES_R.into_iter());
+    ITA2_FIGURE_MAP_R: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES_R.into_iter());
+    GCHQ_MAP_R: BiMap<char, &'static str> = GCHQ.chars().zip(CODES_R.into_iter());
+    ITA2_LETTER_MAP_L: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES_L.into_iter());
+    ITA2_FIGURE_MAP_L: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES_L.into_iter());
+    GCHQ_MAP_L: BiMap<char, &'static str> = GCHQ.chars().zip(CODES_L.into_iter());
 );
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -73,30 +91,50 @@ impl BaudotMode {
     }
 }
 
-fn map(k: &char, mode: BaudotMode) -> Option<&str> {
+fn map_r(k: &char, mode: BaudotMode) -> Option<&str> {
     let map = match mode {
-        BaudotMode::Letters => &ITA2_LETTER_MAP,
-        BaudotMode::Figures => &ITA2_FIGURE_MAP,
+        BaudotMode::Letters => &ITA2_LETTER_MAP_R,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP_R,
     };
     map.get_by_left(k).cloned()
 }
 
-fn map_inv(k: &str, mode: BaudotMode) -> Option<char> {
+fn map_r_inv(k: &str, mode: BaudotMode) -> Option<char> {
     let map = match mode {
-        BaudotMode::Letters => &ITA2_LETTER_MAP,
-        BaudotMode::Figures => &ITA2_FIGURE_MAP,
+        BaudotMode::Letters => &ITA2_LETTER_MAP_R,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP_R,
     };
     map.get_by_right(k).cloned()
 }
 
-fn map_inv_gchq(k: &str) -> Option<&char> {
-    GCHQ_MAP.get_by_right(k)
+fn map_r_inv_gchq(k: &str) -> Option<&char> {
+    GCHQ_MAP_R.get_by_right(k)
 }
 
-pub fn encode_ita2(text: &str) -> Result<String, CodeError> {
+fn map_l(k: &char, mode: BaudotMode) -> Option<&str> {
+    let map = match mode {
+        BaudotMode::Letters => &ITA2_LETTER_MAP_L,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP_L,
+    };
+    map.get_by_left(k).cloned()
+}
+
+fn map_l_inv(k: &str, mode: BaudotMode) -> Option<char> {
+    let map = match mode {
+        BaudotMode::Letters => &ITA2_LETTER_MAP_L,
+        BaudotMode::Figures => &ITA2_FIGURE_MAP_L,
+    };
+    map.get_by_right(k).cloned()
+}
+
+fn map_l_inv_gchq(k: &str) -> Option<&char> {
+    GCHQ_MAP_L.get_by_right(k)
+}
+
+pub fn encode_ita2(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
     let mut mode = BaudotMode::Letters;
     let mut out = String::with_capacity(text.len() * WIDTH);
-    for s in text.chars() {
+    for s in text.chars().map(|c| c.to_ascii_uppercase()) {
         // Handle explicit use of the Shift Out Unicode symbol
         if s == '␎' {
             out.push_str("11011");
@@ -116,22 +154,80 @@ pub fn encode_ita2(text: &str) -> Result<String, CodeError> {
             mode.to_letters();
             continue;
         }
-        match map(&s, mode) {
-            Some(code_group) => out.push_str(code_group),
-            None => match map(&s, !mode) {
-                Some(code_group) => {
-                    out.push_str(mode.shift_from_code());
-                    out.push_str(code_group);
-                    mode = !mode;
+        if bit_order == BitOrder::LsbR {
+            match map_r(&s, mode) {
+                Some(code_group) => out.push_str(code_group),
+                None => match map_r(&s, !mode) {
+                    Some(code_group) => {
+                        out.push_str(mode.shift_from_code());
+                        out.push_str(code_group);
+                        mode = !mode;
+                    }
+                    None => return Err(CodeError::invalid_input_char(s)),
+                },
+            }
+        } else {
+            match map_l(&s, mode) {
+                Some(code_group) => out.push_str(code_group),
+                None => match map_l(&s, !mode) {
+                    Some(code_group) => {
+                        out.push_str(mode.shift_from_code());
+                        out.push_str(code_group);
+                        mode = !mode;
+                    }
+                    None => return Err(CodeError::invalid_input_char(s)),
+                },
+            }
+        }
+    }
+    Ok(out)
+}
+
+pub fn decode_ita2(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
+    let mut mode = BaudotMode::Letters;
+    let mut out = String::with_capacity(text.len() / WIDTH);
+    for group in string_chunks(
+        &text
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .collect::<String>(),
+        WIDTH,
+    ) {
+        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correction is handled correctly
+        if group == "11011" {
+            mode.to_figures();
+            continue;
+        }
+        if group == "11111" {
+            mode.to_letters();
+            continue;
+        }
+        match bit_order {
+            BitOrder::LsbR => match map_r_inv(&group, mode) {
+                Some(code_group) => out.push(code_group),
+                None => {
+                    return Err(CodeError::Input(format!(
+                        "The code group `{}` is not valid in ITA2",
+                        group
+                    )))
                 }
-                None => return Err(CodeError::invalid_input_char(s)),
+            },
+            BitOrder::LsbL => match map_l_inv(&group, mode) {
+                Some(code_group) => out.push(code_group),
+                None => {
+                    return Err(CodeError::Input(format!(
+                        "The code group `{}` is not valid in ITA2",
+                        group
+                    )))
+                }
             },
         }
     }
+
     Ok(out)
 }
 
-pub fn decode_ita2(text: &str) -> Result<String, CodeError> {
+fn decode_ita2_gchq(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
     let mut mode = BaudotMode::Letters;
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(
@@ -150,47 +246,25 @@ pub fn decode_ita2(text: &str) -> Result<String, CodeError> {
             mode.to_letters();
             continue;
         }
-        match map_inv(&group, mode) {
-            Some(code_group) => out.push(code_group),
-            None => {
-                return Err(CodeError::Input(format!(
-                    "The code group `{}` is not valid in ITA2",
-                    group
-                )))
-            }
-        }
-    }
-
-    Ok(out)
-}
-
-fn decode_ita2_gchq(text: &str) -> Result<String, CodeError> {
-    let mut mode = BaudotMode::Letters;
-    let mut out = String::with_capacity(text.len() / WIDTH);
-    for group in string_chunks(
-        &text
-            .chars()
-            .filter(|c| !c.is_whitespace())
-            .collect::<String>(),
-        WIDTH,
-    ) {
-        // Note that repeated shifts of the same kind are the same as a single shift, so an input that repeats a shift code for error correction is handled correctly
-        if group == "11011" {
-            mode.to_figures();
-            continue;
-        }
-        if group == "11111" {
-            mode.to_letters();
-            continue;
-        }
-        match map_inv_gchq(&group) {
-            Some(code_group) => out.push(*code_group),
-            None => {
-                return Err(CodeError::Input(format!(
-                    "The code group `{}` is not valid in ITA2",
-                    group
-                )))
-            }
+        match bit_order {
+            BitOrder::LsbR => match map_r_inv_gchq(&group) {
+                Some(code_group) => out.push(*code_group),
+                None => {
+                    return Err(CodeError::Input(format!(
+                        "The code group `{}` is not valid in ITA2",
+                        group
+                    )))
+                }
+            },
+            BitOrder::LsbL => match map_l_inv_gchq(&group) {
+                Some(code_group) => out.push(*code_group),
+                None => {
+                    return Err(CodeError::Input(format!(
+                        "The code group `{}` is not valid in ITA2",
+                        group
+                    )))
+                }
+            },
         }
     }
 
@@ -200,20 +274,33 @@ fn decode_ita2_gchq(text: &str) -> Result<String, CodeError> {
 pub struct Baudot {
     pub spaced: bool,
     pub alt_decode: bool,
+    pub bit_order: BitOrder,
 }
 
 impl Baudot {
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&str, String)> + '_> {
-        Box::new(CODES.into_iter().map(|code| {
-            (
-                code,
-                format!(
-                    "{} {}",
-                    ITA2_LETTER_MAP.get_by_right(code).unwrap(),
-                    ITA2_FIGURE_MAP.get_by_right(code).unwrap()
-                ),
-            )
-        }))
+        match self.bit_order {
+            BitOrder::LsbR => Box::new(CODES_R.into_iter().map(|code| {
+                (
+                    code,
+                    format!(
+                        "{} {}",
+                        ITA2_LETTER_MAP_R.get_by_right(code).unwrap(),
+                        ITA2_FIGURE_MAP_R.get_by_right(code).unwrap()
+                    ),
+                )
+            })),
+            BitOrder::LsbL => Box::new(CODES_L.into_iter().map(|code| {
+                (
+                    code,
+                    format!(
+                        "{} {}",
+                        ITA2_LETTER_MAP_L.get_by_right(code).unwrap(),
+                        ITA2_FIGURE_MAP_L.get_by_right(code).unwrap()
+                    ),
+                )
+            })),
+        }
     }
 }
 
@@ -222,13 +309,14 @@ impl Default for Baudot {
         Baudot {
             spaced: false,
             alt_decode: false,
+            bit_order: BitOrder::LsbL,
         }
     }
 }
 
 impl Code for Baudot {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let out = encode_ita2(text)?;
+        let out = encode_ita2(text, self.bit_order)?;
 
         if self.spaced {
             Ok(chunk_and_join(&out, WIDTH, ' '))
@@ -239,9 +327,9 @@ impl Code for Baudot {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         if self.alt_decode {
-            Ok(decode_ita2_gchq(text)?)
+            Ok(decode_ita2_gchq(text, self.bit_order)?)
         } else {
-            Ok(decode_ita2(text)?)
+            Ok(decode_ita2(text, self.bit_order)?)
         }
     }
 }
@@ -256,7 +344,7 @@ mod baudot_tests {
     #[test]
     #[ignore = "visual correctness check"]
     fn ita2_pairs() {
-        for (letter, code) in ITA2_LETTERS.chars().zip(CODES) {
+        for (letter, code) in ITA2_LETTERS.chars().zip(CODES_R) {
             println!("{letter} {code}")
         }
     }
