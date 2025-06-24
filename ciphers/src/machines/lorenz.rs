@@ -7,7 +7,7 @@ const WIDTH: usize = 5;
 
 const LETTERS: &'static str = "\0E\nA SIU\rDRJNFCKTZLWHYPQOBG␎MXV␏";
 const FIGURES: &'static str = "\03\n- '87\r␅4␇,!:(5+)2£6019?&␎./=␏";
-const GCHQ: &'static str = "/E3A9SIU4DRJNFCKTZLWHYPQOBG5MXV8"; // I only know of this mapping from the GCHQ code chef
+const CYBER_CHEF: &'static str = "/E3A9SIU4DRJNFCKTZLWHYPQOBG5MXV8"; // I only know of this mapping from the GCHQ Cyber Chef
 
 const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
@@ -31,9 +31,10 @@ static FIGURE_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
     std::sync::LazyLock::new(|| {
         utils::text_functions::bimap_from_iter(FIGURES.chars().zip(CODES.into_iter()))
     });
-static GCHQ_MAP: std::sync::LazyLock<BiMap<char, &'static str>> = std::sync::LazyLock::new(|| {
-    utils::text_functions::bimap_from_iter(GCHQ.chars().zip(CODES.into_iter()))
-});
+static CYBER_CHEF_MAP: std::sync::LazyLock<BiMap<char, &'static str>> =
+    std::sync::LazyLock::new(|| {
+        utils::text_functions::bimap_from_iter(CYBER_CHEF.chars().zip(CODES.into_iter()))
+    });
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 enum Mode {
@@ -77,31 +78,28 @@ fn map_inv(k: &str, mode: Mode) -> Option<char> {
     map.get_by_right(k).cloned()
 }
 
-fn map_inv_alt(k: &str) -> Option<char> {
-    GCHQ_MAP.get_by_right(k).cloned()
+fn map_inv_cyber_chef(k: &str) -> Option<char> {
+    CYBER_CHEF_MAP.get_by_right(k).cloned()
 }
 
-/// Uses doubled codes for figure and letter shift
+/// Uses doubled codes for figure and letter shift, following Cyber Chef
 pub fn encode_ita2(text: &str) -> Result<String, CipherError> {
     let mut mode = Mode::Letters;
     let mut out = String::with_capacity(text.len() * WIDTH);
-    for s in text.chars() {
+    for s in text.chars().map(|c| c.to_ascii_uppercase()) {
         if s == '␎' {
-            // Code Chef implementation doubles shifts
             out.push_str("11011");
             out.push_str("11011");
             mode = Mode::Figures;
             continue;
         }
         if s == '␏' {
-            // Code Chef implementation doubles shifts
             out.push_str("11111");
             out.push_str("11111");
             mode = Mode::Letters;
             continue;
         }
         if mode == Mode::Figures && s == ' ' {
-            // Code Chef implementation doubles shifts
             out.push_str("11111");
             out.push_str("11111");
             out.push_str("00100");
@@ -112,7 +110,6 @@ pub fn encode_ita2(text: &str) -> Result<String, CipherError> {
             Some(code_group) => out.push_str(code_group),
             None => match map(&s, !mode) {
                 Some(code_group) => {
-                    // Code Chef implementation doubles shifts
                     out.push_str(mode.shift());
                     out.push_str(mode.shift());
                     out.push_str(code_group);
@@ -152,10 +149,10 @@ pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
     Ok(out)
 }
 
-pub fn decode_ita2_gchq(text: &str) -> Result<String, CipherError> {
+pub fn decode_ita2_cyber_chef(text: &str) -> Result<String, CipherError> {
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(&text.replace(' ', ""), WIDTH) {
-        match map_inv_alt(&group) {
+        match map_inv_cyber_chef(&group) {
             Some(code_group) => out.push(code_group),
             None => {
                 return Err(CipherError::Input(format!(
@@ -415,14 +412,15 @@ impl Lorenz {
     }
 
     fn decrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
+        let text: String = text.chars().filter(|c| !c.is_whitespace()).collect();
         let mut out = Vec::new();
-        if text.replace(" ", "").chars().count() % 5 != 0 {
+        if text.chars().count() % 5 != 0 {
             return Err(CipherError::input("input must be groups of five bits"));
         }
-        if text.chars().any(|c| c != '0' && c != '1' && c != ' ') {
+        if text.chars().any(|c| c != '0' && c != '1') {
             return Err(CipherError::input("invalid bit found"));
         }
-        for group in string_chunks(&text.replace(" ", ""), WIDTH) {
+        for group in string_chunks(&text, WIDTH) {
             self.encrypt_group(&group, &mut out);
             self.step_sz40();
         }
@@ -456,7 +454,7 @@ mod tests {
         let plaintext = "TEST";
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("GIBR", decode_ita2_gchq(&ciphertext).unwrap());
+        assert_eq!("GIBR", decode_ita2_cyber_chef(&ciphertext).unwrap());
     }
 
     #[test]
@@ -470,10 +468,13 @@ mod tests {
     #[test]
     fn test_a() {
         // Why does this show such a high rate of matching characters?
-        let plaintext = "AAAAAA"; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        let plaintext = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
         let cipher = Lorenz::default();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("D98BJ4", decode_ita2_gchq(&ciphertext).unwrap());
+        assert_eq!(
+            "D98BJ4TYCGDOTDGOHQMPKEVK9FGA/AJELR4498WZMKRVXQXSRW5I84TLRNFFLNJ9MGAB4I",
+            decode_ita2_cyber_chef(&ciphertext).unwrap()
+        );
     }
 
     #[test]
@@ -482,7 +483,7 @@ mod tests {
             "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
         let cipher = Lorenz::new_kh();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("GWG8NUPLCXGGPGXJXQWTT9ODEPY5ONQXY9JB5OWPFHAMLSGAOJAKKVNYUDOGTSN9KDAHYBP5U8MIYPMSAFTHWFGZJXTM5SR4L", decode_ita2_gchq(&ciphertext).unwrap());
+        assert_eq!("GWG8NUPLCXGGPGXJXQWTT9ODEPY5ONQXY9JB5OWPFHAMLSGAOJAKKVNYUDOGTSN9KDAHYBP5U8MIYPMSAFTHWFGZJXTM5SR4L", decode_ita2_cyber_chef(&ciphertext).unwrap());
     }
 
     #[test]
@@ -491,7 +492,7 @@ mod tests {
             "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
         let cipher = Lorenz::new_zmug();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("JXFCVJS/YWVJ5Y44FUBLHYCHY8LS/MLUPWHTVNCGFG38MLYAG4BLUJATPTV9/EPGYVHTOE5ECZOLB4YOAVKUXD/9YVRLYSARP", decode_ita2_gchq(&ciphertext).unwrap());
+        assert_eq!("JXFCVJS/YWVJ5Y44FUBLHYCHY8LS/MLUPWHTVNCGFG38MLYAG4BLUJATPTV9/EPGYVHTOE5ECZOLB4YOAVKUXD/9YVRLYSARP", decode_ita2_cyber_chef(&ciphertext).unwrap());
     }
 
     #[test]
@@ -500,7 +501,7 @@ mod tests {
             "THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.";
         let cipher = Lorenz::new_bream();
         let ciphertext = cipher.encrypt(plaintext).unwrap();
-        assert_eq!("R/OSBCINF9QQBHHFPXQ9XYQPLXXOWXD8AXFYEQXWZBDLIMRUSMBP5WAWOMC8XZGPOU4MKW4MBBRKLRFTTKLL3UWQNE4UY8PIC", decode_ita2_gchq(&ciphertext).unwrap());
+        assert_eq!("R/OSBCINF9QQBHHFPXQ9XYQPLXXOWXD8AXFYEQXWZBDLIMRUSMBP5WAWOMC8XZGPOU4MKW4MBBRKLRFTTKLL3UWQNE4UY8PIC", decode_ita2_cyber_chef(&ciphertext).unwrap());
     }
 
     #[test]
@@ -511,11 +512,11 @@ mod tests {
         );
         assert_eq!(
             "ABC55QWE88DEF55M",
-            decode_ita2_gchq(&encode_ita2("ABC123DEF.").unwrap()).unwrap()
+            decode_ita2_cyber_chef(&encode_ita2("ABC123DEF.").unwrap()).unwrap()
         );
         assert_eq!(
             "THIS9IS9A9TEST9TRANSMISSION55N889FROM9A9LORENZ9SZ55RW889CIPHER9ATTACHMENT55N889USING9CYBERCHEF55M",
-            decode_ita2_gchq(&encode_ita2("THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.").unwrap()).unwrap()
+            decode_ita2_cyber_chef(&encode_ita2("THIS IS A TEST TRANSMISSION, FROM A LORENZ SZ42 CIPHER ATTACHMENT, USING CYBERCHEF.").unwrap()).unwrap()
         );
     }
 
