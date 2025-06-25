@@ -91,7 +91,7 @@
     ]
   },
   "Baudot": {
-    "Description": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand that would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures.\n␀: The null character, nothing transmitted.\n␍: Carriage Return, place the printing head at the start of a line.\n␊: Line Feed, move to the next line\n␅: Enqiry, test for an automatic response from the receiving station\n␇: Bell, ring a bell at the receiving station\nAdditionally there is a Figure Shift code and a Letter Shift code. This implementation inserts the necessary shift codes automatically but they can be inserted manually as ␎ (Figure Shift) and ␏ (Letter Shift)",
+    "Description": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand that would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures but also accept escaped forms.\n␀: The null character, nothing transmitted. It may be typed as \\0.\n␍: Carriage Return, place the printing head at the start of a line. It may be typed as \\r.\n␊: Line Feed, move to the next line. It may be typed as \\n.\n␅: Enqiry, test for an automatic response from the receiving station. It may be typed as \\e.\n␇: Bell, ring a bell at the receiving station. It may be typed as \\a.\nAdditionally there is a Figure Shift code (␎) and a Letter Shift code (␏). This implementation inserts the necessary shift codes automatically when encoding and removes them automatically when decoding.",
     "Authors": null,
     "Publication": null,
     "Traits": [
@@ -495,6 +495,15 @@
     "Publication": null,
     "Traits": [
       "Error Correction"
+    ]
+  },
+  "USTTY": {
+    "Description": "The American Teletypewriter code (USTTY) is a variant of the Baudot (ITA2) that was standardized in the United States. It is nearly identical to ITA2 with only a few figures differing.\n\nAn important part of the USTTY codes is control characters. These are represented here by Unicode control pictures but also accept escaped forms.\n␀: The null character, nothing transmitted. It may be typed as \\0.\n␍: Carriage Return, place the printing head at the start of a line. It may be typed as \\r.\n␊: Line Feed, move to the next line. It may be typed as \\n.\n␇: Bell, ring a bell at the receiving station. It may be typed as \\a.\nAdditionally there is a Figure Shift code (␎) and a Letter Shift code (␏). This implementation inserts the necessary shift codes automatically when encoding and removes them automatically when decoding.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Fixed-Width",
+      "Prefix"
     ]
   },
   "Verhoeff": {

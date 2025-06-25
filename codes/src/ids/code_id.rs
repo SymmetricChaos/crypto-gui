@@ -91,6 +91,7 @@ code_ids_and_names!(
     UnarySymmetric, "Symmetric Unary";
     Unicode, "Unicode";
     Upc, "UPC";
+    UsTty, "USTTY";
     Verhoeff, "Verhoeff";
     Wabun, "Wabun";
 );
