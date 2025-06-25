@@ -201,6 +201,11 @@ impl Wheel {
         self.pins[self.position]
     }
 
+    pub fn reverse(&mut self) {
+        self.pins = self.pins.iter().copied().rev().collect();
+        self.position = self.pins.len() - self.position;
+    }
+
     pub fn print_pins(&self) -> String {
         self.pins
             .iter()

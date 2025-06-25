@@ -132,9 +132,19 @@ fn map_l_inv_gchq(k: &str) -> Option<&char> {
 }
 
 pub fn encode_ita2(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
+    let mut text = text.to_string();
+    text = text.replace("\\0", "␀");
+    text = text.replace("\\r", "␍");
+    text = text.replace("\\n", "␊");
+    text = text.replace("\\e", "␅");
+    text = text.replace("\\a", "␇");
+    text = text.replace("\0", "␀");
+    text = text.replace("\r", "␍");
+    text = text.replace("\n", "␊");
+    text = text.to_ascii_uppercase();
     let mut mode = BaudotMode::Letters;
     let mut out = String::with_capacity(text.len() * WIDTH);
-    for s in text.chars().map(|c| c.to_ascii_uppercase()) {
+    for s in text.chars() {
         // Handle explicit use of the Shift Out Unicode symbol
         if s == '␎' {
             out.push_str("11011");
@@ -277,6 +287,16 @@ pub struct Baudot {
     pub bit_order: BitOrder,
 }
 
+impl Default for Baudot {
+    fn default() -> Self {
+        Baudot {
+            spaced: false,
+            alt_decode: false,
+            bit_order: BitOrder::LsbR,
+        }
+    }
+}
+
 impl Baudot {
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&str, String)> + '_> {
         match self.bit_order {
@@ -304,16 +324,6 @@ impl Baudot {
     }
 }
 
-impl Default for Baudot {
-    fn default() -> Self {
-        Baudot {
-            spaced: false,
-            alt_decode: false,
-            bit_order: BitOrder::LsbL,
-        }
-    }
-}
-
 impl Code for Baudot {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let out = encode_ita2(text, self.bit_order)?;
@@ -335,7 +345,7 @@ impl Code for Baudot {
 }
 
 #[cfg(test)]
-mod baudot_tests {
+mod tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS£572WHILEONSALE";
