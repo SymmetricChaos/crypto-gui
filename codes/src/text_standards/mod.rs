@@ -11,6 +11,6 @@ pub mod punycode;
 pub mod semaphore;
 pub mod spelling_alphabet;
 pub mod unicode;
-pub mod us_tty;
+pub mod ustty;
 pub mod wabun;
 pub mod wabun_encoding;

@@ -68,6 +68,7 @@ mod ueb_controls;
 mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
+mod ustty_controls;
 mod verhoeff_controls;
 mod wabun_controls;
 
@@ -123,6 +124,7 @@ pub struct CodeInterface {
     spelling: spelling_alphabet_controls::SpellingAlphabetFrame,
     ueb: ueb_controls::UebFrame,
     unicode: unicode_controls::UnicodeFrame,
+    ustty: ustty_controls::UsTtyFrame,
     wabun: wabun_controls::WabunFrame,
 
     // Binary to Text
@@ -206,6 +208,7 @@ impl CodeInterface {
                 CodeId::SpellingAlphabet,
                 CodeId::Ueb,
                 CodeId::Unicode,
+                CodeId::UsTty,
                 CodeId::Wabun,
             ],
             active_code,
@@ -371,6 +374,7 @@ impl CodeInterface {
             CodeId::Unary => &mut self.unary,
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
+            CodeId::UsTty => &mut self.ustty,
             CodeId::Verhoeff => &mut self.verhoeff,
             CodeId::Wabun => &mut self.wabun,
             _ => panic!("unknown code selected"),
