@@ -12,5 +12,6 @@ pub mod semaphore;
 pub mod spelling_alphabet;
 pub mod unicode;
 pub mod ustty;
+pub mod varicode;
 pub mod wabun;
 pub mod wabun_encoding;
