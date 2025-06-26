@@ -90,7 +90,7 @@
       "Binary-to-Text"
     ]
   },
-  "Baudot": {
+  "Baudot (ITA2)": {
     "Description": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand that would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures but also accept escaped forms.\n␀: The null character, nothing transmitted. It may be typed as \\0.\n␍: Carriage Return, place the printing head at the start of a line. It may be typed as \\r.\n␊: Line Feed, move to the next line. It may be typed as \\n.\n␅: Enqiry, test for an automatic response from the receiving station. It may be typed as \\e.\n␇: Bell, ring a bell at the receiving station. It may be typed as \\a.\nAdditionally there is a Figure Shift code (␎) and a Letter Shift code (␏). This implementation inserts the necessary shift codes automatically when encoding and removes them automatically when decoding.",
     "Authors": null,
     "Publication": null,
@@ -504,6 +504,14 @@
     "Traits": [
       "Fixed-Width",
       "Prefix"
+    ]
+  },
+  "Varicode": {
+    "Description": "Varicode encodes the ASCII character set using the Fibonacci encoding with the most common letters get shorter codes. The space character is encoded with one bit while the longest codes have ten bits.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Variable Width"
     ]
   },
   "Verhoeff": {

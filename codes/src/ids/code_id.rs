@@ -35,10 +35,9 @@ code_ids_and_names!(
     BaseNegativeTwo, "Base Negative 2";
     BaseNBijective, "Bijective Base-N";
     BaseX, "BaseX";
-    Hexadecimal, "Hexadecimal";
     Base32, "Base32";
     Base64, "Base64";
-    Baudot, "Baudot";
+    Baudot, "Baudot (ITA2)";
     BinaryCodedDecimal, "Binary-Coded Decimal";
     BiquinaryDecimal, "Biquinary Coded Decimal";
     Braille, "Simplified Braille";
@@ -60,6 +59,7 @@ code_ids_and_names!(
     Golomb, "Golomb";
     Gray, "Gray Code";
     Hamming, "Hamming Code";
+    Hexadecimal, "Hexadecimal";
     IcsFlags, "ICS Flags";
     IntelHex, "IntelHex";
     Isbn, "ISBN";
@@ -92,6 +92,7 @@ code_ids_and_names!(
     Unicode, "Unicode";
     Upc, "UPC";
     UsTty, "USTTY";
+    Varicode, "Varicode";
     Verhoeff, "Verhoeff";
     Wabun, "Wabun";
 );
