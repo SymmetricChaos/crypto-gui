@@ -16,6 +16,8 @@ pub enum Alphabet {
     Alphanumeric,
     /// The 94 printing ASCII symbols (not including space)
     Ascii94,
+    /// The 95 printing ASCII symbols (including space)
+    Ascii95,
     ///  The 128 ASCII symbols with control pictures for non-printing characters
     Ascii128,
     /// ABCDEFGHIKLMNOPQRSTVXYZ (lacks J, U, and W)
@@ -34,6 +36,7 @@ impl Alphabet {
             Alphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
             Alphabet::Alphanumeric => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+            Alphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
             Alphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
             Alphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
@@ -72,6 +75,7 @@ impl Alphabet {
             Alphabet::BasicLatinNoQ => "Basic Latin, No Q",
             Alphabet::Alphanumeric => "Alphanumeric",
             Alphabet::Ascii94 => "ASCII",
+            Alphabet::Ascii95 => "ASCII (with space)",
             Alphabet::Ascii128 => "Full ASCII",
             Alphabet::ClassicalLatin => "Classical Latin",
             Alphabet::Base64 => "Base64",
