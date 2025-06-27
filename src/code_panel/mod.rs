@@ -126,6 +126,7 @@ pub struct CodeInterface {
     ueb: ueb_controls::UebFrame,
     unicode: unicode_controls::UnicodeFrame,
     ustty: ustty_controls::UsTtyFrame,
+    varicode: varicode_controls::VaricodeFrame,
     wabun: wabun_controls::WabunFrame,
 
     // Binary to Text
@@ -210,6 +211,7 @@ impl CodeInterface {
                 CodeId::Ueb,
                 CodeId::Unicode,
                 CodeId::UsTty,
+                CodeId::Varicode,
                 CodeId::Wabun,
             ],
             active_code,
@@ -376,6 +378,7 @@ impl CodeInterface {
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
             CodeId::UsTty => &mut self.ustty,
+            CodeId::Varicode => &mut self.varicode,
             CodeId::Verhoeff => &mut self.verhoeff,
             CodeId::Wabun => &mut self.wabun,
             _ => panic!("unknown code selected"),
