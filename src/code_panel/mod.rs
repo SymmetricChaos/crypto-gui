@@ -69,6 +69,7 @@ mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
 mod ustty_controls;
+mod varicode_controls;
 mod verhoeff_controls;
 mod wabun_controls;
 

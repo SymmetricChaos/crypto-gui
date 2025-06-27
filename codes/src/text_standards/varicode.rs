@@ -222,6 +222,14 @@ impl Varicode {
         }
         output
     }
+
+    pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
+        Box::new(
+            Alphabet::Ascii128
+                .chars()
+                .map(|c| (c, VARICODE_MAP.get_by_left(&c).unwrap())),
+        )
+    }
 }
 
 impl Code for Varicode {
