@@ -12,7 +12,7 @@ pub const FIBS: [u32; 46] = [
     433494437, 701408733, 1134903170, 1836311903, 2971215073,
 ];
 
-const VARICODE_PRINTING: [&str; 128] = [
+const VARICODE: [&str; 128] = [
     "1010101011",
     "1011011011",
     "1011101101",
@@ -144,7 +144,7 @@ const VARICODE_PRINTING: [&str; 128] = [
 ];
 
 crate::lazy_bimap!(
-    VARICODE_MAP: BiMap<char, &str> = Alphabet::Ascii128.chars().zip(VARICODE_PRINTING);
+    VARICODE_MAP: BiMap<char, &str> = Alphabet::Ascii128.chars().zip(VARICODE);
 );
 
 pub struct Varicode {
@@ -159,6 +159,9 @@ impl Default for Varicode {
 
 impl Varicode {
     pub fn map(&self, c: char) -> Result<String, CodeError> {
+        if c.is_ascii_control() {
+            return Ok(VARICODE[c as usize].to_string());
+        }
         match VARICODE_MAP.get_by_left(&c) {
             Some(s) => Ok(s.to_string()),
             None => Err(CodeError::invalid_alphabet_char(c)),
@@ -248,14 +251,17 @@ impl Code for Varicode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let text = text.replace(" ", "");
         let codes = self.parse_codes(&text);
-        let mut out = Vec::new();
-        for c in codes {
-            match c {
-                Some(s) => out.push(self.map_inv(&s)?),
+        let mut out = String::new();
+        for s in codes {
+            match s {
+                // This line is a little weird.
+                // The control pictures have the last same eight bits as the actual control characters.
+                // Casting to u8 is guaranteed keep only the last eight bits so it automatically maps control pictures to control characters.
+                Some(code) => out.push((self.map_inv(&code)? as u8) as char),
                 None => return Err(CodeError::input("impossible input group")),
             }
         }
-        Ok(out.into_iter().join(""))
+        Ok(out)
     }
 }
 #[cfg(test)]
