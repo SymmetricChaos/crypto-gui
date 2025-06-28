@@ -365,7 +365,9 @@ impl Code for Ascii {
         let mut out = String::with_capacity(chunks.len());
 
         for chunk in chunks {
-            out.push(self.map_inv(&chunk)?)
+            // The control pictures have the last same eight bits as the actual control characters.
+            // Casting to u8 is guaranteed keep only the last eight bits so it automatically maps control pictures to control characters.
+            out.push((self.map_inv(&chunk)? as u8) as char);
         }
 
         Ok(out)

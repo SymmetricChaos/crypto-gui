@@ -254,7 +254,6 @@ impl Code for Varicode {
         let mut out = String::new();
         for s in codes {
             match s {
-                // This line is a little weird.
                 // The control pictures have the last same eight bits as the actual control characters.
                 // Casting to u8 is guaranteed keep only the last eight bits so it automatically maps control pictures to control characters.
                 Some(code) => out.push((self.map_inv(&code)? as u8) as char),
