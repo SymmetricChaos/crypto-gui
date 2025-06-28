@@ -83,9 +83,6 @@ impl ClassicRngFrame for LcgFrame {
         if self.rng.modulus < 2 {
             self.rng.modulus = 2;
         }
-        if self.rng.increment.gcd(&self.rng.modulus) != 1 {
-            self.rng.increment = self.rng.increment.wrapping_add(1);
-        }
         if self.rng.multiplier == 0 {
             self.rng.multiplier = 1;
         }

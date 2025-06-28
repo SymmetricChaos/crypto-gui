@@ -242,7 +242,7 @@ impl Code for Varicode {
             out.push(self.map(c)?)
         }
         if self.spaced {
-            Ok(out.into_iter().join("00 "))
+            Ok(out.into_iter().join(" "))
         } else {
             Ok(out.into_iter().join("00"))
         }
