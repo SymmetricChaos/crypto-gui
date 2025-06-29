@@ -507,11 +507,12 @@
     ]
   },
   "Varicode": {
-    "Description": "Varicode encodes the ASCII character set using the Fibonacci encoding with the most common letters get shorter codes. The space character is encoded with one bit while the longest codes have ten bits.",
-    "Authors": null,
-    "Publication": null,
+    "Description": "Varicode encodes the ASCII character set using a Fibonacci encoding for compression. The author seems not have been aware of the Fibonacci encoding and describes developing Varicode as a \"logical extension of Morse code\" with dashes of any length allowed. The code table below excludes the final 00 bits of each because standard treats these as intercharacter gaps. This means transmitting the space character actually takes three bits instead of the one shown and the longest codes require twelve bits instead of ten. Varicode the the basis for transmitting in PSK31, a radio text standard.",
+    "Authors": "Peter Martinez",
+    "Publication": "1999",
     "Traits": [
-      "Variable Width"
+      "Variable Width",
+      "Prefix"
     ]
   },
   "Verhoeff": {
