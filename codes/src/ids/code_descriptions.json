@@ -5,6 +5,7 @@
     "Publication": null,
     "Traits": [
       "Fixed-Width",
+      "Text",
       "Prefix"
     ]
   },
@@ -22,6 +23,7 @@
     "Publication": null,
     "Traits": [
       "Fixed-Width",
+      "Text",
       "Prefix"
     ]
   },
@@ -37,7 +39,9 @@
     "Description": "The Barbier Code is a predecessor to the Braille writing system, originally created as a method for reading and writing in the dark. 36 common sounds in French are assigned positions in a grid and they are indicated by two sets of dots that give the row and column, much as in a tap code. Here the dots are written out horizontally but Barbier intended them to be written in vertical pairs. While Braille would retained the use of dots his system was much more compact so a character could be read in a single motion.\n\nNOTE: Syllables must be separated by spaces when written for this page, otherwise the encoding is ambiguous.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Base-N": {
     "Description": "In an important sense every code can be thought of as simply assigning a number to each value. Arguably the simplest way to do this is to directly assign numbers to values using the ordinary number system. This has signigicant inefficiencies and limitations, however. Here a code may be created that assigns values a numnber in any base from 2 to 36.",
@@ -96,6 +100,7 @@
     "Publication": null,
     "Traits": [
       "Fixed-Width",
+      "Text",
       "Prefix"
     ]
   },
@@ -111,7 +116,9 @@
     "Description": "There are several one-to-one encodings used to describe the 64 possible Braille cells when the characters themselved cannot be used.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Bytewords": {
     "Description": "Bytewords is a method for encoding binary data as common English words. Several design features were chosen: words are all four letters, have unique starting and ending letters, require at least two substitutions or transpositions to change one into another, the first three and last three letters are also all unique. The uniquness of the starting and ending letters allows a compressed representation that is an efficient as hexadecimal.",
@@ -125,7 +132,9 @@
     "Description": "Coded Character Set Identifiers are the numeric designations given to various encodings over various code pages. A code page consists of a set of characters to represent and its encoding is the values assigned to each character. Code pages were an early method for expanding the characters that could be represented on computers by allowing the character and encoding to be specified. The disadvantage of this system was that if text were present without its identifier or if a device did not have the necessary information for that page and encoding the result was gibberish (often called mojibake). Here control characters are represented by their picture so that they appear as printed characters. Eventually Unicode emerged as a widespread replacement for code pages.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Convolutional Code": {
     "Description": "Convolutional codes are error correcting codes that take a sliding window of the data, produce parity bits and then transmit those parity bits instead of the data. The message is then reconstructed by the reciever using statistics, specifically maximum-likelihood estimation. Generation of the parity bits is straightfoward. A window is slid across the data bits looking at only a portion of them, then two or more times some bits are masked out and the are XORed together. The window is then moved one bit and the process repeated. The rate of the code is given as the size of the number of masks divided by the size of the window.",
@@ -145,8 +154,8 @@
   },
   "Damm": {
     "Description": "The Damm algorithm is a check digit algorithm similar to the Verhoeff algorithm but with a simpler implementation. A sigle table (a Cayley table with the Latin Square property) is sufficient to catch any change of a single digit as well as any transposition of adjacent elements. The table chosen by Damm also catches common English phonetic errors such as saying 14 and 40 similarly.",
-    "Authors": null,
-    "Publication": null,
+    "Authors": "H. Michael Damm",
+    "Publication": "2004",
     "Traits": [
       "Error Correction"
     ]
@@ -249,7 +258,9 @@
     "Description": "The International Code of Signals (ICS) defines a set of maritime signal flags that represent letters of the alphabet. These flags can be described by their heraldic blazon. The names of the flags are given using the NATO phonetic alphabet when spoken aloud.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Intel Hex": {
     "Description": "Intel hex encodes bytes of data into ASCII text with light error detection. The data is broken up into chunks of up to 255 bytes (though smaller values were more common) and recorded as uppercase hexadecimal. The record includes auxiliary data indicating length, location in memory, and record type are along with a one byte checksum. To check a line all of the bytes are added together, ignoring overflow, and should result in zero. Although several record types are defined this implementation uses only 00 (data) and 01 (end of file).",
@@ -300,12 +311,14 @@
     "Description": "The internal sorting mechanism of the Linotype machine used a seven-bit code to mechnically identify the characters. Each matrix, a small brass unit with an inscribed character, has seven teeth which engage with seven rails in the distributor system. Gaps in the rails at each channel were the complement of the teeth on the matrix for that letter. This automatic reloading ability, enabled by the code, was a major factor in the machine's success. Note that ligatures may not render correctly on all systems.\n\nFor ease of use on modern computers the ordinary space character may be entered in place of the em-space (0100010) when encoding.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Luhn's Algorithm": {
     "Description": "Luhn's Algorithm is a technique for calculating a checksum developed by Hans Luhn in 1960. Digits are taken right to left, the value of every even digit doubled, and then all summed together. That check digit is the smallest number, if added to the total, would make a multiple of 10 (or whatever modulus is chosen).",
-    "Authors": null,
-    "Publication": null,
+    "Authors": "Hans Peter Luhn",
+    "Publication": "1960",
     "Traits": [
       "Error Correction"
     ]
@@ -324,6 +337,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Text",
       "Variable Width"
     ]
   },
@@ -331,13 +345,17 @@
     "Description": "MTK2 is the Russian variant of the ITA2 Baudot Code. Due to the larger Cyrillic alphabet additional space was needed to transmit all characters. To this end MTK2 has an extra control character that shifts to Cyrillic Mode.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Needle": {
     "Description": "The needle code is the coding method using by the earliest electrical telegraph system created by Cooke and Wheatstone. Letters were arranged in a diamond shaped grid with five needles across the middle. Letters were indicated by turning two of the needles so that they pointed to a specific letter. Although it required no training to use the complexity and unreliability of this system was a problem. Later needle codes were created that used just one or two needles and did not operate by pointing.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Parity Bit": {
     "Description": "A parity bit is a very simple way of efficiently detecting single bit errors. The bits of some segment are added up and a bit is appended indicating if the value is odd or even. Equivalently the bits are XORed together and the value is appended. In this example the check bit is added immediately after the block though it can be placed anywhere.",
@@ -368,7 +386,9 @@
     "Description": "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Repetition": {
     "Description": "The simplest form of error correcting code is Repetition in which every bit is encoded as that bit repeated several times. When decoding each bit in the block 'votes' for  what the block should decode as with the majority winning. Only odd numbered block sizes are always unambigious. This form of encoding is extremely space inefficient and more sophisticated codes are often used in practice.",
@@ -382,7 +402,9 @@
     "Description": "It is often convient or necessary for Japanese text to be rendered in Latin characters. To accomplish this an encoding known as romaji (roman characters) is used. Several version are available: Kunrei-shiki is endorsed by the government of Japan, Hebern-shiki is widely used in the West, Nihon-shiki is a highly regular encoding no longer in common use.\nNotes on decoding: Decoding romaji back to kana is an imperfect process. The system used here does not vary with the variant chosen and should provide a decoding of any valid romaji. Because information is lost when encoding this decoding may not be perfectly accurate. For instance the を (wo) and お (o) kana are both transliterated as 'o' in Kunrei and Hebern. Likewise っに and んに are both rendered as `nni` in all encodings used. Decoding is consistent, so 'o' always becomes お while 'nni' always becomes んに but these many not reflect the original kana.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Roman Numeral": {
     "Description": "Roman Numerals are a now obsolete numeral system derived from an older Etruscan system. Their familiar form was arrived at about 2000 years ago. The symbols I, V, X, L, C, D, M stand for values of 1, 5, 10, 50, 100, 500, and 1000. The simplest use of these symbols is to just add up the values, for readability they are written from largest to smallest going left to right. However this can result is very long representations for numbers that are just under the value of a symbol. To correct for this a symbol with a small value may be placed to the left of one with a large value to indicate the small value should be subtracted. Thus 9 is written IX rather than VIIII. The Romans themselves were not consistent about the use of this rule but modern standardized Roman numerals enforce it by allowing no more than three of a symbol to appear consecutively. The modern system limnits \"correct\" Roman Numerals to being less than 4000. The Romans did occasionally use additional symbols to represent larger values.",
@@ -414,19 +436,25 @@
     "Description": "In flag semaphore information is transmitted using the positions of the arms, usually while holding flags to make their positions more apparent. Flags are held away from the body in five positions, ordered from lowest to highest: down, low, out, high, up. Any of the positions may be held across the body instead to put two flags on the same side. Flag semaphore positions are named as a pair that give the left arm and right arm from the perspective of the flag holder.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Simplified Braille": {
     "Description": "Braille is a tactile writing system in which each character consists of six raised dots arranged in two columns of three, known as a cell. Early Braille simply encoded the letters of the French alphabet on a one-to-one basis but it has diverged since then with abbreviations becoming common almost immediately. Modern versions of Braille cover numerous languages and have developed their own syntax with some languages extending the dots to eight instead of six. Here only simple early mappings between letters and Braille cells are provided.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Spelling Alphabet": {
     "Description": "Spelling Alphabets are designed to spell short sequences of letters over voice channels where noise might cause ambiguity. Written specifications for these systems appeared in the early 20th century with several focusing only on the most easily confused letters.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "Symmetric Unary": {
     "Description": "The symmetric unary code is a variation on the unary encoding that can be read either in either direction with exactly the same efficiency as the regular version. The number n is encoded as '0' followed by n-2 '1's followed by and additional '0'. An exception is 0 which is encoded as just the symbol '1'.",
@@ -443,6 +471,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Text",
       "Variable Width"
     ]
   },
@@ -478,16 +507,19 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Variable Width",
       "Fixed-Width",
-      "Prefix"
+      "Prefix",
+      "Text",
+      "Variable Width"
     ]
   },
   "Unified English Braille": {
     "Description": "Unified English Braille the form of Braille used internationally for writing in English, though it is not the only form of English Braille in usage. Unlike early Braille UEB is a complete writing system with unique syntax. Most commonly UEB is written in Grade 2 with extensive use of contractions and abbreviations. Here only Grade 1 UEB without those is presented as correct transliteration of Grade 2 UEB is much more complex.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   },
   "UPC": {
     "Description": "The Universal Product Code is a widely used encoding for barcodes. It has twelve digits, including the check digit. It is divided into two sections. The six left digits use a seven bit code while the six right digits use the bitwise inverse of that the same code. The start and end are padded with a guard pattern while the left and right are separated by another pattern.",
@@ -503,7 +535,8 @@
     "Publication": null,
     "Traits": [
       "Fixed-Width",
-      "Prefix"
+      "Prefix",
+      "Text"
     ]
   },
   "Varicode": {
@@ -511,14 +544,15 @@
     "Authors": "Peter Martinez",
     "Publication": "1999",
     "Traits": [
-      "Variable Width",
-      "Prefix"
+      "Prefix",
+      "Text",
+      "Variable Width"
     ]
   },
   "Verhoeff": {
     "Description": "The Verhoeff algorithm was the first checksum algorithm using only decimal digits able to both detect all single digit errors and all adjacent transposition errors. Rather than using standard arithmetic operations calculation is done using a dihedrial group and permutation.",
-    "Authors": null,
-    "Publication": null,
+    "Authors": "Jacobus Verhoeff",
+    "Publication": "1969",
     "Traits": [
       "Error Correction"
     ]
@@ -535,6 +569,8 @@
     "Description": "The Wabun code (和文 meaning 'Japanese Text') is a variation on Morse Code used for Japanese. Each kana is assigned a code point as are the two Japanese diacritical marks and several punctuation symbols. When mixed with ITU Morse code the prosigns DO and SN used to indicate the start and end of Wabun encoding.\n\nThe small yōon and sokuon kana use the same code as their larger versions. When decoding this site will create the yōon after an 'i' kana but does not create sokuon at all.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Text"
+    ]
   }
 }
