@@ -17,6 +17,7 @@ use eframe::{
     App,
 };
 use hashers::ids::HasherId;
+use itertools::Itertools;
 use rngs::ids::RngId;
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
@@ -195,15 +196,19 @@ impl ClassicCryptoApp {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
+                            ui.add_space(4.0);
                             if let Some(s) = code.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
                             if let Some(s) = code.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
                             };
-                            ui.add_space(16.0);
+                            if !code.traits().is_null() {
+                                ui.label(RichText::new(format!("Traits: {}", code.traits().members().map(|j| j.as_str().unwrap()).join(", "))).size(12.0));
+                            };
+                            ui.add_space(8.0);
                             ui.separator();
-                            ui.add_space(16.0);
+                            ui.add_space(8.0);
                             self.code_interface
                                 .get_active_code(&code)
                                 .ui(ui);
@@ -273,15 +278,22 @@ impl ClassicCryptoApp {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
+                            ui.add_space(4.0);
                             if let Some(s) = cipher.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
                             if let Some(s) = cipher.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
                             };
-                            ui.add_space(16.0);
+                            if !cipher.traits().is_null() {
+                                ui.label(RichText::new(format!("Traits: {}", cipher.traits().members().map(|j| j.as_str().unwrap()).join(", "))).size(12.0));
+                            };
+                            if !cipher.traits().is_null() {
+                                ui.label(RichText::new(format!("Names: {}", cipher.names().members().map(|j| j.as_str().unwrap()).join(", "))).size(12.0));
+                            };
+                            ui.add_space(8.0);
                             ui.separator();
-                            ui.add_space(16.0);
+                            ui.add_space(8.0);
                             self.cipher_interface
                                 .get_active_cipher(&cipher)
                                 .ui(ui, &mut self.errors);

@@ -116,8 +116,8 @@ impl CodeId {
         &CODE_INFORMATION[self.to_string()]["Publication"]
     }
 
-    pub fn traits(&self) -> Members {
-        CODE_INFORMATION[self.to_string()]["Traits"].members()
+    pub fn traits(&self) -> &JsonValue {
+        &CODE_INFORMATION[self.to_string()]["Traits"]
     }
 }
 

@@ -148,12 +148,12 @@ impl CipherId {
         &CIPHER_INFORMATION[self.to_string()]["Publication"]
     }
 
-    pub fn traits(&self) -> Members {
-        CIPHER_INFORMATION[self.to_string()]["Traits"].members()
+    pub fn traits(&self) -> &JsonValue {
+        &CIPHER_INFORMATION[self.to_string()]["Traits"]
     }
 
-    pub fn names(&self) -> Members {
-        CIPHER_INFORMATION[self.to_string()]["Names"].members()
+    pub fn names(&self) -> &JsonValue {
+        &CIPHER_INFORMATION[self.to_string()]["Names"]
     }
 }
 
