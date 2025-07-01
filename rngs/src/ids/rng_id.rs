@@ -77,20 +77,20 @@ impl Default for RngId {
 }
 
 impl RngId {
-    pub fn description(&self) -> Option<&'static str> {
-        RNG_INFORMATION[self.to_string()]["Description"].as_str()
+    pub fn description(&self) -> &JsonValue {
+        &RNG_INFORMATION[self.to_string()]["Description"]
     }
 
-    pub fn authors(&self) -> Option<&'static str> {
-        RNG_INFORMATION[self.to_string()]["Authors"].as_str()
+    pub fn authors(&self) -> &JsonValue {
+        &RNG_INFORMATION[self.to_string()]["Authors"]
     }
 
-    pub fn publication_date(&self) -> Option<&'static str> {
-        RNG_INFORMATION[self.to_string()]["Publication"].as_str()
+    pub fn publication_date(&self) -> &JsonValue {
+        &RNG_INFORMATION[self.to_string()]["Publication"]
     }
 
-    pub fn traits(&self) -> Option<&'static str> {
-        RNG_INFORMATION[self.to_string()]["Traits"].as_str()
+    pub fn traits(&self) -> &JsonValue {
+        &RNG_INFORMATION[self.to_string()]["Traits"]
     }
 }
 
