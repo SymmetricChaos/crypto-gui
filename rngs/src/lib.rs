@@ -34,6 +34,7 @@ pub mod salsa20;
 pub mod self_shrinking_generator;
 pub mod shrinking_generator;
 pub mod splitmix;
+pub mod squares;
 pub mod traits;
 pub mod vmpcr;
 pub mod well;

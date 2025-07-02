@@ -447,6 +447,7 @@ impl ClassicCryptoApp {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
+                            ui.add_space(4.0);
                             if let Some(s) = hasher.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
