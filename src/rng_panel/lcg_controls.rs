@@ -1,7 +1,6 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
 use egui::TextStyle;
-use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
 
