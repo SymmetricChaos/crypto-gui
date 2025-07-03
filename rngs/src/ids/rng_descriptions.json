@@ -261,6 +261,12 @@
     "Publication": "2014",
     "Traits": null
   },
+  "Squares": {
+    "Description": "Squares is based on a combination of two techniques: a Weyl sequence and perturned version of middle square method. The Weyl sequence is used as a counter then several middle square steps generate the output.",
+    "Authors": "Bernard Widynski",
+    "Publication": "2020",
+    "Traits": null
+  },
   "TT800": {
     "Description": "TT800 is a prececessor the Mersenne Twister algorithm.",
     "Authors": "Makoto Matsumoto",

@@ -60,6 +60,7 @@ rng_ids_and_names!(
     SelfShrinkingGenerator, "Self Shrinking Generator";
     ShrinkingGenerator, "Shrinking Generator";
     Splitmix, "Splitmix64";
+    Squares, "Squares";
     Tt800, "TT800";
     Vmpcr, "VMPC-R";
     Well, "WELL";

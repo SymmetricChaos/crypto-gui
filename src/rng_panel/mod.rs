@@ -27,6 +27,7 @@ mod salsa20_controls;
 mod self_shrinking_generator_controls;
 mod shrinking_generator_controls;
 mod splitmix_controls;
+mod squares_controls;
 mod tt800_controls;
 mod vmpcr_controls;
 mod well_controls;
@@ -100,6 +101,7 @@ pub struct RngInterface {
     self_shrinking_generator: self_shrinking_generator_controls::SelfShrinkingGeneratorFrame,
     shrinking_generator: shrinking_generator_controls::ShrinkingGeneratorFrame,
     splitmix: splitmix_controls::SplitmixFrame,
+    squares: squares_controls::SquaresFrame,
     tt800: tt800_controls::Tt800Frame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     well: well_controls::WellFrame,
@@ -129,6 +131,7 @@ impl RngInterface {
                 RngId::SelfShrinkingGenerator,
                 RngId::ShrinkingGenerator,
                 RngId::Splitmix,
+                RngId::Squares,
                 RngId::Tt800,
                 RngId::Well,
                 RngId::WichmannHill,
@@ -200,6 +203,7 @@ impl RngInterface {
             RngId::SelfShrinkingGenerator => &mut self.self_shrinking_generator,
             RngId::ShrinkingGenerator => &mut self.shrinking_generator,
             RngId::Splitmix => &mut self.splitmix,
+            RngId::Squares => &mut self.squares,
             RngId::Tt800 => &mut self.tt800,
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Well => &mut self.well,
