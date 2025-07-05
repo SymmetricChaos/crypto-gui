@@ -13,6 +13,7 @@ pub mod rc4;
 pub mod salsa20;
 pub mod seal;
 pub mod snow;
+pub mod wake;
 
 #[macro_export]
 macro_rules! impl_cipher_for_stream_cipher {
