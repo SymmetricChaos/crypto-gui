@@ -817,7 +817,7 @@
     ],
     "Description": "RC2 (Rivest Cipher 2) is an early digital block cipher created by Ronald Rivest in 1987 with a key size of between 1 and 128 bytes. It was reverse egnineered before being official published in 1994 and sometimes appears as ARC2 (Alleged RC2) in literature. RC2 includs an unusual effective key size parameter which limits the security of the cipher regardless of the size of the key used. The published recommendation was for the actual and effective key size to both be 64 bits, so that is the default here.",
     "Authors": "Ronald Rivest",
-    "Publication": "1987",
+    "Publication": "1998",
     "Traits": [
       "Block Cipher",
       "Feistel"
@@ -833,7 +833,7 @@
     ],
     "Description": "RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that are used to permute the list initially. It was reverse egnineered before being official published and sometimes appears as ARC4 (Alleged RC4) in literature.",
     "Authors": "Ronald Rivest",
-    "Publication": "1987",
+    "Publication": "1994",
     "Traits": [
       "Stream Cipher"
     ]
@@ -841,11 +841,29 @@
   "RC5": {
     "Names": [
       "RC5",
-      "Rivest Cipher 5"
+      "Rivest Cipher 5",
+      "RC5-16",
+      "RC5-32",
+      "RC5-64"
     ],
     "Description": "RC5 (Rivest Cipher 5) is an early digital block cipher created by Ronald Rivest in 1994 that is now considered insecure. Its round function is simple while the key schedule is complex. The cipher was designed to be parameterized by its word size, number of rounds, and key size. Here three versions with different block sizes are presented with adjustable rounds and key size. The 16-bit is intended for academic purposes only. The 32-bit version was originally recommended for computers with the matching word size but is likely vulnerable to modern attacks. The 64-bit version was made for, then uncommon, hardware with a matching word size and is likely best on modern computers.",
     "Authors": "Ronald Rivest",
     "Publication": "1994",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
+  "RC6": {
+    "Names": [
+      "RC6",
+      "Rivest Cipher 6",
+      "RC6-32",
+      "RC6-64"
+    ],
+    "Description": "RC6 an early digital block cipher created by Ronald Rivest.",
+    "Authors": "Ronald Rivest",
+    "Publication": "1998",
     "Traits": [
       "Block Cipher",
       "Feistel"

@@ -11,7 +11,7 @@ macro_rules! impl_rc5 {
             pub input_format: utils::byte_formatting::ByteFormat,
             pub output_format: utils::byte_formatting::ByteFormat,
             pub rounds: usize,
-            pub state: Vec<$word>,
+            pub round_keys: Vec<$word>,
             pub iv: $iv_word,
             pub mode: crate::digital::block_ciphers::block_cipher::BCMode,
             pub padding: crate::digital::block_ciphers::block_cipher::BCPadding,
@@ -21,7 +21,7 @@ macro_rules! impl_rc5 {
             fn default() -> Self {
                 Self {
                     rounds: $rounds,
-                    state: Vec::new(),
+                    round_keys: Vec::new(),
                     input_format: utils::byte_formatting::ByteFormat::Hex,
                     output_format: utils::byte_formatting::ByteFormat::Hex,
                     iv: 0,
@@ -49,7 +49,7 @@ macro_rules! impl_rc5 {
                 out
             }
 
-            pub fn state_size(&self) -> usize {
+            pub fn round_keys_size(&self) -> usize {
                 2 * (self.rounds + 1)
             }
 
@@ -62,7 +62,7 @@ macro_rules! impl_rc5 {
                 let u = $bytes_in_word; // bytes in a word
                 let b = key.len(); // bytes in the key
                 let c = std::cmp::max(b.div_ceil(u), 1); // words in the key
-                let t = self.state_size(); // words in the state
+                let t = self.round_keys_size(); // words in the round_keys
                 let mut l = vec![0 as $word; c];
                 for i in (0..b).rev() {
                     l[i / u] = (l[i / u].shl(8_u32)).wrapping_add(key[i] as $word)
@@ -88,25 +88,25 @@ macro_rules! impl_rc5 {
                     j = (j + 1) % c;
                 }
 
-                self.state = s;
+                self.round_keys = s;
             }
         }
 
         impl crate::digital::block_ciphers::block_cipher::BlockCipher<$bytes_in_block> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
                 let mut block = Self::bytes_to_words(bytes);
-                block[0] = block[0].wrapping_add(self.state[0]);
-                block[1] = block[1].wrapping_add(self.state[1]);
+                block[0] = block[0].wrapping_add(self.round_keys[0]);
+                block[1] = block[1].wrapping_add(self.round_keys[1]);
 
                 for i in 1..=self.rounds {
                     block[0] = block[0]
                         .bitxor(block[1])
                         .rotate_left(block[1] as u32 % $bits_in_word)
-                        .wrapping_add(self.state[2 * i]);
+                        .wrapping_add(self.round_keys[2 * i]);
                     block[1] = block[1]
                         .bitxor(block[0])
                         .rotate_left(block[0] as u32 % $bits_in_word)
-                        .wrapping_add(self.state[(2 * i) + 1])
+                        .wrapping_add(self.round_keys[(2 * i) + 1])
                 }
                 utils::byte_formatting::overwrite_bytes(bytes, &Self::words_to_bytes(&block));
             }
@@ -115,17 +115,17 @@ macro_rules! impl_rc5 {
                 let mut block = Self::bytes_to_words(bytes);
                 for i in (1..=self.rounds).rev() {
                     block[1] = block[1]
-                        .wrapping_sub(self.state[(2 * i) + 1])
+                        .wrapping_sub(self.round_keys[(2 * i) + 1])
                         .rotate_right(block[0] as u32 % $bits_in_word)
                         .bitxor(block[0]);
                     block[0] = block[0]
-                        .wrapping_sub(self.state[2 * i])
+                        .wrapping_sub(self.round_keys[2 * i])
                         .rotate_right(block[1] as u32 % $bits_in_word)
                         .bitxor(block[1]);
                 }
 
-                block[0] = block[0].wrapping_sub(self.state[0]);
-                block[1] = block[1].wrapping_sub(self.state[1]);
+                block[0] = block[0].wrapping_sub(self.round_keys[0]);
+                block[1] = block[1].wrapping_sub(self.round_keys[1]);
                 utils::byte_formatting::overwrite_bytes(bytes, &Self::words_to_bytes(&block));
             }
 
