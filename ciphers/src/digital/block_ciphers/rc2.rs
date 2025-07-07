@@ -232,13 +232,6 @@ impl BlockCipher<8> for Rc2 {
 
 crate::impl_cipher_for_block_cipher!(Rc2, 8);
 
-// #[cfg(test)]
-// mod rc2_tests {
-
-//     use super::*;
-
-// }
-
 crate::test_block_cipher!(
     test_1, Rc2::default().with_key(&[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
     [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
