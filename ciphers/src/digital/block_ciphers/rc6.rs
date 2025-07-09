@@ -58,11 +58,10 @@ impl Rc6 {
     }
 
     pub fn ksa_128(&mut self, key: &[u8]) {
-        let b = key.len();
-        assert_eq!(b, 16);
-        let c = max(b.div_ceil(WORDSIZE), 1); // number of words in the key
+        assert_eq!(key.len(), 16);
+        let c = max(key.len().div_ceil(WORDSIZE), 1); // number of words in the key
         let mut l = vec![0_u32; c];
-        for i in (0..b).rev() {
+        for i in (0..key.len()).rev() {
             l[i / WORDSIZE] = (l[i / WORDSIZE].shl(8_u32)).wrapping_add(key[i] as u32)
         }
 
@@ -89,24 +88,22 @@ impl Rc6 {
     }
 
     pub fn with_key_192(mut self, bytes: &[u8]) -> Self {
-        self.ksa_128(bytes);
+        self.ksa_192(bytes);
         self
     }
 
     pub fn ksa_192(&mut self, key: &[u8]) {
-        let b = key.len();
-        assert_eq!(b, 24);
+        assert_eq!(key.len(), 24);
         todo!()
     }
 
     pub fn with_key_256(mut self, bytes: &[u8]) -> Self {
-        self.ksa_128(bytes);
+        self.ksa_256(bytes);
         self
     }
 
     pub fn ksa_256(&mut self, key: &[u8]) {
-        let b = key.len();
-        assert_eq!(b, 32);
+        assert_eq!(key.len(), 32);
         todo!()
     }
 }
