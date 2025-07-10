@@ -11,7 +11,7 @@ const BLOCKWORDS: usize = BLOCKSIZE / WORDSIZE;
 const ROUNDS: usize = 20;
 const NUM_ROUND_KEYS: usize = (2 * ROUNDS) + 4;
 
-pub fn bytes_to_words(s: &[u8]) -> [u32; BLOCKWORDS] {
+fn bytes_to_words(s: &[u8]) -> [u32; BLOCKWORDS] {
     [
         u32::from_le_bytes(s[..4].try_into().unwrap()),
         u32::from_le_bytes(s[4..8].try_into().unwrap()),
@@ -20,13 +20,65 @@ pub fn bytes_to_words(s: &[u8]) -> [u32; BLOCKWORDS] {
     ]
 }
 
-pub fn words_to_bytes(s: &[u32]) -> [u8; BLOCKSIZE] {
+fn words_to_bytes(s: &[u32]) -> [u8; BLOCKSIZE] {
     let mut out = [0; BLOCKSIZE];
     out[..4].copy_from_slice(&s[0].to_le_bytes());
     out[4..8].copy_from_slice(&s[1].to_le_bytes());
     out[8..12].copy_from_slice(&s[2].to_le_bytes());
     out[12..16].copy_from_slice(&s[3].to_le_bytes());
     out
+}
+
+// B = B + S[0]
+// D = D + S[1]
+// for i = 1 to r do
+// {
+// 	t = (B * (2B + 1)) <<< lg w
+// 	u = (D * (2D + 1)) <<< lg w
+// 	A = ((A ^ t) <<< u) + S[2i]
+// 	C = ((C ^ u) <<< t) + S[2i + 1]
+// 	(A, B, C, D)  =  (B, C, D, A)
+// }
+// A = A + S[2r + 2]
+// C = C + S[2r + 3]
+macro_rules! enc_round {
+    ($i: literal, $a: ident, $b: ident, $c: ident, $d: ident, $round_keys: ident) => {
+        let t = $b
+            .wrapping_mul($b.wrapping_add($b).wrapping_add(1))
+            .rotate_left(5);
+        let u = $d
+            .wrapping_mul($d.wrapping_add($d).wrapping_add(1))
+            .rotate_left(5);
+        $a = ($a ^ t).rotate_left(u).wrapping_add($round_keys[2 * $i]);
+        $c = ($c ^ u)
+            .rotate_left(t)
+            .wrapping_add($round_keys[2 * $i + 1]);
+    };
+}
+
+// C = C - S[2r + 3]
+// A = A - S[2r + 2]
+// for i = r downto 1 do
+// {
+// 	(A, B, C, D) = (D, A, B, C)
+// 	u = (D * (2D + 1)) <<< lg w
+// 	t = (B * (2B + 1)) <<< lg w
+// 	C = ((C - S[2i + 1]) >>> t) ^ u
+// 	A = ((A - S[2i]) >>> u) ^ t
+// }
+// D = D - S[1]
+// B = B - S[0]
+macro_rules! dec_round {
+    ($i: literal, $a: ident, $b: ident, $c: ident, $d: ident, $round_keys: ident) => {
+        let u = $d
+            .wrapping_mul($d.wrapping_add($d).wrapping_add(1))
+            .rotate_left(5);
+        let t = $b
+            .wrapping_mul($b.wrapping_add($b).wrapping_add(1))
+            .rotate_left(5);
+        $c = $c.wrapping_sub($round_keys[2 * $i + 1]).rotate_right(t) ^ u;
+        $a = $a.wrapping_sub($round_keys[2 * $i]).rotate_right(u) ^ t;
+    };
 }
 
 struct Rc6 {
@@ -137,6 +189,7 @@ impl Rc6 {
             j = (j + 1) % key_words;
         }
 
+        // println!("{:08x?}", s);
         self.round_keys = s;
     }
 
@@ -163,76 +216,80 @@ impl Rc6 {
 
 impl BlockCipher<BLOCKSIZE> for Rc6 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        // B = B + S[0]
-        // D = D + S[1]
-        // for i = 1 to r do
-        // {
-        // 	t = (B * (2B + 1)) <<< lg w
-        // 	u = (D * (2D + 1)) <<< lg w
-        // 	A = ((A ^ t) <<< u) + S[2i]
-        // 	C = ((C ^ u) <<< t) + S[2i + 1]
-        // 	(A, B, C, D)  =  (B, C, D, A)
-        // }
-        // A = A + S[2r + 2]
-        // C = C + S[2r + 3]
         let [mut a, mut b, mut c, mut d] = bytes_to_words(bytes);
 
-        b = b.wrapping_add(self.round_keys[0]);
-        d = d.wrapping_add(self.round_keys[1]);
+        let keys = &self.round_keys;
 
-        for i in 1..ROUNDS {
-            let t = b
-                .wrapping_mul(b.wrapping_add(b).wrapping_add(1))
-                .rotate_left(5);
-            let u = d
-                .wrapping_mul(d.wrapping_add(d).wrapping_add(1))
-                .rotate_left(5);
-            a = (a ^ t).rotate_left(u).wrapping_add(self.round_keys[2 * i]);
-            c = (c ^ u)
-                .rotate_left(t)
-                .wrapping_add(self.round_keys[2 * i + 1]);
-            (a, b, c, d) = (b, c, d, a);
-        }
+        b = b.wrapping_add(keys[0]);
+        d = d.wrapping_add(keys[1]);
 
-        a = a.wrapping_add(self.round_keys[2 * ROUNDS + 2]);
-        c = c.wrapping_add(self.round_keys[2 * ROUNDS + 3]);
+        enc_round!(1, a, b, c, d, keys);
+        enc_round!(2, b, c, d, a, keys);
+        enc_round!(3, c, d, a, b, keys);
+        enc_round!(4, d, a, b, c, keys);
+
+        enc_round!(5, a, b, c, d, keys);
+        enc_round!(6, b, c, d, a, keys);
+        enc_round!(7, c, d, a, b, keys);
+        enc_round!(8, d, a, b, c, keys);
+
+        enc_round!(9, a, b, c, d, keys);
+        enc_round!(10, b, c, d, a, keys);
+        enc_round!(11, c, d, a, b, keys);
+        enc_round!(12, d, a, b, c, keys);
+
+        enc_round!(13, a, b, c, d, keys);
+        enc_round!(14, b, c, d, a, keys);
+        enc_round!(15, c, d, a, b, keys);
+        enc_round!(16, d, a, b, c, keys);
+
+        enc_round!(17, a, b, c, d, keys);
+        enc_round!(18, b, c, d, a, keys);
+        enc_round!(19, c, d, a, b, keys);
+        enc_round!(20, d, a, b, c, keys);
+
+        a = a.wrapping_add(keys[2 * ROUNDS + 2]);
+        c = c.wrapping_add(keys[2 * ROUNDS + 3]);
+
+        println!("{:08x?} {:08x?} {:08x?} {:08x?} ", a, b, c, d);
 
         utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&[a, b, c, d]));
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        // C = C - S[2r + 3]
-        // A = A - S[2r + 2]
-        // for i = r downto 1 do
-        // {
-        // 	(A, B, C, D) = (D, A, B, C)
-        // 	u = (D * (2D + 1)) <<< lg w
-        // 	t = (B * (2B + 1)) <<< lg w
-        // 	C = ((C - S[2i + 1]) >>> t) ^ u
-        // 	A = ((A - S[2i]) >>> u) ^ t
-        // }
-        // D = D - S[1]
-        // B = B - S[0]
         let [mut a, mut b, mut c, mut d] = bytes_to_words(bytes);
 
-        c = c.wrapping_sub(self.round_keys[2 * ROUNDS + 3]);
-        a = a.wrapping_sub(self.round_keys[2 * ROUNDS + 2]);
+        let keys = &self.round_keys;
+        c = c.wrapping_sub(keys[2 * ROUNDS + 3]);
+        a = a.wrapping_sub(keys[2 * ROUNDS + 2]);
 
-        for i in (1..ROUNDS).rev() {
-            (a, b, c, d) = (d, a, b, c);
+        dec_round!(20, d, a, b, c, keys);
+        dec_round!(19, c, d, a, b, keys);
+        dec_round!(18, b, c, d, a, keys);
+        dec_round!(17, a, b, c, d, keys);
 
-            let t = b
-                .wrapping_mul(b.wrapping_add(b).wrapping_add(1))
-                .rotate_left(5);
-            let u = d
-                .wrapping_mul(d.wrapping_add(d).wrapping_add(1))
-                .rotate_left(5);
-            c = (c.wrapping_sub(self.round_keys[2 * i + 1]).rotate_right(t)) ^ u;
-            a = (a.wrapping_sub(self.round_keys[2 * i]).rotate_right(u)) ^ t;
-        }
+        dec_round!(16, d, a, b, c, keys);
+        dec_round!(15, c, d, a, b, keys);
+        dec_round!(14, b, c, d, a, keys);
+        dec_round!(13, a, b, c, d, keys);
 
-        d = d.wrapping_sub(self.round_keys[1]);
-        b = b.wrapping_sub(self.round_keys[0]);
+        dec_round!(12, d, a, b, c, keys);
+        dec_round!(11, c, d, a, b, keys);
+        dec_round!(10, b, c, d, a, keys);
+        dec_round!(9, a, b, c, d, keys);
+
+        dec_round!(8, d, a, b, c, keys);
+        dec_round!(7, c, d, a, b, keys);
+        dec_round!(6, b, c, d, a, keys);
+        dec_round!(5, a, b, c, d, keys);
+
+        dec_round!(4, d, a, b, c, keys);
+        dec_round!(3, c, d, a, b, keys);
+        dec_round!(2, b, c, d, a, keys);
+        dec_round!(1, a, b, c, d, keys);
+
+        d = d.wrapping_sub(keys[1]);
+        b = b.wrapping_sub(keys[0]);
 
         utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&[a, b, c, d]));
     }
