@@ -109,53 +109,6 @@ impl Rc6 {
         self
     }
 
-    // Confirmed via a C implementation (below) that this is correct with the key set to 0
-    // #include <stdio.h>
-    // #include <stdint.h>
-    // #include <inttypes.h>
-
-    // #define rotl(a, b) (((a) << ((b) & 31)) | ((a) >> (32 - ((b) & 31))))
-
-    // void *set_key(const uint32_t in_key[])
-    // {   uint32_t  i, j, k, a, b, l[8], t, key_len;
-
-    //     key_len = 128;
-
-    //     uint32_t l_key[44];
-
-    //     l_key[0] = 0xb7e15163;
-
-    //     for(k = 1; k < 44; ++k)
-    //         l_key[k] = l_key[k - 1] + 0x9e3779b9;
-
-    //     for(k = 0; k < key_len / 32; ++k)
-    //         l[k] = in_key[k];
-
-    //     t = (key_len / 32) - 1;
-
-    //     a = b = i = j = 0;
-
-    //     for(k = 0; k < 132; ++k)
-    //     {   a = rotl(l_key[i] + a + b, 3); b += a;
-    //         b = rotl(l[j] + b, b);
-    //         l_key[i] = a; l[j] = b;
-    //         i = (i == 43 ? 0 : i + 1);
-    //         j = (j == t ? 0 : j + 1);
-    //     }
-
-    //     for(k = 0; k < 44; ++k)
-    //         printf("%08" PRIx32 ",\n", l_key[k]);
-
-    // };
-
-    // int main()
-    // {
-    //     uint8_t key[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-    //     set_key(key);
-
-    //     return 0;
-    // }
     pub fn ksa_128(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 16);
         let key_words = 4; // number of words in the key
@@ -189,7 +142,6 @@ impl Rc6 {
             j = (j + 1) % key_words;
         }
 
-        // println!("{:08x?}", s);
         self.round_keys = s;
     }
 
@@ -200,7 +152,38 @@ impl Rc6 {
 
     pub fn ksa_192(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 24);
-        todo!()
+        let key_words = 6; // number of words in the key
+
+        let mut s = [0; NUM_ROUND_KEYS];
+        s[0] = P32;
+        for i in 1..NUM_ROUND_KEYS {
+            s[i] = s[i - 1].wrapping_add(Q32)
+        }
+
+        let mut l = [0_u32; 6];
+        for i in (0..key.len()).rev() {
+            l[i / WORDSIZE] = (l[i / WORDSIZE].shl(8_u32)).wrapping_add(key[i] as u32)
+        }
+
+        let mut i = 0;
+        let mut j = 0;
+        let mut a = 0;
+        let mut b = 0;
+        let v = 3 * max(NUM_ROUND_KEYS, key_words);
+        for _ in 1..(v + 1) {
+            a = s[i].wrapping_add(a).wrapping_add(b).rotate_left(3);
+            s[i] = a;
+            b = l[j]
+                .wrapping_add(a)
+                .wrapping_add(b)
+                .rotate_left(a.wrapping_add(b));
+            l[j] = b;
+
+            i = (i + 1) % NUM_ROUND_KEYS;
+            j = (j + 1) % key_words;
+        }
+
+        self.round_keys = s;
     }
 
     pub fn with_key_256(mut self, bytes: &[u8]) -> Self {
@@ -210,7 +193,38 @@ impl Rc6 {
 
     pub fn ksa_256(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 32);
-        todo!()
+        let key_words = 8; // number of words in the key
+
+        let mut s = [0; NUM_ROUND_KEYS];
+        s[0] = P32;
+        for i in 1..NUM_ROUND_KEYS {
+            s[i] = s[i - 1].wrapping_add(Q32)
+        }
+
+        let mut l = [0_u32; 8];
+        for i in (0..key.len()).rev() {
+            l[i / WORDSIZE] = (l[i / WORDSIZE].shl(8_u32)).wrapping_add(key[i] as u32)
+        }
+
+        let mut i = 0;
+        let mut j = 0;
+        let mut a = 0;
+        let mut b = 0;
+        let v = 3 * max(NUM_ROUND_KEYS, key_words);
+        for _ in 1..(v + 1) {
+            a = s[i].wrapping_add(a).wrapping_add(b).rotate_left(3);
+            s[i] = a;
+            b = l[j]
+                .wrapping_add(a)
+                .wrapping_add(b)
+                .rotate_left(a.wrapping_add(b));
+            l[j] = b;
+
+            i = (i + 1) % NUM_ROUND_KEYS;
+            j = (j + 1) % key_words;
+        }
+
+        self.round_keys = s;
     }
 }
 
@@ -333,4 +347,10 @@ crate::test_block_cipher!(
     [0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
     [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
     [0x91, 0x2E, 0x9C, 0xF1, 0x47, 0x30, 0x35, 0xA8, 0x44, 0x3A, 0x82, 0x49, 0x5C, 0x07, 0x30, 0xD3];
+
+
+    test_4, Rc6::default().with_key_128(&
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78]),
+    [0x02, 0x13, 0x24, 0x35, 0x46, 0x57, 0x68, 0x79, 0x8a, 0x9b, 0xac, 0xbd, 0xce, 0xdf, 0xe0, 0xf1],
+    [0x52, 0x4e, 0x19, 0x2f, 0x47, 0x15, 0xc6, 0x23, 0x1f, 0x51, 0xf6, 0x36, 0x7e, 0xa4, 0x3f, 0x18];
 );
