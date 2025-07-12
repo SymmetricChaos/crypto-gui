@@ -109,9 +109,18 @@ impl Rc6 {
         self
     }
 
+    /// Reads words in big-endian order
+    pub fn ksa_128_u32(&mut self, words: &[u32; 4]) {
+        let mut bytes = [0; 16];
+        for i in 0..4 {
+            bytes[(4 * i)..(4 * i + 4)].copy_from_slice(&words[i].to_be_bytes());
+        }
+        self.ksa_128(&bytes);
+    }
+
     pub fn ksa_128(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 16);
-        let key_words = 4; // number of words in the key
+        const KEY_WORDS: usize = 4; // number of words in the key
 
         let mut s = [0; NUM_ROUND_KEYS];
         s[0] = P32;
@@ -119,7 +128,7 @@ impl Rc6 {
             s[i] = s[i - 1].wrapping_add(Q32)
         }
 
-        let mut l = [0_u32; 4];
+        let mut l = [0_u32; KEY_WORDS];
         for i in (0..key.len()).rev() {
             l[i / WORDSIZE] = (l[i / WORDSIZE].shl(8_u32)).wrapping_add(key[i] as u32)
         }
@@ -128,7 +137,7 @@ impl Rc6 {
         let mut j = 0;
         let mut a = 0;
         let mut b = 0;
-        let v = 3 * max(NUM_ROUND_KEYS, key_words);
+        let v = 3 * max(NUM_ROUND_KEYS, KEY_WORDS);
         for _ in 1..(v + 1) {
             a = s[i].wrapping_add(a).wrapping_add(b).rotate_left(3);
             s[i] = a;
@@ -139,7 +148,7 @@ impl Rc6 {
             l[j] = b;
 
             i = (i + 1) % NUM_ROUND_KEYS;
-            j = (j + 1) % key_words;
+            j = (j + 1) % KEY_WORDS;
         }
 
         self.round_keys = s;
@@ -150,9 +159,18 @@ impl Rc6 {
         self
     }
 
+    /// Reads words in big-endian order
+    pub fn ksa_192_u32(&mut self, words: &[u32; 6]) {
+        let mut bytes = [0; 24];
+        for i in 0..6 {
+            bytes[(4 * i)..(4 * i + 4)].copy_from_slice(&words[i].to_be_bytes());
+        }
+        self.ksa_192(&bytes);
+    }
+
     pub fn ksa_192(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 24);
-        let key_words = 6; // number of words in the key
+        const KEY_WORDS: usize = 6; // number of words in the key
 
         let mut s = [0; NUM_ROUND_KEYS];
         s[0] = P32;
@@ -169,7 +187,7 @@ impl Rc6 {
         let mut j = 0;
         let mut a = 0;
         let mut b = 0;
-        let v = 3 * max(NUM_ROUND_KEYS, key_words);
+        let v = 3 * max(NUM_ROUND_KEYS, KEY_WORDS);
         for _ in 1..(v + 1) {
             a = s[i].wrapping_add(a).wrapping_add(b).rotate_left(3);
             s[i] = a;
@@ -180,7 +198,7 @@ impl Rc6 {
             l[j] = b;
 
             i = (i + 1) % NUM_ROUND_KEYS;
-            j = (j + 1) % key_words;
+            j = (j + 1) % KEY_WORDS;
         }
 
         self.round_keys = s;
@@ -191,9 +209,18 @@ impl Rc6 {
         self
     }
 
+    /// Reads words in big-endian order
+    pub fn ksa_256_u32(&mut self, words: &[u32; 8]) {
+        let mut bytes = [0; 32];
+        for i in 0..8 {
+            bytes[(4 * i)..(4 * i + 4)].copy_from_slice(&words[i].to_be_bytes());
+        }
+        self.ksa_256(&bytes);
+    }
+
     pub fn ksa_256(&mut self, key: &[u8]) {
         assert_eq!(key.len(), 32);
-        let key_words = 8; // number of words in the key
+        const KEY_WORDS: usize = 8; // number of words in the key
 
         let mut s = [0; NUM_ROUND_KEYS];
         s[0] = P32;
@@ -201,7 +228,7 @@ impl Rc6 {
             s[i] = s[i - 1].wrapping_add(Q32)
         }
 
-        let mut l = [0_u32; 8];
+        let mut l = [0_u32; KEY_WORDS];
         for i in (0..key.len()).rev() {
             l[i / WORDSIZE] = (l[i / WORDSIZE].shl(8_u32)).wrapping_add(key[i] as u32)
         }
@@ -210,7 +237,7 @@ impl Rc6 {
         let mut j = 0;
         let mut a = 0;
         let mut b = 0;
-        let v = 3 * max(NUM_ROUND_KEYS, key_words);
+        let v = 3 * max(NUM_ROUND_KEYS, KEY_WORDS);
         for _ in 1..(v + 1) {
             a = s[i].wrapping_add(a).wrapping_add(b).rotate_left(3);
             s[i] = a;
@@ -221,7 +248,7 @@ impl Rc6 {
             l[j] = b;
 
             i = (i + 1) % NUM_ROUND_KEYS;
-            j = (j + 1) % key_words;
+            j = (j + 1) % KEY_WORDS;
         }
 
         self.round_keys = s;

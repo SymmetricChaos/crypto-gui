@@ -3,6 +3,7 @@ use crate::{
     ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements},
 };
 use ciphers::{digital::block_ciphers::rc6::Rc6, Cipher};
+use rand::{thread_rng, Rng};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum KeySelect {
@@ -14,7 +15,9 @@ enum KeySelect {
 pub struct Rc6Frame {
     cipher: Rc6,
     key_size: KeySelect,
-    key: String,
+    key_128: [u32; 4],
+    key_192: [u32; 6],
+    key_256: [u32; 8],
 }
 
 impl Default for Rc6Frame {
@@ -22,7 +25,9 @@ impl Default for Rc6Frame {
         Self {
             cipher: Default::default(),
             key_size: KeySelect::K128,
-            key: Default::default(),
+            key_128: Default::default(),
+            key_192: Default::default(),
+            key_256: Default::default(),
         }
     }
 }
@@ -50,31 +55,73 @@ impl CipherFrame for Rc6Frame {
         ui.selectable_value(&mut self.key_size, KeySelect::K192, "192-bit Key");
         ui.selectable_value(&mut self.key_size, KeySelect::K256, "256-bit Key");
 
-        ui.subheading("Key");
-        ui.label("Key should be provided as a string of hexadecimal digits representing between 1 and 255 bytes.");
-        if ui.text_edit_multiline(&mut self.key).changed() {
-            self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
-        }
-        if ui.button("Set State from Key").clicked() {
-            if self.key.len() > 510 {
-                self.key.truncate(510)
+        match self.key_size {
+            KeySelect::K128 => {
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    if ui.random_bytes_button(&mut self.key_128).clicked() {
+                        self.cipher.ksa_128_u32(&self.key_128);
+                    }
+                });
+                for i in 0..4 {
+                    if ui.u32_hex_edit(&mut self.key_128[i]).lost_focus() {
+                        self.cipher.ksa_128_u32(&self.key_128);
+                    }
+                }
             }
-            if self.key.len() % 2 == 1 {
-                self.key.push('0')
+            KeySelect::K192 => {
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    if ui.random_bytes_button(&mut self.key_192).clicked() {
+                        self.cipher.ksa_192_u32(&self.key_192);
+                    }
+                });
+                for i in 0..6 {
+                    if ui.u32_hex_edit(&mut self.key_192[i]).lost_focus() {
+                        self.cipher.ksa_192_u32(&self.key_192);
+                    }
+                }
             }
-            self.run_ksa()
+            KeySelect::K256 => {
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    if ui.random_bytes_button(&mut self.key_256).clicked() {
+                        self.cipher.ksa_256_u32(&self.key_256);
+                    }
+                });
+                for i in 0..8 {
+                    if ui.u32_hex_edit(&mut self.key_256[i]).lost_focus() {
+                        self.cipher.ksa_256_u32(&self.key_256);
+                    }
+                }
+            }
         }
-        ui.add_space(16.0);
 
         block_cipher_mode_and_padding(ui, &mut self.cipher.mode, &mut self.cipher.padding);
         ui.add_space(8.0);
 
         block_cipher_iv_128(ui, &mut self.cipher.iv, self.cipher.mode);
-        todo!()
     }
 
     fn randomize(&mut self) {
-        todo!()
+        let mut rng = thread_rng();
+        match self.key_size {
+            KeySelect::K128 => {
+                rng.fill(&mut self.key_128);
+                self.cipher.ksa_128_u32(&self.key_128)
+            }
+            KeySelect::K192 => {
+                rng.fill(&mut self.key_192);
+                self.cipher.ksa_192_u32(&self.key_192)
+            }
+            KeySelect::K256 => {
+                rng.fill(&mut self.key_256);
+                self.cipher.ksa_256_u32(&self.key_256)
+            }
+        }
     }
 
     fn reset(&mut self) {
