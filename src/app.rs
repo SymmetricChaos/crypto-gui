@@ -19,9 +19,10 @@ use eframe::{
 use hashers::ids::HasherId;
 use itertools::Itertools;
 use rngs::ids::RngId;
+use std::sync::Arc;
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
-    font_def.font_data.insert(name.into(), font_data);
+    font_def.font_data.insert(name.into(), Arc::new(font_data));
     font_def.families.get_mut(family).unwrap().push(name.into());
 }
 

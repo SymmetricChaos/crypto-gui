@@ -151,7 +151,7 @@ macro_rules! integer_edit_box {
                     // in button mode for just one frame. This is important for
                     // screen readers.
                     let is_kb_editing = ui.memory_mut(|mem| {
-                        mem.interested_in_focus(id);
+                        mem.interested_in_focus(id,ui.layer_id());
                         mem.has_focus(id)
                     });
 
@@ -309,7 +309,7 @@ macro_rules! integer_edit_box {
                         response
                     };
 
-                    response.changed = [<get_ $t >](&mut get_set_value) != old_value;
+                    // response.sense.set([<get_ $t >](&mut get_set_value) != old_value);
 
                     response
                 }
