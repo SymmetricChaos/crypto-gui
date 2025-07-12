@@ -858,11 +858,10 @@
     "Names": [
       "RC6",
       "Rivest Cipher 6",
-      "RC6-32",
-      "RC6-64"
+      "RC6-32"
     ],
-    "Description": "RC6 an early digital block cipher created by Ronald Rivest.",
-    "Authors": "Ronald Rivest",
+    "Description": "RC6 is a block cipher that was a finalist for the AES competition. The key-expansion and the block function are very similar in structure to RC5.",
+    "Authors": "Ron Rivest, Matt Robshaw, Ray Sidney, Yiqun Lisa Yin",
     "Publication": "1998",
     "Traits": [
       "Block Cipher",

@@ -81,7 +81,7 @@ macro_rules! dec_round {
     };
 }
 
-struct Rc6 {
+pub struct Rc6 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub round_keys: [u32; NUM_ROUND_KEYS],

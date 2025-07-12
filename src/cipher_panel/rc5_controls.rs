@@ -138,7 +138,7 @@ impl CipherFrame for Rc5Frame {
                     .num_columns(16)
                     .striped(true)
                     .show(ui, |ui| {
-                        for (n, b) in self.cipher_16.state.iter().enumerate() {
+                        for (n, b) in self.cipher_16.round_keys.iter().enumerate() {
                             if n % 16 == 0 && n != 0 {
                                 ui.end_row()
                             }
@@ -153,7 +153,7 @@ impl CipherFrame for Rc5Frame {
                     .num_columns(16)
                     .striped(true)
                     .show(ui, |ui| {
-                        for (n, b) in self.cipher_32.state.iter().enumerate() {
+                        for (n, b) in self.cipher_32.round_keys.iter().enumerate() {
                             if n % 16 == 0 && n != 0 {
                                 ui.end_row()
                             }
@@ -168,7 +168,7 @@ impl CipherFrame for Rc5Frame {
                     .num_columns(16)
                     .striped(true)
                     .show(ui, |ui| {
-                        for (n, b) in self.cipher_64.state.iter().enumerate() {
+                        for (n, b) in self.cipher_64.round_keys.iter().enumerate() {
                             if n % 16 == 0 && n != 0 {
                                 ui.end_row()
                             }

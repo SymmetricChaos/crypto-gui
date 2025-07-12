@@ -64,6 +64,7 @@ mod rail_fence_controls;
 mod rc2_controls;
 mod rc4_controls;
 mod rc5_controls;
+mod rc6_controls;
 mod rs44_controls;
 mod rsa_controls;
 mod salsa20_controls;
