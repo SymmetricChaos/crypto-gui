@@ -26,6 +26,7 @@ pub mod middle_square_binary;
 pub mod mwc;
 pub mod naor_reingold;
 pub mod pcg;
+pub mod philox;
 pub mod rabbit;
 pub mod randu;
 pub mod rc4;
