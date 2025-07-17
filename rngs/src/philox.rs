@@ -66,7 +66,12 @@ impl Philox2_32 {
 
 impl ClassicRng for Philox2_32 {
     fn next_u32(&mut self) -> u32 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0]
     }
 }
 
@@ -93,7 +98,12 @@ impl Philox4_32 {
 
 impl ClassicRng for Philox4_32 {
     fn next_u32(&mut self) -> u32 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0]
     }
 }
 
@@ -116,11 +126,21 @@ impl Philox2_64 {
 
 impl ClassicRng for Philox2_64 {
     fn next_u32(&mut self) -> u32 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0] as u32
     }
 
     fn next_u64(&mut self) -> u64 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0]
     }
 }
 
@@ -147,10 +167,20 @@ impl Philox4_64 {
 
 impl ClassicRng for Philox4_64 {
     fn next_u32(&mut self) -> u32 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0] as u32
     }
 
     fn next_u64(&mut self) -> u64 {
-        todo!()
+        for _ in 0..9 {
+            self.round();
+            self.bumpkey();
+        }
+        self.round();
+        self.ctr[0]
     }
 }
