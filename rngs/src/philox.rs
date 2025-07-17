@@ -48,40 +48,109 @@ fn mul64(a: u64, b: u64) -> (u64, u64) {
 }
 
 pub struct Philox2_32 {
-    key: u32,
-    ctr: [u32; 2],
+    pub key: u32,
+    pub ctr: [u32; 2],
 }
 
-impl Philox2_32 {}
+impl Philox2_32 {
+    pub fn bumpkey(&mut self) {
+        self.key = self.key.wrapping_add(PHILOX_W_32[0])
+    }
 
-impl ClassicRng for Philox2_32 {
-    fn next_u32(&mut self) -> u32 {
+    fn round(&mut self) {
         let (hi, lo) = mul32(PHILOX_M2_32, self.ctr[0]);
         self.ctr[0] = hi ^ self.ctr[1] ^ self.key;
         self.ctr[1] = lo;
-        self.ctr[0]
+    }
+}
+
+impl ClassicRng for Philox2_32 {
+    fn next_u32(&mut self) -> u32 {
+        todo!()
+    }
+}
+
+pub struct Philox4_32 {
+    pub key: [u32; 2],
+    pub ctr: [u32; 4],
+}
+
+impl Philox4_32 {
+    pub fn bumpkey(&mut self) {
+        self.key[0] = self.key[0].wrapping_add(PHILOX_W_32[0]);
+        self.key[1] = self.key[1].wrapping_add(PHILOX_W_32[1]);
+    }
+
+    fn round(&mut self) {
+        let (hi1, lo1) = mul32(PHILOX_M4_32[0], self.ctr[0]);
+        let (hi2, lo2) = mul32(PHILOX_M4_32[1], self.ctr[1]);
+        self.ctr[0] = hi2 ^ self.ctr[1] ^ self.key[0];
+        self.ctr[1] = lo2;
+        self.ctr[2] = hi1 ^ self.ctr[3] ^ self.key[1];
+        self.ctr[3] = lo1;
+    }
+}
+
+impl ClassicRng for Philox4_32 {
+    fn next_u32(&mut self) -> u32 {
+        todo!()
     }
 }
 
 pub struct Philox2_64 {
-    key: u64,
-    ctr: [u64; 2],
+    pub key: u64,
+    pub ctr: [u64; 2],
 }
 
-impl Philox2_64 {}
+impl Philox2_64 {
+    pub fn bumpkey(&mut self) {
+        self.key = self.key.wrapping_add(PHILOX_W_64[0])
+    }
+
+    fn round(&mut self) {
+        let (hi, lo) = mul64(PHILOX_M2_64, self.ctr[0]);
+        self.ctr[0] = hi ^ self.ctr[1] ^ self.key;
+        self.ctr[1] = lo;
+    }
+}
 
 impl ClassicRng for Philox2_64 {
     fn next_u32(&mut self) -> u32 {
-        let (hi, lo) = mul64(PHILOX_M2_64, self.ctr[0]);
-        self.ctr[0] = hi ^ self.ctr[1] ^ self.key;
-        self.ctr[1] = lo;
-        self.ctr[0] as u32
+        todo!()
     }
 
     fn next_u64(&mut self) -> u64 {
-        let (hi, lo) = mul64(PHILOX_M2_64, self.ctr[0]);
-        self.ctr[0] = hi ^ self.ctr[1] ^ self.key;
-        self.ctr[1] = lo;
-        self.ctr[0]
+        todo!()
+    }
+}
+
+pub struct Philox4_64 {
+    pub key: [u64; 2],
+    pub ctr: [u64; 4],
+}
+
+impl Philox4_64 {
+    pub fn bumpkey(&mut self) {
+        self.key[0] = self.key[0].wrapping_add(PHILOX_W_64[0]);
+        self.key[1] = self.key[1].wrapping_add(PHILOX_W_64[1]);
+    }
+
+    fn round(&mut self) {
+        let (hi1, lo1) = mul64(PHILOX_M4_64[0], self.ctr[0]);
+        let (hi2, lo2) = mul64(PHILOX_M4_64[1], self.ctr[1]);
+        self.ctr[0] = hi2 ^ self.ctr[1] ^ self.key[0];
+        self.ctr[1] = lo2;
+        self.ctr[2] = hi1 ^ self.ctr[3] ^ self.key[1];
+        self.ctr[3] = lo1;
+    }
+}
+
+impl ClassicRng for Philox4_64 {
+    fn next_u32(&mut self) -> u32 {
+        todo!()
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        todo!()
     }
 }
