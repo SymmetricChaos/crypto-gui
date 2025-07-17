@@ -14,27 +14,6 @@ const PHILOX_W_64: [u64; 2] = [0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B];
 // 32 bit
 const PHILOX_W_32: [u32; 2] = [0x9E3779B9, 0xBB67AE85];
 
-// # _round() in 2 versions for x2 or x4
-// def philox2_round(counter, key, philox_m, len_w, mask_w):
-//   # philox_mulhilo
-//   prod = philox_m[VAL_1] * counter[VAL_1]
-//   hi_2 = prod >> len_w
-//   lo_2 = prod & mask_w
-//   counter[VAL_1] = hi_2 ^ counter[VAL_2] ^ key[VAL_1]
-//   counter[VAL_2] = lo_2
-
-// def philox4_round(counter, key, philox_m, len_w, mask_w):
-//   prod = philox_m[VAL_1] * counter[VAL_1]
-//   hi_1 = prod >> len_w
-//   lo_1 = prod & mask_w
-//   prod = philox_m[VAL_2] * counter[VAL_3]
-//   hi_2 = prod >> len_w
-//   lo_2 = prod & mask_w
-//   counter[VAL_1] = hi_2 ^ counter[VAL_2] ^ key[VAL_1]
-//   counter[VAL_2] = lo_2
-//   counter[VAL_3] = hi_1 ^ counter[VAL_4] ^ key[VAL_2]
-//   counter[VAL_4] = lo_1
-
 #[inline]
 fn mul32(a: u32, b: u32) -> (u32, u32) {
     let p = (a as u64).wrapping_mul(b as u64);
@@ -44,7 +23,7 @@ fn mul32(a: u32, b: u32) -> (u32, u32) {
 #[inline]
 fn mul64(a: u64, b: u64) -> (u64, u64) {
     let p = (a as u128).wrapping_mul(b as u128);
-    ((p >> 32) as u64, (p as u64))
+    ((p >> 64) as u64, (p as u64))
 }
 
 pub struct Philox2_32 {
