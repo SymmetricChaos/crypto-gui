@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use egui::{DragValue, TextStyle};
 use rngs::{
-    lfg::{FibOp, Lfg},
+    lfg::{FibOp32, Lfg32},
     ClassicRng,
 };
 
@@ -11,7 +11,7 @@ use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements}
 use super::ClassicRngFrame;
 
 pub struct LfgFrame {
-    rng: Lfg,
+    rng: Lfg32,
     vector_length: usize,
     state_strings: VecDeque<String>,
     randoms: String,
@@ -20,7 +20,7 @@ pub struct LfgFrame {
 
 impl Default for LfgFrame {
     fn default() -> Self {
-        let rng = Lfg::default();
+        let rng = Lfg32::default();
         let vector_length = rng.state.len();
         let mut s = Self {
             rng,
@@ -110,9 +110,9 @@ impl ClassicRngFrame for LfgFrame {
 
         ui.add_space(8.0);
         ui.subheading("Operation");
-        ui.selectable_value(&mut self.rng.op, FibOp::Add, "Addition");
-        ui.selectable_value(&mut self.rng.op, FibOp::Mul, "Multiplication");
-        ui.selectable_value(&mut self.rng.op, FibOp::Xor, "Bitwise XOR");
+        ui.selectable_value(&mut self.rng.op, FibOp32::Add, "Addition");
+        ui.selectable_value(&mut self.rng.op, FibOp32::Mul, "Multiplication");
+        ui.selectable_value(&mut self.rng.op, FibOp32::Xor, "Bitwise XOR");
 
         ui.add_space(8.0);
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);

@@ -2,10 +2,10 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
 use egui::TextStyle;
 use rand::{thread_rng, Rng};
-use rngs::{lcg::Lcg, ClassicRng};
+use rngs::{lcg::Lcg32, ClassicRng};
 
 pub struct LcgFrame {
-    rng: Lcg,
+    rng: Lcg32,
     state_string: String,
     multiplier_string: String,
     increment_string: String,
