@@ -212,12 +212,15 @@ mod tests {
     #[test]
     fn sequence2_32() {
         let mut rng = Philox2_32::default();
+
         rng.key = 0;
         rng.ctr = [0, 0];
         assert_eq!([0xff1dae59, 0x6cd10df2], rng.next_ctr());
+
         rng.key = 0xffffffff;
         rng.ctr = [0xffffffff, 0xffffffff];
         assert_eq!([0x2c3f628b, 0xab4fd7ad], rng.next_ctr());
+
         rng.key = 0x13198a2e;
         rng.ctr = [0x243f6a88, 0x85a308d3];
         assert_eq!([0xdd7ce038, 0xf62a4c12], rng.next_ctr());
@@ -226,23 +229,93 @@ mod tests {
     #[test]
     fn sequence4_32() {
         let mut rng = Philox4_32::default();
+
         rng.key = [0, 0];
         rng.ctr = [0, 0, 0, 0];
-
         assert_eq!(
             [0x6627e8d5, 0xe169c58d, 0xbc57ac4c, 0x9b00dbd8],
             rng.next_ctr()
         );
+
         rng.key = [0xffffffff, 0xffffffff];
         rng.ctr = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
         assert_eq!(
             [0x408f276d, 0x41c83b0e, 0xa20bc7c6, 0x6d5451fd],
             rng.next_ctr()
         );
+
         rng.key = [0x243f6a88, 0x85a308d3];
         rng.ctr = [0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0];
         assert_eq!(
             [0xd16cfe09, 0x94fdcceb, 0x5001e420, 0x24126ea1],
+            rng.next_ctr()
+        );
+    }
+
+    #[test]
+    fn sequence2_64() {
+        let mut rng = Philox2_64::default();
+
+        rng.key = 0;
+        rng.ctr = [0, 0];
+        assert_eq!([0xca00a0459843d731, 0x66c24222c9a845b5], rng.next_ctr());
+
+        rng.key = 0xffffffffffffffff;
+        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
+        assert_eq!([0x65b021d60cd8310f, 0x4d02f3222f86df20], rng.next_ctr());
+
+        rng.key = 0xa4093822299f31d0;
+        rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
+        assert_eq!([0x0a5e742c2997341c, 0xb0f883d38000de5d], rng.next_ctr());
+    }
+
+    #[test]
+    fn sequence4_64() {
+        let mut rng = Philox4_64::default();
+
+        rng.key = [0, 0];
+        rng.ctr = [0, 0, 0, 0];
+        assert_eq!(
+            [
+                0x16554d9eca36314c,
+                0xdb20fe9d672d0fdc,
+                0xd7e772cee186176b,
+                0x7e68b68aec7ba23b
+            ],
+            rng.next_ctr()
+        );
+
+        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.ctr = [
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+        ];
+        assert_eq!(
+            [
+                0x87b092c3013fe90b,
+                0x438c3c67be8d0224,
+                0x9cc7d7c69cd777b6,
+                0xa09caebf594f0ba0
+            ],
+            rng.next_ctr()
+        );
+
+        rng.key = [0x243f6a8885a308d3, 0x13198a2e03707344];
+        rng.ctr = [
+            0xa4093822299f31d0,
+            0x082efa98ec4e6c89,
+            0x452821e638d01377,
+            0xbe5466cf34e90c6c,
+        ];
+        assert_eq!(
+            [
+                0xa528f45403e61d95,
+                0x38c72dbd566e9788,
+                0xa5a1610e72fd18b5,
+                0x57bd43b5e52b7fe6
+            ],
             rng.next_ctr()
         );
     }
