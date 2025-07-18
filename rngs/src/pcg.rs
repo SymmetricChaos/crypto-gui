@@ -74,3 +74,14 @@ impl ClassicRng for Pcg {
         self.transform.transform64(self.state)
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+
+//     use super::*;
+
+//     #[test]
+//     fn sequence() {
+//         let mut rng = Pcg::default();
+//     }
+// }
