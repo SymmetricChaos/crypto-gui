@@ -48,7 +48,7 @@ impl Default for Philox2_32 {
 }
 
 impl Philox2_32 {
-    pub fn bumpkey(key: &mut u32) {
+    fn next_round_key(key: &mut u32) {
         *key = key.wrapping_add(PHILOX_W_32[0])
     }
 
@@ -63,7 +63,7 @@ impl Philox2_32 {
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
             Self::round(key, &mut ctr);
-            Self::bumpkey(&mut key);
+            Self::next_round_key(&mut key);
         }
         Self::round(key, &mut ctr);
         self.saved = ctr;
@@ -108,7 +108,7 @@ impl Default for Philox4_32 {
 }
 
 impl Philox4_32 {
-    pub fn bumpkey(key: &mut [u32; 2]) {
+    fn next_round_key(key: &mut [u32; 2]) {
         key[0] = key[0].wrapping_add(PHILOX_W_32[0]);
         key[1] = key[1].wrapping_add(PHILOX_W_32[1]);
     }
@@ -127,7 +127,7 @@ impl Philox4_32 {
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
             Self::round(&key, &mut ctr);
-            Self::bumpkey(&mut key);
+            Self::next_round_key(&mut key);
         }
         Self::round(&key, &mut ctr);
         self.saved = ctr;
@@ -179,7 +179,7 @@ impl Default for Philox2_64 {
 }
 
 impl Philox2_64 {
-    fn bumpkey(key: &mut u64) {
+    fn next_round_key(key: &mut u64) {
         *key = key.wrapping_add(PHILOX_W_64[0])
     }
 
@@ -194,7 +194,7 @@ impl Philox2_64 {
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
             Self::round(key, &mut ctr);
-            Self::bumpkey(&mut key);
+            Self::next_round_key(&mut key);
         }
         Self::round(key, &mut ctr);
         self.saved = ctr;
@@ -203,7 +203,8 @@ impl Philox2_64 {
 }
 
 impl ClassicRng for Philox2_64 {
-    // Because we are saving the output array and making partial indexes into it, its not possible to define .next_u64() efficiently by just directly outputting words
+    // Because of how this is defined the method .next_u64() is inefficient
+    // Suggest using .next_array() instead
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.next_array();
@@ -243,7 +244,7 @@ impl Default for Philox4_64 {
 }
 
 impl Philox4_64 {
-    pub fn bumpkey(key: &mut [u64; 2]) {
+    pub fn next_round_key(key: &mut [u64; 2]) {
         key[0] = key[0].wrapping_add(PHILOX_W_64[0]);
         key[1] = key[1].wrapping_add(PHILOX_W_64[1]);
     }
@@ -262,7 +263,7 @@ impl Philox4_64 {
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
             Self::round(&key, &mut ctr);
-            Self::bumpkey(&mut key);
+            Self::next_round_key(&mut key);
         }
         Self::round(&key, &mut ctr);
         self.saved = ctr;
@@ -271,7 +272,8 @@ impl Philox4_64 {
 }
 
 impl ClassicRng for Philox4_64 {
-    // Because we are saving the output array and making partial indexes into it, its not possible to define .next_u64() efficiently by just directly outputting words
+    // Because of how this is defined the method .next_u64() is inefficient
+    // Suggest using .next_array() instead
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.next_array();
