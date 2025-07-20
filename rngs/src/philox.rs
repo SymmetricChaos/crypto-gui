@@ -244,7 +244,7 @@ impl Default for Philox4_64 {
 }
 
 impl Philox4_64 {
-    pub fn next_round_key(key: &mut [u64; 2]) {
+    fn next_round_key(key: &mut [u64; 2]) {
         key[0] = key[0].wrapping_add(PHILOX_W_64[0]);
         key[1] = key[1].wrapping_add(PHILOX_W_64[1]);
     }
