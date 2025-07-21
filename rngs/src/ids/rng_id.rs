@@ -52,6 +52,7 @@ rng_ids_and_names!(
     Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
+    Philox, "Philox";
     Rabbit, "Rabbit";
     Randu, "RANDU";
     Rc4, "RC4";

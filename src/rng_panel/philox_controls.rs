@@ -1,6 +1,9 @@
 use rngs::philox::{Philox2_32, Philox2_64, Philox4_32, Philox4_64};
 
-use crate::{rng_panel::ClassicRngFrame, ui_elements::generate_randoms_box};
+use crate::{
+    rng_panel::ClassicRngFrame,
+    ui_elements::{generate_randoms_box, UiElements},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Variant {
@@ -48,6 +51,56 @@ impl ClassicRngFrame for PhiloxFrame {
         ui.selectable_value(&mut self.variant, Variant::P2_64, "Philox2_64");
         ui.selectable_value(&mut self.variant, Variant::P4_32, "Philox4_32");
         ui.selectable_value(&mut self.variant, Variant::P4_64, "Philox4_64");
+        ui.add_space(8.0);
+
+        match self.variant {
+            Variant::P2_32 => {
+                ui.subheading("Key");
+                ui.u32_hex_edit(&mut self.rng2_32.key);
+                ui.add_space(8.0);
+
+                ui.subheading("Counter");
+                ui.u32_hex_edit(&mut self.rng2_32.ctr[0]);
+                ui.u32_hex_edit(&mut self.rng2_32.ctr[1]);
+                ui.add_space(8.0);
+            }
+            Variant::P2_64 => {
+                ui.subheading("Key");
+                ui.u64_hex_edit(&mut self.rng2_64.key);
+                ui.add_space(8.0);
+
+                ui.subheading("Counter");
+                ui.u64_hex_edit(&mut self.rng2_64.ctr[0]);
+                ui.u64_hex_edit(&mut self.rng2_64.ctr[1]);
+                ui.add_space(8.0);
+            }
+            Variant::P4_32 => {
+                ui.subheading("Key");
+                ui.u32_hex_edit(&mut self.rng4_32.key[0]);
+                ui.u32_hex_edit(&mut self.rng4_32.key[1]);
+                ui.add_space(8.0);
+
+                ui.subheading("Counter");
+                ui.u32_hex_edit(&mut self.rng4_32.ctr[0]);
+                ui.u32_hex_edit(&mut self.rng4_32.ctr[1]);
+                ui.u32_hex_edit(&mut self.rng4_32.ctr[2]);
+                ui.u32_hex_edit(&mut self.rng4_32.ctr[3]);
+                ui.add_space(8.0);
+            }
+            Variant::P4_64 => {
+                ui.subheading("Key");
+                ui.u64_hex_edit(&mut self.rng4_64.key[0]);
+                ui.u64_hex_edit(&mut self.rng4_64.key[1]);
+                ui.add_space(8.0);
+
+                ui.subheading("Counter");
+                ui.u64_hex_edit(&mut self.rng4_64.ctr[0]);
+                ui.u64_hex_edit(&mut self.rng4_64.ctr[1]);
+                ui.u64_hex_edit(&mut self.rng4_64.ctr[2]);
+                ui.u64_hex_edit(&mut self.rng4_64.ctr[3]);
+                ui.add_space(8.0);
+            }
+        }
 
         generate_randoms_box(
             ui,
