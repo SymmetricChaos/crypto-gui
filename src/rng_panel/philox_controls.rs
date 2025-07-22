@@ -1,3 +1,4 @@
+use egui::DragValue;
 use rngs::philox::{Philox2_32, Philox2_64, Philox4_32, Philox4_64};
 
 use crate::{
@@ -21,6 +22,7 @@ pub struct PhiloxFrame {
     variant: Variant,
     randoms: String,
     n_random: usize,
+    rounds: usize,
 }
 
 impl Default for PhiloxFrame {
@@ -33,6 +35,7 @@ impl Default for PhiloxFrame {
             variant: Variant::P2_32,
             randoms: String::new(),
             n_random: 5,
+            rounds: 10,
         }
     }
 }
@@ -47,11 +50,22 @@ impl ClassicRngFrame for PhiloxFrame {
         );
         ui.add_space(8.0);
 
-        ui.selectable_value(&mut self.variant, Variant::P2_32, "Philox2_32");
-        ui.selectable_value(&mut self.variant, Variant::P2_64, "Philox2_64");
-        ui.selectable_value(&mut self.variant, Variant::P4_32, "Philox4_32");
-        ui.selectable_value(&mut self.variant, Variant::P4_64, "Philox4_64");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::P2_32, "Philox2_32");
+            ui.selectable_value(&mut self.variant, Variant::P2_64, "Philox2_64");
+        });
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::P4_32, "Philox4_32");
+            ui.selectable_value(&mut self.variant, Variant::P4_64, "Philox4_64");
+        });
         ui.add_space(8.0);
+
+        if ui.add(DragValue::new(&mut self.rounds)).changed() {
+            self.rng2_32.rounds = self.rounds;
+            self.rng2_64.rounds = self.rounds;
+            self.rng4_32.rounds = self.rounds;
+            self.rng4_64.rounds = self.rounds;
+        }
 
         match self.variant {
             Variant::P2_32 => {
