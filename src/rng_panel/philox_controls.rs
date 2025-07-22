@@ -60,7 +60,10 @@ impl ClassicRngFrame for PhiloxFrame {
         });
         ui.add_space(8.0);
 
-        if ui.add(DragValue::new(&mut self.rounds)).changed() {
+        if ui
+            .add(DragValue::new(&mut self.rounds).range(1..=16))
+            .changed()
+        {
             self.rng2_32.rounds = self.rounds;
             self.rng2_64.rounds = self.rounds;
             self.rng4_32.rounds = self.rounds;
