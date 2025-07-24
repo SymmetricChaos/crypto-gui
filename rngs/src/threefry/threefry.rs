@@ -15,10 +15,11 @@ use crate::{
 
 // impl Threefry64_2 {}
 
-// They only give test vectors for Threefry4_64_13 but the paper claims that Threefry4_64_12 passes the test suite
+// According to the reference paper Threefry-4×64-12 passes all their tests
+// For unclear reasons no test vectors are provided for it
 pub struct Threefry4_64_12 {
-    ctr: [u64; 4],
-    key: [u64; 4],
+    pub ctr: [u64; 4],
+    pub key: [u64; 4],
     saved: [u64; 4],
     idx: usize,
 }
@@ -49,6 +50,8 @@ impl Threefry4_64_12 {
 }
 
 impl ClassicRng for Threefry4_64_12 {
+    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }
@@ -74,8 +77,8 @@ impl ClassicRng for Threefry4_64_12 {
 }
 
 pub struct Threefry4_64_13 {
-    ctr: [u64; 4],
-    key: [u64; 4],
+    pub ctr: [u64; 4],
+    pub key: [u64; 4],
     saved: [u64; 4],
     idx: usize,
 }
@@ -106,6 +109,8 @@ impl Threefry4_64_13 {
 }
 
 impl ClassicRng for Threefry4_64_13 {
+    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }
@@ -131,8 +136,10 @@ impl ClassicRng for Threefry4_64_13 {
 }
 
 pub struct Threefry4_64_20 {
-    ctr: [u64; 4],
-    key: [u64; 4],
+    pub ctr: [u64; 4],
+    pub key: [u64; 4],
+    saved: [u64; 4],
+    idx: usize,
 }
 
 impl Default for Threefry4_64_20 {
@@ -140,6 +147,8 @@ impl Default for Threefry4_64_20 {
         Self {
             ctr: [0; 4],
             key: [0; 4],
+            saved: [0; 4],
+            idx: 0,
         }
     }
 }
@@ -159,8 +168,29 @@ impl Threefry4_64_20 {
 }
 
 impl ClassicRng for Threefry4_64_20 {
+    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
-        todo!()
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        if self.idx == 0 {
+            self.saved = self.array();
+            self.ctr[0] = self.ctr[0].wrapping_add(1);
+            if self.ctr[0] == 0 {
+                self.ctr[1] = self.ctr[1].wrapping_add(1);
+                if self.ctr[1] == 0 {
+                    self.ctr[2] = self.ctr[2].wrapping_add(1);
+                    if self.ctr[2] == 0 {
+                        self.ctr[3] = self.ctr[3].wrapping_add(1);
+                    }
+                }
+            }
+        }
+        let out = self.saved[self.idx];
+        self.idx = (self.idx + 1) % 4;
+        out
     }
 }
 
