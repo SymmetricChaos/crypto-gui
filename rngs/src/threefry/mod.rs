@@ -20,6 +20,11 @@ macro_rules! skein_mix {
 
 #[inline]
 pub fn threefry_64_4_12(w: &mut [u64; 4], key: &[u64; 5]) {
+    w[0] = w[0].wrapping_add(key[0]);
+    w[1] = w[1].wrapping_add(key[1]);
+    w[2] = w[2].wrapping_add(key[2]);
+    w[3] = w[3].wrapping_add(key[3]);
+
     skein_mix!(w[0], w[1], 14);
     skein_mix!(w[2], w[3], 16);
 
@@ -32,10 +37,10 @@ pub fn threefry_64_4_12(w: &mut [u64; 4], key: &[u64; 5]) {
     skein_mix!(w[0], w[3], 5);
     skein_mix!(w[2], w[1], 37);
 
-    w[0] = w[0].wrapping_add(key[0]);
-    w[1] = w[1].wrapping_add(key[1]);
-    w[2] = w[2].wrapping_add(key[2]);
-    w[3] = w[3].wrapping_add(key[3]);
+    w[0] = w[0].wrapping_add(key[1]);
+    w[1] = w[1].wrapping_add(key[2]);
+    w[2] = w[2].wrapping_add(key[3]);
+    w[3] = w[3].wrapping_add(key[4]);
     w[3] = w[3].wrapping_add(1);
 
     skein_mix!(w[0], w[1], 25);
@@ -73,6 +78,71 @@ pub fn threefry_64_4_12(w: &mut [u64; 4], key: &[u64; 5]) {
     w[2] = w[2].wrapping_add(key[0]);
     w[3] = w[3].wrapping_add(key[1]);
     w[3] = w[3].wrapping_add(3);
+}
+
+#[inline]
+pub fn threefry_64_4_13(w: &mut [u64; 4], key: &[u64; 5]) {
+    w[0] = w[0].wrapping_add(key[0]);
+    w[1] = w[1].wrapping_add(key[1]);
+    w[2] = w[2].wrapping_add(key[2]);
+    w[3] = w[3].wrapping_add(key[3]);
+
+    skein_mix!(w[0], w[1], 14);
+    skein_mix!(w[2], w[3], 16);
+
+    skein_mix!(w[0], w[3], 52);
+    skein_mix!(w[2], w[1], 57);
+
+    skein_mix!(w[0], w[1], 23);
+    skein_mix!(w[2], w[3], 40);
+
+    skein_mix!(w[0], w[3], 5);
+    skein_mix!(w[2], w[1], 37);
+
+    w[0] = w[0].wrapping_add(key[1]);
+    w[1] = w[1].wrapping_add(key[2]);
+    w[2] = w[2].wrapping_add(key[3]);
+    w[3] = w[3].wrapping_add(key[4]);
+    w[3] = w[3].wrapping_add(1);
+
+    skein_mix!(w[0], w[1], 25);
+    skein_mix!(w[2], w[3], 33);
+
+    skein_mix!(w[0], w[3], 46);
+    skein_mix!(w[2], w[1], 12);
+
+    skein_mix!(w[0], w[1], 58);
+    skein_mix!(w[2], w[3], 22);
+
+    skein_mix!(w[0], w[3], 32);
+    skein_mix!(w[2], w[1], 32);
+
+    w[0] = w[0].wrapping_add(key[2]);
+    w[1] = w[1].wrapping_add(key[3]);
+    w[2] = w[2].wrapping_add(key[4]);
+    w[3] = w[3].wrapping_add(key[0]);
+    w[3] = w[3].wrapping_add(2);
+
+    skein_mix!(w[0], w[1], 14);
+    skein_mix!(w[2], w[3], 16);
+
+    skein_mix!(w[0], w[3], 52);
+    skein_mix!(w[2], w[1], 57);
+
+    skein_mix!(w[0], w[1], 23);
+    skein_mix!(w[2], w[3], 40);
+
+    skein_mix!(w[0], w[3], 5);
+    skein_mix!(w[2], w[1], 37);
+
+    w[0] = w[0].wrapping_add(key[3]);
+    w[1] = w[1].wrapping_add(key[4]);
+    w[2] = w[2].wrapping_add(key[0]);
+    w[3] = w[3].wrapping_add(key[1]);
+    w[3] = w[3].wrapping_add(3);
+
+    skein_mix!(w[0], w[1], 25);
+    skein_mix!(w[2], w[3], 33);
 }
 
 #[inline]

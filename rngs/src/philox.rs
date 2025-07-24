@@ -200,9 +200,13 @@ impl Philox2_64 {
 }
 
 impl ClassicRng for Philox2_64 {
-    // Because of how this is defined the method .next_u64() is inefficient
-    // Suggest using .array() instead
+    /// The 64-bit Philox is meant to produce 64-bit random numbers and this methods ignores the upper bits.
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();
             self.ctr[0] = self.ctr[0].wrapping_add(1);
@@ -210,12 +214,8 @@ impl ClassicRng for Philox2_64 {
                 self.ctr[1] = self.ctr[1].wrapping_add(1);
             }
         }
-        let out = if self.idx % 2 == 0 {
-            (self.saved[self.idx / 2] >> 32) as u32
-        } else {
-            self.saved[self.idx / 2] as u32
-        };
-        self.idx = (self.idx + 1) % 4;
+        let out = self.saved[self.idx];
+        self.idx = (self.idx + 1) % 2;
         out
     }
 }
@@ -269,9 +269,13 @@ impl Philox4_64 {
 }
 
 impl ClassicRng for Philox4_64 {
-    // Because of how this is defined the method .next_u64() is inefficient
-    // Suggest using .array() instead
+    /// The 64-bit Philox is meant to produce 64-bit random numbers and this methods ignores the upper bits.
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();
             self.ctr[0] = self.ctr[0].wrapping_add(1);
@@ -285,12 +289,8 @@ impl ClassicRng for Philox4_64 {
                 }
             }
         }
-        let out = if self.idx % 2 == 0 {
-            (self.saved[self.idx / 2] >> 32) as u32
-        } else {
-            self.saved[self.idx / 2] as u32
-        };
-        self.idx = (self.idx + 1) % 8;
+        let out = self.saved[self.idx];
+        self.idx = (self.idx + 1) % 4;
         out
     }
 }
