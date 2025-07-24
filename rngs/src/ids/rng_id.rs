@@ -31,6 +31,7 @@ rng_ids_and_names!(
     A52, "A5/2";
     Acorn, "ACORN";
     AlternatingStep, "Alternating Step Generator";
+    Ars, "ARS";
     BlumBlumShub, "Blum-Blum-Shub";
     ChaCha, "ChaCha";
     DualEcDrbg, "Dual_EC_DRBG";
@@ -62,6 +63,7 @@ rng_ids_and_names!(
     ShrinkingGenerator, "Shrinking Generator";
     Splitmix, "Splitmix64";
     Squares, "Squares";
+    Threefry, "Threefry";
     Tt800, "TT800";
     Vmpcr, "VMPC-R";
     Well, "WELL";
