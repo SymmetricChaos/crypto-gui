@@ -58,7 +58,7 @@ impl Philox2_32 {
         ctr[1] = lo;
     }
 
-    pub fn array(&mut self) -> [u32; 2] {
+    pub fn array(&self) -> [u32; 2] {
         let mut key = self.key;
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
@@ -121,7 +121,7 @@ impl Philox4_32 {
         ctr[3] = lo1;
     }
 
-    pub fn array(&mut self) -> [u32; 4] {
+    pub fn array(&self) -> [u32; 4] {
         let mut key = self.key;
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
@@ -187,7 +187,7 @@ impl Philox2_64 {
         ctr[1] = lo;
     }
 
-    pub fn array(&mut self) -> [u64; 2] {
+    pub fn array(&self) -> [u64; 2] {
         let mut key = self.key;
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
@@ -256,7 +256,7 @@ impl Philox4_64 {
         ctr[3] = lo1;
     }
 
-    pub fn array(&mut self) -> [u64; 4] {
+    pub fn array(&self) -> [u64; 4] {
         let mut key = self.key;
         let mut ctr = self.ctr;
         for _ in 0..(self.rounds - 1) {
