@@ -1,7 +1,4 @@
-use crate::{
-    threefry::{threefry_64_4_12, threefry_64_4_13, threefry_64_4_20},
-    ClassicRng,
-};
+use crate::{threefry::threefry_64_4_r, ClassicRng};
 
 // pub struct Threefry32_2 {}
 
@@ -15,27 +12,27 @@ use crate::{
 
 // impl Threefry64_2 {}
 
-// According to the reference paper Threefry-4×64-12 passes all their tests
-// For unclear reasons no test vectors are provided for it
-pub struct Threefry4_64_12 {
+pub struct Threefry4_64 {
     pub ctr: [u64; 4],
     pub key: [u64; 4],
+    pub rounds: usize,
     saved: [u64; 4],
     idx: usize,
 }
 
-impl Default for Threefry4_64_12 {
+impl Default for Threefry4_64 {
     fn default() -> Self {
         Self {
             ctr: [0; 4],
             key: [0; 4],
+            rounds: 20,
             saved: [0; 4],
             idx: 0,
         }
     }
 }
 
-impl Threefry4_64_12 {
+impl Threefry4_64 {
     pub fn array(&self) -> [u64; 4] {
         let mut arr = self.ctr.clone();
         let mut ex_key = [0; 4 + 1];
@@ -44,130 +41,12 @@ impl Threefry4_64_12 {
             ex_key[i] = self.key[i];
             ex_key[4] ^= self.key[i];
         }
-        threefry_64_4_12(&mut arr, &ex_key);
+        threefry_64_4_r(&mut arr, &ex_key, self.rounds);
         arr
     }
 }
 
-impl ClassicRng for Threefry4_64_12 {
-    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
-    fn next_u64(&mut self) -> u64 {
-        if self.idx == 0 {
-            self.saved = self.array();
-            self.ctr[0] = self.ctr[0].wrapping_add(1);
-            if self.ctr[0] == 0 {
-                self.ctr[1] = self.ctr[1].wrapping_add(1);
-                if self.ctr[1] == 0 {
-                    self.ctr[2] = self.ctr[2].wrapping_add(1);
-                    if self.ctr[2] == 0 {
-                        self.ctr[3] = self.ctr[3].wrapping_add(1);
-                    }
-                }
-            }
-        }
-        let out = self.saved[self.idx];
-        self.idx = (self.idx + 1) % 4;
-        out
-    }
-}
-
-pub struct Threefry4_64_13 {
-    pub ctr: [u64; 4],
-    pub key: [u64; 4],
-    saved: [u64; 4],
-    idx: usize,
-}
-
-impl Default for Threefry4_64_13 {
-    fn default() -> Self {
-        Self {
-            ctr: [0; 4],
-            key: [0; 4],
-            saved: [0; 4],
-            idx: 0,
-        }
-    }
-}
-
-impl Threefry4_64_13 {
-    pub fn array(&self) -> [u64; 4] {
-        let mut arr = self.ctr.clone();
-        let mut ex_key = [0; 4 + 1];
-        ex_key[4] = super::C240;
-        for i in 0..4 {
-            ex_key[i] = self.key[i];
-            ex_key[4] ^= self.key[i];
-        }
-        threefry_64_4_13(&mut arr, &ex_key);
-        arr
-    }
-}
-
-impl ClassicRng for Threefry4_64_13 {
-    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
-    fn next_u64(&mut self) -> u64 {
-        if self.idx == 0 {
-            self.saved = self.array();
-            self.ctr[0] = self.ctr[0].wrapping_add(1);
-            if self.ctr[0] == 0 {
-                self.ctr[1] = self.ctr[1].wrapping_add(1);
-                if self.ctr[1] == 0 {
-                    self.ctr[2] = self.ctr[2].wrapping_add(1);
-                    if self.ctr[2] == 0 {
-                        self.ctr[3] = self.ctr[3].wrapping_add(1);
-                    }
-                }
-            }
-        }
-        let out = self.saved[self.idx];
-        self.idx = (self.idx + 1) % 4;
-        out
-    }
-}
-
-pub struct Threefry4_64_20 {
-    pub ctr: [u64; 4],
-    pub key: [u64; 4],
-    saved: [u64; 4],
-    idx: usize,
-}
-
-impl Default for Threefry4_64_20 {
-    fn default() -> Self {
-        Self {
-            ctr: [0; 4],
-            key: [0; 4],
-            saved: [0; 4],
-            idx: 0,
-        }
-    }
-}
-
-impl Threefry4_64_20 {
-    pub fn array(&self) -> [u64; 4] {
-        let mut arr = self.ctr.clone();
-        let mut ex_key = [0; 4 + 1];
-        ex_key[4] = super::C240;
-        for i in 0..4 {
-            ex_key[i] = self.key[i];
-            ex_key[4] ^= self.key[i];
-        }
-        threefry_64_4_20(&mut arr, &ex_key);
-        arr
-    }
-}
-
-impl ClassicRng for Threefry4_64_20 {
+impl ClassicRng for Threefry4_64 {
     /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
     /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
     fn next_u32(&mut self) -> u32 {
@@ -201,7 +80,7 @@ mod tests {
 
     #[test]
     fn sequence4_64_20() {
-        let mut rng = Threefry4_64_20::default();
+        let mut rng = Threefry4_64::default();
 
         rng.ctr = [0, 0, 0, 0];
         rng.key = [0, 0, 0, 0];
@@ -262,7 +141,8 @@ mod tests {
 
     #[test]
     fn sequence4_64_13() {
-        let mut rng = Threefry4_64_13::default();
+        let mut rng = Threefry4_64::default();
+        rng.rounds = 13;
 
         rng.ctr = [0, 0, 0, 0];
         rng.key = [0, 0, 0, 0];
