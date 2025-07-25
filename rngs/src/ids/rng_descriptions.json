@@ -273,6 +273,12 @@
     "Publication": "2020",
     "Traits": null
   },
+  "Threefry": {
+    "Description": "The Threefry family of PRNGs are based on a simplified version the Threefish block cipher (a fry is a stage of development for juvenile fish) and related Skein hash function. The key schedule is simplified by removing the \"tweak\" used in Threefish and the number of rounds is drastically reduced. The resulting PRNG is not cryptographically secure but just much more quickly than Threefish and passes extensive tests of statistical randomness.",
+    "Authors": "John Salmon, Mark Moraes, Ron Dror, David Shaw",
+    "Publication": "2011",
+    "Traits": null
+  },
   "TT800": {
     "Description": "TT800 is a prececessor the Mersenne Twister algorithm.",
     "Authors": "Makoto Matsumoto",

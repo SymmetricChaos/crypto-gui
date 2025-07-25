@@ -308,25 +308,25 @@ mod tests {
 
         rng.rounds = 13;
 
-        // rng.ctr = [0, 0, 0, 0];
-        // rng.key = [0, 0, 0, 0];
-        // assert_eq!(
-        //     [0x9c6ca96a, 0xe17eae66, 0xfc10ecd4, 0x5256a7d8],
-        //     rng.array()
-        // );
+        rng.ctr = [0, 0, 0, 0];
+        rng.key = [0, 0, 0, 0];
+        assert_eq!(
+            [0x531c7e4f, 0x39491ee5, 0x2c855a92, 0x3d6abf9a],
+            rng.array()
+        );
 
-        // rng.ctr = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
-        // rng.key = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
-        // assert_eq!(
-        //     [0x2a881696, 0x57012287, 0xf6c7446e, 0xa16a6732],
-        //     rng.array()
-        // );
+        rng.ctr = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
+        rng.key = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
+        assert_eq!(
+            [0xc4189358, 0x1c9cc83a, 0xd5881c67, 0x6a0a89e0],
+            rng.array()
+        );
 
-        // rng.ctr = [0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344];
-        // rng.key = [0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89];
-        // assert_eq!(
-        //     [0x59cd1dbb, 0xb8879579, 0x86b5d00c, 0xac8b6d84],
-        //     rng.array()
-        // );
+        rng.ctr = [0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344];
+        rng.key = [0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89];
+        assert_eq!(
+            [0x4aa71d8f, 0x734738c2, 0x431fc6a8, 0xae6debf1],
+            rng.array()
+        );
     }
 }
