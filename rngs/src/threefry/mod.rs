@@ -153,6 +153,114 @@ pub fn threefry_64_4_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
     //this goes up to 72 rounds but I'm lazy and 20 rounds is the recommendation
 }
 
+#[inline]
+pub fn threefry_64_2_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
+    w[0] = w[0].wrapping_add(key[0]);
+    w[1] = w[1].wrapping_add(key[1]);
+
+    if rounds >= 1 {
+        skein_mix!(w[0], w[1], 16);
+    }
+
+    if rounds >= 2 {
+        skein_mix!(w[1], w[0], 42);
+    }
+
+    if rounds >= 3 {
+        skein_mix!(w[0], w[1], 12);
+    }
+
+    if rounds >= 4 {
+        skein_mix!(w[1], w[0], 31);
+
+        w[0] = w[0].wrapping_add(key[1]);
+        w[1] = w[1].wrapping_add(key[2]);
+        w[1] = w[1].wrapping_add(1);
+    }
+
+    if rounds >= 5 {
+        skein_mix!(w[0], w[1], 16);
+    }
+
+    if rounds >= 6 {
+        skein_mix!(w[1], w[0], 32);
+    }
+
+    if rounds >= 7 {
+        skein_mix!(w[0], w[1], 24);
+    }
+
+    if rounds >= 8 {
+        skein_mix!(w[1], w[0], 21);
+
+        w[0] = w[0].wrapping_add(key[2]);
+        w[1] = w[1].wrapping_add(key[0]);
+        w[1] = w[1].wrapping_add(2);
+    }
+
+    if rounds >= 9 {
+        skein_mix!(w[0], w[1], 16);
+    }
+
+    if rounds >= 10 {
+        skein_mix!(w[1], w[0], 42);
+    }
+
+    if rounds >= 11 {
+        skein_mix!(w[0], w[1], 12);
+    }
+
+    if rounds >= 12 {
+        skein_mix!(w[1], w[0], 31);
+
+        w[0] = w[0].wrapping_add(key[0]);
+        w[1] = w[1].wrapping_add(key[1]);
+        w[1] = w[1].wrapping_add(3);
+    }
+
+    if rounds >= 13 {
+        skein_mix!(w[0], w[1], 16);
+    }
+
+    if rounds >= 14 {
+        skein_mix!(w[1], w[0], 32);
+    }
+
+    if rounds >= 15 {
+        skein_mix!(w[0], w[1], 24);
+    }
+
+    if rounds >= 16 {
+        skein_mix!(w[1], w[0], 21);
+
+        w[0] = w[0].wrapping_add(key[1]);
+        w[1] = w[1].wrapping_add(key[2]);
+        w[1] = w[1].wrapping_add(4);
+    }
+
+    if rounds >= 17 {
+        skein_mix!(w[0], w[1], 16);
+    }
+
+    if rounds >= 18 {
+        skein_mix!(w[1], w[0], 42);
+    }
+
+    if rounds >= 19 {
+        skein_mix!(w[0], w[1], 12);
+    }
+
+    if rounds >= 20 {
+        skein_mix!(w[1], w[0], 31);
+
+        w[0] = w[0].wrapping_add(key[2]);
+        w[1] = w[1].wrapping_add(key[0]);
+        w[1] = w[1].wrapping_add(5);
+    }
+
+    //this goes up to 72 rounds but I'm lazy and 20 rounds is the recommendation
+}
+
 // Yes, this is incredibly awkard
 // A real implementation should just pick a specific round count like 12 or 20
 #[inline]
