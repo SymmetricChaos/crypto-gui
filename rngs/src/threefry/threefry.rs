@@ -234,15 +234,8 @@ mod tests {
     fn sequence4_64() {
         let mut rng = Threefry4_64::default();
 
-        const ALL_ONE: [u64; 4] = [
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-        ];
-
-        rng.ctr = [0, 0, 0, 0];
-        rng.key = [0, 0, 0, 0];
+        rng.ctr = [0x0000000000000000; 4];
+        rng.key = [0x0000000000000000; 4];
         assert_eq!(
             [
                 0x09218ebde6c85537,
@@ -253,8 +246,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffffffffffff; 4];
+        rng.key = [0xffffffffffffffff; 4];
         assert_eq!(
             [
                 0x29c24097942bba1b,
@@ -289,8 +282,8 @@ mod tests {
 
         rng.rounds = 13;
 
-        rng.ctr = [0, 0, 0, 0];
-        rng.key = [0, 0, 0, 0];
+        rng.ctr = [0x0000000000000000; 4];
+        rng.key = [0x0000000000000000; 4];
         assert_eq!(
             [
                 0x4071fabee1dc8e05,
@@ -301,8 +294,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffffffffffff; 4];
+        rng.key = [0xffffffffffffffff; 4];
         assert_eq!(
             [
                 0x7eaed935479722b5,
@@ -340,14 +333,12 @@ mod tests {
     fn sequence2_64() {
         let mut rng = Threefry2_64::default();
 
-        const ALL_ONE: [u64; 2] = [0xffffffffffffffff, 0xffffffffffffffff];
-
         rng.ctr = [0, 0];
         rng.key = [0, 0];
         assert_eq!([0xc2b6e3a8c2c69865, 0x6f81ed42f350084d,], rng.array());
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
         assert_eq!([0xe02cb7c4d95d277a, 0xd06633d0893b8b68,], rng.array());
 
         rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
@@ -360,8 +351,8 @@ mod tests {
         rng.key = [0, 0];
         assert_eq!([0xf167b032c3b480bd, 0xe91f9fee4b7a6fb5,], rng.array());
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
         assert_eq!([0xccdec5c917a874b1, 0x4df53abca26ceb01,], rng.array());
 
         rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
@@ -373,17 +364,15 @@ mod tests {
     fn sequence4_32() {
         let mut rng = Threefry4_32::default();
 
-        const ALL_ONE: [u32; 4] = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
-
-        rng.ctr = [0, 0, 0, 0];
-        rng.key = [0, 0, 0, 0];
+        rng.ctr = [0x00000000; 4];
+        rng.key = [0x00000000; 4];
         assert_eq!(
             [0x9c6ca96a, 0xe17eae66, 0xfc10ecd4, 0x5256a7d8],
             rng.array()
         );
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffff; 4];
+        rng.key = [0xffffffff; 4];
         assert_eq!(
             [0x2a881696, 0x57012287, 0xf6c7446e, 0xa16a6732],
             rng.array()
@@ -398,15 +387,15 @@ mod tests {
 
         rng.rounds = 13;
 
-        rng.ctr = [0, 0, 0, 0];
-        rng.key = [0, 0, 0, 0];
+        rng.ctr = [0x00000000; 4];
+        rng.key = [0x00000000; 4];
         assert_eq!(
             [0x531c7e4f, 0x39491ee5, 0x2c855a92, 0x3d6abf9a],
             rng.array()
         );
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffff; 4];
+        rng.key = [0xffffffff; 4];
         assert_eq!(
             [0xc4189358, 0x1c9cc83a, 0xd5881c67, 0x6a0a89e0],
             rng.array()
@@ -424,14 +413,12 @@ mod tests {
     fn sequence2_32() {
         let mut rng = Threefry2_32::default();
 
-        const ALL_ONE: [u32; 2] = [0xffffffff, 0xffffffff];
-
         rng.ctr = [0, 0];
         rng.key = [0, 0];
         assert_eq!([0x6b200159, 0x99ba4efe], rng.array());
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffff, 0xffffffff];
+        rng.key = [0xffffffff, 0xffffffff];
         assert_eq!([0x1cb996fc, 0xbb002be7], rng.array());
 
         rng.ctr = [0x243f6a88, 0x85a308d3];
@@ -444,8 +431,8 @@ mod tests {
         rng.key = [0, 0];
         assert_eq!([0x9d1c5ec6, 0x8bd50731], rng.array());
 
-        rng.ctr = ALL_ONE;
-        rng.key = ALL_ONE;
+        rng.ctr = [0xffffffff, 0xffffffff];
+        rng.key = [0xffffffff, 0xffffffff];
         assert_eq!([0xfd36d048, 0x2d17272c], rng.array());
 
         rng.ctr = [0x243f6a88, 0x85a308d3];
