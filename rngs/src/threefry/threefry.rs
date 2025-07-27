@@ -1,11 +1,58 @@
 use crate::{
-    threefry::{threefry_2_64_r, threefry_4_32_r, threefry_4_64_r},
+    threefry::{threefry_2_32_r, threefry_2_64_r, threefry_4_32_r, threefry_4_64_r},
     ClassicRng,
 };
 
-// pub struct Threefry32_2 {}
+pub struct Threefry2_32 {
+    pub ctr: [u32; 2],
+    pub key: [u32; 2],
+    pub rounds: usize,
+    saved: [u32; 2],
+    idx: usize,
+}
 
-// impl Threefry32_2 {}
+impl Default for Threefry2_32 {
+    fn default() -> Self {
+        Self {
+            ctr: [0; 2],
+            key: [0; 2],
+            rounds: 20,
+            saved: [0; 2],
+            idx: 0,
+        }
+    }
+}
+
+impl Threefry2_32 {
+    pub fn array(&self) -> [u32; 2] {
+        let mut arr = self.ctr.clone();
+        let mut ex_key = [0; 2 + 1];
+        ex_key[2] = super::C240_32;
+        for i in 0..2 {
+            ex_key[i] = self.key[i];
+            ex_key[2] ^= self.key[i];
+        }
+        threefry_2_32_r(&mut arr, &ex_key, self.rounds);
+        arr
+    }
+}
+
+impl ClassicRng for Threefry2_32 {
+    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
+    fn next_u32(&mut self) -> u32 {
+        if self.idx == 0 {
+            self.saved = self.array();
+            self.ctr[0] = self.ctr[0].wrapping_add(1);
+            if self.ctr[0] == 0 {
+                self.ctr[1] = self.ctr[1].wrapping_add(1);
+            }
+        }
+        let out = self.saved[self.idx];
+        self.idx = (self.idx + 1) % 2;
+        out
+    }
+}
 
 pub struct Threefry4_32 {
     pub ctr: [u32; 4],
@@ -187,6 +234,13 @@ mod tests {
     fn sequence4_64() {
         let mut rng = Threefry4_64::default();
 
+        const ALL_ONE: [u64; 4] = [
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+            0xffffffffffffffff,
+        ];
+
         rng.ctr = [0, 0, 0, 0];
         rng.key = [0, 0, 0, 0];
         assert_eq!(
@@ -199,18 +253,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = [
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-        ];
-        rng.key = [
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-        ];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!(
             [
                 0x29c24097942bba1b,
@@ -257,18 +301,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = [
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-        ];
-        rng.key = [
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-            0xffffffffffffffff,
-        ];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!(
             [
                 0x7eaed935479722b5,
@@ -306,12 +340,14 @@ mod tests {
     fn sequence2_64() {
         let mut rng = Threefry2_64::default();
 
+        const ALL_ONE: [u64; 2] = [0xffffffffffffffff, 0xffffffffffffffff];
+
         rng.ctr = [0, 0];
         rng.key = [0, 0];
         assert_eq!([0xc2b6e3a8c2c69865, 0x6f81ed42f350084d,], rng.array());
 
-        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
-        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!([0xe02cb7c4d95d277a, 0xd06633d0893b8b68,], rng.array());
 
         rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
@@ -324,8 +360,8 @@ mod tests {
         rng.key = [0, 0];
         assert_eq!([0xf167b032c3b480bd, 0xe91f9fee4b7a6fb5,], rng.array());
 
-        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
-        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!([0xccdec5c917a874b1, 0x4df53abca26ceb01,], rng.array());
 
         rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
@@ -337,6 +373,8 @@ mod tests {
     fn sequence4_32() {
         let mut rng = Threefry4_32::default();
 
+        const ALL_ONE: [u32; 4] = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
+
         rng.ctr = [0, 0, 0, 0];
         rng.key = [0, 0, 0, 0];
         assert_eq!(
@@ -344,8 +382,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
-        rng.key = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!(
             [0x2a881696, 0x57012287, 0xf6c7446e, 0xa16a6732],
             rng.array()
@@ -367,8 +405,8 @@ mod tests {
             rng.array()
         );
 
-        rng.ctr = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
-        rng.key = [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff];
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
         assert_eq!(
             [0xc4189358, 0x1c9cc83a, 0xd5881c67, 0x6a0a89e0],
             rng.array()
@@ -380,5 +418,38 @@ mod tests {
             [0x4aa71d8f, 0x734738c2, 0x431fc6a8, 0xae6debf1],
             rng.array()
         );
+    }
+
+    #[test]
+    fn sequence2_32() {
+        let mut rng = Threefry2_32::default();
+
+        const ALL_ONE: [u32; 2] = [0xffffffff, 0xffffffff];
+
+        rng.ctr = [0, 0];
+        rng.key = [0, 0];
+        assert_eq!([0x6b200159, 0x99ba4efe], rng.array());
+
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
+        assert_eq!([0x1cb996fc, 0xbb002be7], rng.array());
+
+        rng.ctr = [0x243f6a88, 0x85a308d3];
+        rng.key = [0x13198a2e, 0x03707344];
+        assert_eq!([0xc4923a9c, 0x483df7a0], rng.array());
+
+        rng.rounds = 13;
+
+        rng.ctr = [0, 0];
+        rng.key = [0, 0];
+        assert_eq!([0x9d1c5ec6, 0x8bd50731], rng.array());
+
+        rng.ctr = ALL_ONE;
+        rng.key = ALL_ONE;
+        assert_eq!([0xfd36d048, 0x2d17272c], rng.array());
+
+        rng.ctr = [0x243f6a88, 0x85a308d3];
+        rng.key = [0x13198a2e, 0x03707344];
+        assert_eq!([0xba3e4725, 0xf27d669e], rng.array());
     }
 }
