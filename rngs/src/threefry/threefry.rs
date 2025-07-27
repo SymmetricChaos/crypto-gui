@@ -1,5 +1,5 @@
 use crate::{
-    threefry::{threefry_32_4_r, threefry_64_2_r, threefry_64_4_r},
+    threefry::{threefry_2_64_r, threefry_4_32_r, threefry_4_64_r},
     ClassicRng,
 };
 
@@ -36,7 +36,7 @@ impl Threefry4_32 {
             ex_key[i] = self.key[i];
             ex_key[4] ^= self.key[i];
         }
-        threefry_32_4_r(&mut arr, &ex_key, self.rounds);
+        threefry_4_32_r(&mut arr, &ex_key, self.rounds);
         arr
     }
 }
@@ -86,12 +86,12 @@ impl Threefry2_64 {
     pub fn array(&self) -> [u64; 2] {
         let mut arr = self.ctr.clone();
         let mut ex_key = [0; 2 + 1];
-        ex_key[3] = super::C240_64;
+        ex_key[2] = super::C240_64;
         for i in 0..2 {
             ex_key[i] = self.key[i];
-            ex_key[3] ^= self.key[i];
+            ex_key[2] ^= self.key[i];
         }
-        threefry_64_2_r(&mut arr, &ex_key, self.rounds);
+        threefry_2_64_r(&mut arr, &ex_key, self.rounds);
         arr
     }
 }
@@ -146,7 +146,7 @@ impl Threefry4_64 {
             ex_key[i] = self.key[i];
             ex_key[4] ^= self.key[i];
         }
-        threefry_64_4_r(&mut arr, &ex_key, self.rounds);
+        threefry_4_64_r(&mut arr, &ex_key, self.rounds);
         arr
     }
 }
@@ -300,6 +300,37 @@ mod tests {
             ],
             rng.array()
         );
+    }
+
+    #[test]
+    fn sequence2_64() {
+        let mut rng = Threefry2_64::default();
+
+        rng.ctr = [0, 0];
+        rng.key = [0, 0];
+        assert_eq!([0xc2b6e3a8c2c69865, 0x6f81ed42f350084d,], rng.array());
+
+        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
+        assert_eq!([0xe02cb7c4d95d277a, 0xd06633d0893b8b68,], rng.array());
+
+        rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
+        rng.key = [0xa4093822299f31d0, 0x082efa98ec4e6c89];
+        assert_eq!([0x263c7d30bb0f0af1, 0x56be8361d3311526,], rng.array());
+
+        rng.rounds = 13;
+
+        rng.ctr = [0, 0];
+        rng.key = [0, 0];
+        assert_eq!([0xf167b032c3b480bd, 0xe91f9fee4b7a6fb5,], rng.array());
+
+        rng.ctr = [0xffffffffffffffff, 0xffffffffffffffff];
+        rng.key = [0xffffffffffffffff, 0xffffffffffffffff];
+        assert_eq!([0xccdec5c917a874b1, 0x4df53abca26ceb01,], rng.array());
+
+        rng.ctr = [0x243f6a8885a308d3, 0x13198a2e03707344];
+        rng.key = [0xa4093822299f31d0, 0x082efa98ec4e6c89];
+        assert_eq!([0xc3aac71561042993, 0x3fe7ae8801aff316,], rng.array());
     }
 
     #[test]

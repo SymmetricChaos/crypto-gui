@@ -14,7 +14,7 @@ macro_rules! skein_mix {
 // Yes, this is incredibly awkard
 // A real implementation should just pick a specific round count like 12 or 20
 #[inline]
-pub fn threefry_64_4_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
+pub fn threefry_4_64_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
     w[0] = w[0].wrapping_add(key[0]);
     w[1] = w[1].wrapping_add(key[1]);
     w[2] = w[2].wrapping_add(key[2]);
@@ -154,7 +154,7 @@ pub fn threefry_64_4_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
 }
 
 #[inline]
-pub fn threefry_64_2_r(w: &mut [u64; 2], key: &[u64; 3], rounds: usize) {
+pub fn threefry_2_64_r(w: &mut [u64; 2], key: &[u64; 3], rounds: usize) {
     w[0] = w[0].wrapping_add(key[0]);
     w[1] = w[1].wrapping_add(key[1]);
 
@@ -264,7 +264,7 @@ pub fn threefry_64_2_r(w: &mut [u64; 2], key: &[u64; 3], rounds: usize) {
 // Yes, this is incredibly awkard
 // A real implementation should just pick a specific round count like 12 or 20
 #[inline]
-pub fn threefry_32_4_r(w: &mut [u32; 4], key: &[u32; 5], rounds: usize) {
+pub fn threefry_4_32_r(w: &mut [u32; 4], key: &[u32; 5], rounds: usize) {
     w[0] = w[0].wrapping_add(key[0]);
     w[1] = w[1].wrapping_add(key[1]);
     w[2] = w[2].wrapping_add(key[2]);
