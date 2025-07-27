@@ -29,6 +29,7 @@ mod self_shrinking_generator_controls;
 mod shrinking_generator_controls;
 mod splitmix_controls;
 mod squares_controls;
+mod threefry_controls;
 mod tt800_controls;
 mod vmpcr_controls;
 mod well_controls;
@@ -104,6 +105,7 @@ pub struct RngInterface {
     shrinking_generator: shrinking_generator_controls::ShrinkingGeneratorFrame,
     splitmix: splitmix_controls::SplitmixFrame,
     squares: squares_controls::SquaresFrame,
+    threefry: threefry_controls::ThreefryFrame,
     tt800: tt800_controls::Tt800Frame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     well: well_controls::WellFrame,
@@ -135,6 +137,7 @@ impl RngInterface {
                 RngId::ShrinkingGenerator,
                 RngId::Splitmix,
                 RngId::Squares,
+                RngId::Threefry,
                 RngId::Tt800,
                 RngId::Well,
                 RngId::WichmannHill,
@@ -208,6 +211,7 @@ impl RngInterface {
             RngId::ShrinkingGenerator => &mut self.shrinking_generator,
             RngId::Splitmix => &mut self.splitmix,
             RngId::Squares => &mut self.squares,
+            RngId::Threefry => &mut self.threefry,
             RngId::Tt800 => &mut self.tt800,
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Well => &mut self.well,
