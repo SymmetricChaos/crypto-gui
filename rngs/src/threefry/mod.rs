@@ -154,7 +154,7 @@ pub fn threefry_64_4_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
 }
 
 #[inline]
-pub fn threefry_64_2_r(w: &mut [u64; 4], key: &[u64; 5], rounds: usize) {
+pub fn threefry_64_2_r(w: &mut [u64; 2], key: &[u64; 3], rounds: usize) {
     w[0] = w[0].wrapping_add(key[0]);
     w[1] = w[1].wrapping_add(key[1]);
 

@@ -1,5 +1,5 @@
 use crate::{
-    threefry::{threefry_32_4_r, threefry_64_4_r},
+    threefry::{threefry_32_4_r, threefry_64_2_r, threefry_64_4_r},
     ClassicRng,
 };
 
@@ -62,39 +62,60 @@ impl ClassicRng for Threefry4_32 {
     }
 }
 
-// pub struct Threefry2_64 {
-//     pub ctr: [u64; 2],
-//     pub key: [u64; 2],
-//     pub rounds: usize,
-//     saved: [u64; 2],
-//     idx: usize,
-// }
+pub struct Threefry2_64 {
+    pub ctr: [u64; 2],
+    pub key: [u64; 2],
+    pub rounds: usize,
+    saved: [u64; 2],
+    idx: usize,
+}
 
-// impl Default for Threefry2_64 {
-//     fn default() -> Self {
-//         Self {
-//             ctr: [0; 2],
-//             key: [0; 2],
-//             rounds: 20,
-//             saved: [0; 2],
-//             idx: 0,
-//         }
-//     }
-// }
+impl Default for Threefry2_64 {
+    fn default() -> Self {
+        Self {
+            ctr: [0; 2],
+            key: [0; 2],
+            rounds: 20,
+            saved: [0; 2],
+            idx: 0,
+        }
+    }
+}
 
-// impl Threefry2_64 {
-//     pub fn array(&self) -> [u64; 2] {
-//         let mut arr = self.ctr.clone();
-//         let mut ex_key = [0; 4 + 1];
-//         ex_key[4] = super::C240;
-//         for i in 0..4 {
-//             ex_key[i] = self.key[i];
-//             ex_key[4] ^= self.key[i];
-//         }
-//         threefry_64_4_r(&mut arr, &ex_key, self.rounds);
-//         arr
-//     }
-// }
+impl Threefry2_64 {
+    pub fn array(&self) -> [u64; 2] {
+        let mut arr = self.ctr.clone();
+        let mut ex_key = [0; 2 + 1];
+        ex_key[3] = super::C240_64;
+        for i in 0..2 {
+            ex_key[i] = self.key[i];
+            ex_key[3] ^= self.key[i];
+        }
+        threefry_64_2_r(&mut arr, &ex_key, self.rounds);
+        arr
+    }
+}
+
+impl ClassicRng for Threefry2_64 {
+    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
+    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        if self.idx == 0 {
+            self.saved = self.array();
+            self.ctr[0] = self.ctr[0].wrapping_add(1);
+            if self.ctr[0] == 0 {
+                self.ctr[1] = self.ctr[1].wrapping_add(1);
+            }
+        }
+        let out = self.saved[self.idx];
+        self.idx = (self.idx + 1) % 2;
+        out
+    }
+}
 
 pub struct Threefry4_64 {
     pub ctr: [u64; 4],
