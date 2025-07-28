@@ -50,6 +50,7 @@ rng_ids_and_names!(
     MersenneTwister, "Mersenne Twister";
     MiddleSquare, "Middle Square";
     MiddleSquareBinary, "Middle Square Binary";
+    MultipleRecursive, "Multiple Recursive Generator";
     Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";

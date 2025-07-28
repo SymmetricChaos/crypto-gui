@@ -175,6 +175,12 @@
     "Publication": null,
     "Traits": null
   },
+  "Multiple Recursive Generator": {
+    "Description": "",
+    "Authors": "Pierre L'ecuyer",
+    "Publication": "1998",
+    "Traits": null
+  },
   "Multiply-with-Carry": {
     "Description": null,
     "Authors": "George Marsaglia",

@@ -23,6 +23,7 @@ pub mod lfsr_small;
 pub mod mersenne_twister;
 pub mod middle_square;
 pub mod middle_square_binary;
+pub mod multiple_recursive;
 pub mod mwc;
 pub mod naor_reingold;
 pub mod pcg;

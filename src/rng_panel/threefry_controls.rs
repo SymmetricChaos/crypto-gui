@@ -59,7 +59,7 @@ impl ClassicRngFrame for ThreefryFrame {
         ui.add_space(8.0);
 
         if ui
-            .add(DragValue::new(&mut self.rounds).range(1..=16))
+            .add(DragValue::new(&mut self.rounds).range(1..=20))
             .changed()
         {
             self.rng2_32.rounds = self.rounds;
