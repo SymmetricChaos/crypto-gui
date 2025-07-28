@@ -49,12 +49,12 @@ impl ClassicRngFrame for PhiloxFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::P2_32, "Philox2_32");
-            ui.selectable_value(&mut self.variant, Variant::P2_64, "Philox2_64");
+            ui.selectable_value(&mut self.variant, Variant::P2_32, "Philox-2×32");
+            ui.selectable_value(&mut self.variant, Variant::P2_64, "Philox-2×64");
         });
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::P4_32, "Philox4_32");
-            ui.selectable_value(&mut self.variant, Variant::P4_64, "Philox4_64");
+            ui.selectable_value(&mut self.variant, Variant::P4_32, "Philox-4×32");
+            ui.selectable_value(&mut self.variant, Variant::P4_64, "Philox-4×64");
         });
         ui.add_space(8.0);
 

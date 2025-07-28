@@ -49,12 +49,12 @@ impl ClassicRngFrame for ThreefryFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::T2_32, "Philox2_32");
-            ui.selectable_value(&mut self.variant, Variant::T2_64, "Philox2_64");
+            ui.selectable_value(&mut self.variant, Variant::T2_32, "Threefry-2×32");
+            ui.selectable_value(&mut self.variant, Variant::T2_64, "Threefry-2×64");
         });
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::T4_32, "Philox4_32");
-            ui.selectable_value(&mut self.variant, Variant::T4_64, "Philox4_64");
+            ui.selectable_value(&mut self.variant, Variant::T4_32, "Threefry-4×32");
+            ui.selectable_value(&mut self.variant, Variant::T4_64, "Threefry-4×64");
         });
         ui.add_space(8.0);
 
