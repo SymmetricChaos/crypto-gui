@@ -32,7 +32,7 @@ impl Default for ThreefryFrame {
             rng2_64: Default::default(),
             rng4_32: Default::default(),
             rng4_64: Default::default(),
-            variant: Variant::T2_32,
+            variant: Variant::T4_64,
             randoms: String::new(),
             n_random: 5,
             rounds: 20,
@@ -95,6 +95,8 @@ impl ClassicRngFrame for ThreefryFrame {
                 ui.subheading("Key");
                 ui.u32_hex_edit(&mut self.rng4_32.key[0]);
                 ui.u32_hex_edit(&mut self.rng4_32.key[1]);
+                ui.u32_hex_edit(&mut self.rng4_32.key[2]);
+                ui.u32_hex_edit(&mut self.rng4_32.key[3]);
                 ui.add_space(8.0);
 
                 ui.subheading("Counter");
@@ -108,6 +110,8 @@ impl ClassicRngFrame for ThreefryFrame {
                 ui.subheading("Key");
                 ui.u64_hex_edit(&mut self.rng4_64.key[0]);
                 ui.u64_hex_edit(&mut self.rng4_64.key[1]);
+                ui.u64_hex_edit(&mut self.rng4_64.key[2]);
+                ui.u64_hex_edit(&mut self.rng4_64.key[3]);
                 ui.add_space(8.0);
 
                 ui.subheading("Counter");
