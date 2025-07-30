@@ -176,7 +176,7 @@
     "Traits": null
   },
   "Multiple Recursive Generator": {
-    "Description": "",
+    "Description": "Multiple recursive generators use a linear recurrence with extremely long period to produce random numbers. In their introduction (and the examples provided) L'ecuyer suggests selecting parameters to give periods of around 2^1000, a period length consider excessive by today's standards.",
     "Authors": "Pierre L'ecuyer",
     "Publication": "1998",
     "Traits": null
