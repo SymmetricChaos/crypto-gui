@@ -437,11 +437,8 @@ pub fn generate_randoms_box(
     randoms: &mut String,
 ) {
     ui.horizontal(|ui| {
-        if ui
-            .button("Unsigned Integers")
-            .on_hover_text("random 32-bit unsigned integers")
-            .clicked()
-        {
+        ui.label("32-bit");
+        if ui.button("Unsigned Integers").clicked() {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -449,11 +446,7 @@ pub fn generate_randoms_box(
                 randoms.push_str(&rng.next_u32().to_string());
             }
         }
-        if ui
-            .button("Signed Integers")
-            .on_hover_text("random 32-bit signed integers")
-            .clicked()
-        {
+        if ui.button("Signed Integers").clicked() {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -463,8 +456,8 @@ pub fn generate_randoms_box(
             }
         }
         if ui
-            .button("Fractions")
-            .on_hover_text("random 32-bit floats in the range [0,1]")
+            .button("Floats")
+            .on_hover_text("random decimals in the range [0,1]")
             .clicked()
         {
             for _ in 0..*n_random {
@@ -472,8 +465,43 @@ pub fn generate_randoms_box(
                     randoms.push_str(", ");
                 }
 
-                let n = rng.next_u32() >> 9; // discarding the lower bits is better for some weaker RNGs
-                let f = f32::from_bits(0x3f80_0000 | n) - 1.0; // set the sign and exponent then read in the 22 bits of n and subtract 1
+                let n = rng.next_u32() >> 9; // discarding the lower bits is better for some RNGs
+                let f = f32::from_bits(0x3f80_0000 | n) - 1.0; // set the sign and exponent then read in the 23 bits of n and subtract 1
+                randoms.push_str(&f.to_string());
+            }
+        }
+    });
+    ui.horizontal(|ui| {
+        ui.label("64-bit");
+        if ui.button("Unsigned Integers").clicked() {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+                randoms.push_str(&rng.next_u64().to_string());
+            }
+        }
+        if ui.button("Signed Integers").clicked() {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+                let int = rng.next_u64() as i64;
+                randoms.push_str(&int.to_string());
+            }
+        }
+        if ui
+            .button("Floats")
+            .on_hover_text("random decimals in the range [0,1]")
+            .clicked()
+        {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+
+                let n = rng.next_u64() >> 12; // discarding the lower bits is better for some RNGs
+                let f = f64::from_bits(0x3ff0_0000_0000_0000 | n) - 1.0; // set the sign and exponent then read in the 52 bits of n and subtract 1
                 randoms.push_str(&f.to_string());
             }
         }
