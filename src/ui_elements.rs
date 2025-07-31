@@ -438,7 +438,11 @@ pub fn generate_randoms_box(
 ) {
     ui.horizontal(|ui| {
         ui.label("32-bit");
-        if ui.button("Unsigned Integers").clicked() {
+        if ui
+            .button("Unsigned")
+            .on_hover_text("non-negative integers")
+            .clicked()
+        {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -446,7 +450,7 @@ pub fn generate_randoms_box(
                 randoms.push_str(&rng.next_u32().to_string());
             }
         }
-        if ui.button("Signed Integers").clicked() {
+        if ui.button("Signed").on_hover_text("integers").clicked() {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -473,7 +477,11 @@ pub fn generate_randoms_box(
     });
     ui.horizontal(|ui| {
         ui.label("64-bit");
-        if ui.button("Unsigned Integers").clicked() {
+        if ui
+            .button("Unsigned")
+            .on_hover_text("non-negative integers")
+            .clicked()
+        {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -481,7 +489,7 @@ pub fn generate_randoms_box(
                 randoms.push_str(&rng.next_u64().to_string());
             }
         }
-        if ui.button("Signed Integers").clicked() {
+        if ui.button("Signed").on_hover_text("integers").clicked() {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");

@@ -243,7 +243,7 @@ macro_rules! integer_edit_box {
 
                     // some clones below are redundant if AccessKit is disabled
                     #[allow(clippy::redundant_clone)]
-                    let mut response = if is_kb_editing {
+                    let response = if is_kb_editing {
                         let mut value_text = ui
                             .data_mut(|data| data.remove_temp::<String>(id))
                             .unwrap_or_else(|| value_text.clone());
