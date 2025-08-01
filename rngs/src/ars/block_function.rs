@@ -1,3 +1,12 @@
+// The internal state of AES is shown as a grid of bytes in column major order.
+// This swaps array positions to transpose the bytes and put them in this order
+// A (faster?) alternative would be to change the block transformation instead
+pub fn transpose_state(state: &mut [u8]) {
+    for (idx, orig) in [(1, 4), (2, 8), (3, 12), (6, 9), (7, 13), (11, 14)].into_iter() {
+        state.swap(orig, idx)
+    }
+}
+
 pub const S_BOX: [u8; 256] = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -82,8 +91,51 @@ pub fn mix_column(state: &mut [u8], idxs: [usize; 4]) {
     state[idxs[3]] = mul3(a) ^ b ^ c ^ mul2(d);
 }
 
+pub fn mix_columns(state: &mut [u8]) {
+    mix_column(state, [0, 4, 8, 12]);
+    mix_column(state, [1, 5, 9, 13]);
+    mix_column(state, [2, 6, 10, 14]);
+    mix_column(state, [3, 7, 11, 15]);
+}
+
 pub fn shift_rows(state: &mut [u8]) {
     state[4..8].rotate_left(1);
     state[8..12].rotate_left(2);
     state[12..16].rotate_left(3);
+}
+
+pub fn add_round_key(state: &mut [u8], round_key: &[u8]) {
+    // Key is added column by column
+    for (idx, key) in [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15]
+        .into_iter()
+        .zip(round_key)
+    {
+        state[idx] ^= key
+    }
+}
+
+pub fn sub_bytes(state: &mut [u8]) {
+    for byte in state {
+        *byte = sbox(*byte)
+    }
+}
+
+pub fn encrypt(bytes: &mut [u8], round_keys: &[&[u8]], rounds: usize) {
+    transpose_state(bytes);
+    // Initial round key
+    add_round_key(bytes, round_keys[0]);
+
+    // Main NR
+    for i in 1..rounds {
+        sub_bytes(bytes);
+        shift_rows(bytes);
+        mix_columns(bytes);
+        add_round_key(bytes, round_keys[i]);
+    }
+
+    // Finalization round
+    sub_bytes(bytes);
+    shift_rows(bytes);
+    add_round_key(bytes, round_keys[rounds]);
+    transpose_state(bytes);
 }
