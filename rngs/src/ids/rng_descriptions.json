@@ -27,6 +27,12 @@
       "LFSR-based"
     ]
   },
+  "ARS": {
+    "Description": "The Advanced Randomization System is a PRNG that uses a simplified version of the AES block function to alter the output. When AES-NI hardware instructions are available ARS can be made to run extremely quickly but is otherwise relatively slow.",
+    "Authors": "John Salmon, Mark Moraes, Ron Dror, David Shaw",
+    "Publication": "2011",
+    "Traits": null
+  },
   "Blum-Blum-Shub": {
     "Description": "The Blum-Blum-Shub algorithm uses a simple recurrence to produce cryptographic quality pseudorandom numbers. The state is advanced by squaring it and reducing the result modulo a large semiprime. The parity of the state is used to produce a single bit, as a result the algorithm runs much more slowly than other PRNGs. Speed can be increased by using other techniques to extract more bits but at the cost of making it easier to determine the state.",
     "Authors": "Lenore Blum, Manuel Blum, Michael Shub",

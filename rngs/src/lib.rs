@@ -2,6 +2,7 @@ pub mod a51;
 pub mod a52;
 pub mod acorn;
 pub mod alternating_step;
+pub mod ars;
 pub mod blum_blum_shub;
 pub mod chacha;
 pub mod dual_ec_drbg;
