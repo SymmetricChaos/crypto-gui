@@ -66,6 +66,24 @@ impl ClassicRng for MRG63k3a {
     }
 
     fn next_u64(&mut self) -> u64 {
-        todo!()
+        let h = self.state[0] / Self::Q13;
+        let p13 = Self::A13N * (self.state[0] - h * Self::Q13) - h * Self::R13;
+        let h = self.state[1] / Self::Q12;
+        let p12 = Self::A12 * (self.state[1] - h * Self::Q12) - h * Self::R12;
+
+        self.state[0] = self.state[1];
+        self.state[1] = self.state[2];
+        self.state[2] = p12;
+
+        let h = self.state[3] / Self::Q23;
+        let p23 = Self::A23N * (self.state[3] - h * Self::Q23) - h * Self::R23;
+        let h = self.state[4] / Self::Q21;
+        let p21 = Self::A12 * (self.state[4] - h * Self::Q21) - h * Self::R21;
+
+        self.state[3] = self.state[4];
+        self.state[4] = self.state[5];
+        self.state[5] = p12;
+
+        p21.wrapping_sub(p12)
     }
 }
