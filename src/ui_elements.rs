@@ -236,7 +236,7 @@ impl UiElements for Ui {
         self.add_space(8.0);
 
         self.collapsing("Output Format", |ui| {
-            ui.label("Output can be hexadecimal, Base64, or binary. All interpreted as bytes. Text formats do not allow all bytes and cannot be used for output.");
+            ui.label("Output can be hexadecimal, Base64, or binary. Text does not allow all bit patterns and cannot be used for output.");
             ui.horizontal(|ui| {
                 ui.selectable_value(output, ByteFormat::Hex, "Hexadecimal");
                 ui.selectable_value(output, ByteFormat::Base64, "Base64");
@@ -251,7 +251,7 @@ impl UiElements for Ui {
             .on_hover_text("copy to clipboard")
             .clicked()
         {
-            self.output_mut(|o| o.copied_text = text.to_string())
+            self.ctx().copy_text(text.to_string());
         }
     }
 
