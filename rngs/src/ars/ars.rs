@@ -1,4 +1,15 @@
-use crate::ClassicRng;
+use itertools::Itertools;
+
+use crate::{ars::block_function::encrypt, ClassicRng};
+
+pub fn make_bytes(key: [u32; 4]) -> [u8; 16] {
+    key.into_iter()
+        .map(|w| w.to_be_bytes())
+        .flatten()
+        .collect_vec()
+        .try_into()
+        .unwrap()
+}
 
 pub struct Ars {
     pub ctr: [u32; 4],
@@ -24,16 +35,8 @@ impl Ars {}
 
 impl ClassicRng for Ars {
     fn next_u32(&mut self) -> u32 {
-        if self.rounds >= 1 {}
-        if self.rounds >= 2 {}
-        if self.rounds >= 3 {}
-        if self.rounds >= 4 {}
-        if self.rounds >= 5 {}
-        if self.rounds >= 6 {}
-        if self.rounds >= 7 {}
-        if self.rounds >= 8 {}
-        if self.rounds >= 9 {}
-        if self.rounds >= 10 {}
+        let ctr = make_bytes(self.ctr);
+        encrypt(&mut ctr, round_keys, self.rounds);
         todo!()
     }
 }
