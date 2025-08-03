@@ -46,9 +46,7 @@ impl Default for Lcg64 {
 
 impl ClassicRng for Lcg64 {
     fn next_u32(&mut self) -> u32 {
-        let m = (self.state as u128 * self.multiplier as u128) % self.modulus as u128;
-        self.state = ((m + self.increment as u128) % self.modulus as u128) as u64;
-        self.state as u32
+        self.next_u64() as u32
     }
 
     fn next_u64(&mut self) -> u64 {

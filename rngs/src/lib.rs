@@ -5,6 +5,7 @@ pub mod alternating_step;
 pub mod ars;
 pub mod blum_blum_shub;
 pub mod chacha;
+pub mod clcg;
 pub mod dual_ec_drbg;
 pub mod errors;
 pub mod geffe;

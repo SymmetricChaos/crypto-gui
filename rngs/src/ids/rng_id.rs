@@ -34,6 +34,7 @@ rng_ids_and_names!(
     Ars, "ARS";
     BlumBlumShub, "Blum-Blum-Shub";
     ChaCha, "ChaCha";
+    Clcg, "Combined Linear Congruential Generator";
     DualEcDrbg, "Dual_EC_DRBG";
     Geffe, "Geffe";
     Gmwc, "Generalized Multiply-with-Carry";
@@ -54,6 +55,7 @@ rng_ids_and_names!(
     Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
+    Plcg, "Polynomial Congruential Generator";
     Philox, "Philox";
     Rabbit, "Rabbit";
     Randu, "RANDU";
