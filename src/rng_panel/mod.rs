@@ -20,6 +20,7 @@ mod middle_square_controls;
 mod naor_reingold_controls;
 mod pcg_controls;
 mod philox_controls;
+mod plcg_controls;
 mod rabbit_controls;
 mod randu_controls;
 mod rc4_controls;
