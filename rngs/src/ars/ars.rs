@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::{ars::block_function::encrypt, ClassicRng};
 
 pub fn make_bytes(key: [u32; 4]) -> [u8; 16] {
@@ -35,8 +33,9 @@ impl Ars {}
 
 impl ClassicRng for Ars {
     fn next_u32(&mut self) -> u32 {
-        let ctr = make_bytes(self.ctr);
-        encrypt(&mut ctr, self.round_keys, self.rounds);
+        let mut ctr = make_bytes(self.ctr);
+        let mut key = make_bytes(self.key);
+        encrypt(&mut ctr, &mut key, self.rounds);
         todo!()
     }
 }

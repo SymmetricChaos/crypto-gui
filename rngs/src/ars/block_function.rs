@@ -1,13 +1,13 @@
 // The internal state of AES is shown as a grid of bytes in column major order.
 // This swaps array positions to transpose the bytes and put them in this order
 // A (faster?) alternative would be to change the block transformation instead
-pub fn transpose_state(state: &mut [u8]) {
+fn transpose_state(state: &mut [u8]) {
     for (idx, orig) in [(1, 4), (2, 8), (3, 12), (6, 9), (7, 13), (11, 14)].into_iter() {
         state.swap(orig, idx)
     }
 }
 
-pub const S_BOX: [u8; 256] = [
+const S_BOX: [u8; 256] = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
     0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -26,23 +26,29 @@ pub const S_BOX: [u8; 256] = [
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16,
 ];
 
-pub fn sbox(byte: u8) -> u8 {
+fn sbox(byte: u8) -> u8 {
     S_BOX[byte as usize]
 }
 
-pub fn sub_word(n: u32) -> u32 {
+fn sub_word(n: u32) -> u32 {
     u32::from_be_bytes(n.to_be_bytes().map(|b| sbox(b)))
 }
 
-pub fn mul2(byte: u8) -> u8 {
+fn sub_bytes(state: &mut [u8]) {
+    for byte in state {
+        *byte = sbox(*byte)
+    }
+}
+
+fn mul2(byte: u8) -> u8 {
     MUL_2[byte as usize]
 }
 
-pub fn mul3(byte: u8) -> u8 {
+fn mul3(byte: u8) -> u8 {
     MUL_3[byte as usize]
 }
 
-pub const MUL_2: [u8; 256] = [
+const MUL_2: [u8; 256] = [
     0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0e, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e,
     0x20, 0x22, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e,
     0x40, 0x42, 0x44, 0x46, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5a, 0x5c, 0x5e,
@@ -61,7 +67,7 @@ pub const MUL_2: [u8; 256] = [
     0xfb, 0xf9, 0xff, 0xfd, 0xf3, 0xf1, 0xf7, 0xf5, 0xeb, 0xe9, 0xef, 0xed, 0xe3, 0xe1, 0xe7, 0xe5,
 ];
 
-pub const MUL_3: [u8; 256] = [
+const MUL_3: [u8; 256] = [
     0x00, 0x03, 0x06, 0x05, 0x0c, 0x0f, 0x0a, 0x09, 0x18, 0x1b, 0x1e, 0x1d, 0x14, 0x17, 0x12, 0x11,
     0x30, 0x33, 0x36, 0x35, 0x3c, 0x3f, 0x3a, 0x39, 0x28, 0x2b, 0x2e, 0x2d, 0x24, 0x27, 0x22, 0x21,
     0x60, 0x63, 0x66, 0x65, 0x6c, 0x6f, 0x6a, 0x69, 0x78, 0x7b, 0x7e, 0x7d, 0x74, 0x77, 0x72, 0x71,
@@ -80,7 +86,7 @@ pub const MUL_3: [u8; 256] = [
     0x0b, 0x08, 0x0d, 0x0e, 0x07, 0x04, 0x01, 0x02, 0x13, 0x10, 0x15, 0x16, 0x1f, 0x1c, 0x19, 0x1a,
 ];
 
-pub fn mix_column(state: &mut [u8], idxs: [usize; 4]) {
+fn mix_column(state: &mut [u8], idxs: [usize; 4]) {
     let a = state[idxs[0]];
     let b = state[idxs[1]];
     let c = state[idxs[2]];
@@ -91,20 +97,20 @@ pub fn mix_column(state: &mut [u8], idxs: [usize; 4]) {
     state[idxs[3]] = mul3(a) ^ b ^ c ^ mul2(d);
 }
 
-pub fn mix_columns(state: &mut [u8]) {
+fn mix_columns(state: &mut [u8]) {
     mix_column(state, [0, 4, 8, 12]);
     mix_column(state, [1, 5, 9, 13]);
     mix_column(state, [2, 6, 10, 14]);
     mix_column(state, [3, 7, 11, 15]);
 }
 
-pub fn shift_rows(state: &mut [u8]) {
+fn shift_rows(state: &mut [u8]) {
     state[4..8].rotate_left(1);
     state[8..12].rotate_left(2);
     state[12..16].rotate_left(3);
 }
 
-pub fn add_round_key(state: &mut [u8], round_key: &[u8]) {
+fn add_key(state: &mut [u8], round_key: &[u8]) {
     // Key is added column by column
     for (idx, key) in [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15]
         .into_iter()
@@ -114,28 +120,32 @@ pub fn add_round_key(state: &mut [u8], round_key: &[u8]) {
     }
 }
 
-pub fn sub_bytes(state: &mut [u8]) {
-    for byte in state {
-        *byte = sbox(*byte)
-    }
-}
+const WEYL_0: u64 = 0xBB67AE8584CAA73B;
+const WEYL_1: u64 = 0x9E3779B97F4A7C15;
+const WEYL: [u8; 16] = [
+    0xBB, 0x67, 0xAE, 0x85, 0x84, 0xCA, 0xA7, 0x3B, 0x9E, 0x37, 0x79, 0xB9, 0x7F, 0x4A, 0x7C, 0x15,
+];
 
-pub fn encrypt(bytes: &mut [u8], round_keys: &[&[u8]], rounds: usize) {
+fn next_key(key: &mut [u8]) {}
+
+pub fn encrypt(bytes: &mut [u8], key: &mut [u8], rounds: usize) {
     transpose_state(bytes);
     // Initial round key
-    add_round_key(bytes, round_keys[0]);
+    add_key(bytes, key);
 
     // Main NR
-    for i in 1..rounds {
+    for _ in 1..rounds {
         sub_bytes(bytes);
         shift_rows(bytes);
         mix_columns(bytes);
-        add_round_key(bytes, round_keys[i]);
+        next_key(key);
+        add_key(bytes, key);
     }
 
     // Finalization round
     sub_bytes(bytes);
     shift_rows(bytes);
-    add_round_key(bytes, round_keys[rounds]);
+    next_key(key);
+    add_key(bytes, key);
     transpose_state(bytes);
 }
