@@ -30,6 +30,7 @@ pub mod mwc;
 pub mod naor_reingold;
 pub mod pcg;
 pub mod philox;
+pub mod plcg;
 pub mod rabbit;
 pub mod randu;
 pub mod rc4;
