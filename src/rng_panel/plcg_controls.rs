@@ -1,14 +1,10 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
-use egui::TextStyle;
+use crate::ui_elements::{generate_randoms_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{lcg::Lcg32, plcg::Plcg32, ClassicRng};
+use rngs::{plcg::Plcg32, ClassicRng};
 
 pub struct PlcgFrame {
     rng: Plcg32,
-    state_string: String,
-    coefs_string: String,
-    modulus_string: String,
     randoms: String,
     n_random: usize,
 }
@@ -17,38 +13,14 @@ impl Default for PlcgFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            state_string: String::from("1257924810"),
-            coefs_string: String::from("1013904223, 1664525"),
-            modulus_string: String::from("4294967295"),
+
             randoms: String::new(),
             n_random: 5,
         }
     }
 }
 
-impl PlcgFrame {
-    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u32) {
-        if ui
-            .add_sized(
-                [40.0, 20.0],
-                egui::TextEdit::singleline(string)
-                    .font(TextStyle::Monospace)
-                    .clip_text(false),
-            )
-            .changed()
-        {
-            filter_and_parse_u32(n, string);
-        }
-    }
-
-    fn set_all_strings(&mut self) {
-        self.state_string = self.rng.state.to_string();
-        self.modulus_string = self.rng.modulus.to_string();
-
-        // self.multiplier_string = self.rng.multiplier.to_string();
-        // self.increment_string = self.rng.increment.to_string();
-    }
-}
+impl PlcgFrame {}
 
 impl ClassicRngFrame for PlcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -59,13 +31,25 @@ impl ClassicRngFrame for PlcgFrame {
         ui.add_space(8.0);
 
         ui.randomize_reset_rng(self);
+        ui.add_space(4.0);
 
         ui.subheading("State");
         ui.u32_drag_value_dec(&mut self.rng.state);
+        ui.add_space(4.0);
+
+        ui.subheading("Modulus");
+        ui.u32_drag_value_dec(&mut self.rng.modulus);
+        ui.add_space(4.0);
+
+        ui.subheading("Coefficients");
+        ui.label("The coefficients are given starting with the constant term as is standard in computer science.");
+        for i in 0..5 {
+            ui.u32_drag_value_dec(&mut self.rng.coefs[i]);
+        }
+        ui.add_space(8.0);
 
         if ui.button("step").clicked() {
             self.rng.next_u32();
-            self.set_all_strings();
         }
 
         ui.add_space(8.0);
@@ -78,13 +62,11 @@ impl ClassicRngFrame for PlcgFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.rng.coefs.clear();
         self.rng.modulus = rng.gen();
         self.rng.state = rng.gen::<u32>() % self.rng.modulus;
-        for _ in 0..3 {
-            self.rng.coefs.push(rng.gen::<u32>() % self.rng.modulus);
+        for i in 0..5 {
+            self.rng.coefs[i] = rng.gen::<u32>() % self.rng.modulus;
         }
-        self.set_all_strings();
     }
 
     fn reset(&mut self) {

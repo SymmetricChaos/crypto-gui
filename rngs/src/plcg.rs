@@ -3,7 +3,7 @@ use crate::traits::ClassicRng;
 pub struct Plcg32 {
     pub state: u32,
     pub modulus: u32,
-    pub coefs: Vec<u32>,
+    pub coefs: [u32; 5], // simpler and no one really needs a higher coefficient
 }
 
 impl Default for Plcg32 {
@@ -11,17 +11,17 @@ impl Default for Plcg32 {
         Self {
             state: 1257924810,
             modulus: 4294967295,
-            coefs: vec![1013904223, 1664525],
+            coefs: [1013904223, 1664525, 0, 0, 0],
         }
     }
 }
 
 impl Plcg32 {
-    pub fn new(state: u32, modulus: u32, coefs: &[u32]) -> Self {
+    pub fn new(state: u32, modulus: u32, coefs: [u32; 5]) -> Self {
         Self {
             state,
             modulus,
-            coefs: coefs.to_vec(),
+            coefs,
         }
     }
 }
@@ -48,7 +48,7 @@ impl ClassicRng for Plcg32 {
 pub struct Plcg64 {
     pub state: u64,
     pub modulus: u64,
-    pub coefs: Vec<u64>,
+    pub coefs: [u64; 5], // simpler and no one really needs a higher coefficient
 }
 
 impl Default for Plcg64 {
@@ -56,17 +56,17 @@ impl Default for Plcg64 {
         Self {
             state: 1257924810,
             modulus: 4294967295,
-            coefs: vec![1013904223, 1664525],
+            coefs: [1013904223, 1664525, 0, 0, 0],
         }
     }
 }
 
 impl Plcg64 {
-    pub fn new(state: u64, modulus: u64, coefs: &[u64]) -> Self {
+    pub fn new(state: u64, modulus: u64, coefs: [u64; 5]) -> Self {
         Self {
             state,
             modulus,
-            coefs: coefs.to_vec(),
+            coefs,
         }
     }
 }
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn outputs32() {
-        let mut rng = Plcg32::new(0, 2147483648, &[12345, 1103515245]);
+        let mut rng = Plcg32::new(0, 2147483648, [12345, 1103515245, 0, 0, 0]);
         assert_eq!(12345, rng.next_u32());
         assert_eq!(1406932606, rng.next_u32());
         assert_eq!(654583775, rng.next_u32());
@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn outputs64() {
-        let mut rng = Plcg64::new(0, 2147483648, &[12345, 1103515245]);
+        let mut rng = Plcg64::new(0, 2147483648, [12345, 1103515245, 0, 0, 0]);
         assert_eq!(12345, rng.next_u32());
         assert_eq!(1406932606, rng.next_u32());
         assert_eq!(654583775, rng.next_u32());
