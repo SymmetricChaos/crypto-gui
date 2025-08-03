@@ -2,7 +2,6 @@ use super::{
     multiplication::{mul11, mul13, mul14, mul2, mul3, mul9},
     sbox::{inv_sbox, sbox},
 };
-use itertools::Itertools;
 
 // Rotate a 32-bit word by 8-bits
 pub fn rot_word(n: u32) -> u32 {
@@ -11,21 +10,21 @@ pub fn rot_word(n: u32) -> u32 {
 
 // When the subkeys are created by the key scheduke they are [u32;4] but need to be [u8;16] to xor into the block
 pub fn sub_key_to_bytes(key: [u32; 4]) -> [u8; 16] {
-    key.into_iter()
-        .map(|w| w.to_be_bytes())
-        .flatten()
-        .collect_vec()
-        .try_into()
-        .unwrap()
+    let mut out = [0; 16];
+    out[0..4].copy_from_slice(&key[0].to_be_bytes());
+    out[4..8].copy_from_slice(&key[1].to_be_bytes());
+    out[8..12].copy_from_slice(&key[2].to_be_bytes());
+    out[12..16].copy_from_slice(&key[3].to_be_bytes());
+    out
 }
 
 pub fn sub_key_slice_to_bytes(key: &[u32]) -> [u8; 16] {
-    key.into_iter()
-        .map(|w| w.to_be_bytes())
-        .flatten()
-        .collect_vec()
-        .try_into()
-        .unwrap()
+    let mut out = [0; 16];
+    out[0..4].copy_from_slice(&key[0].to_be_bytes());
+    out[4..8].copy_from_slice(&key[1].to_be_bytes());
+    out[8..12].copy_from_slice(&key[2].to_be_bytes());
+    out[12..16].copy_from_slice(&key[3].to_be_bytes());
+    out
 }
 
 // The internal state of AES is shown as a grid of bytes in column major order.
