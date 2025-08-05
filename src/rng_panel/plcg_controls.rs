@@ -41,11 +41,21 @@ impl ClassicRngFrame for PlcgFrame {
         ui.u32_drag_value_dec(&mut self.rng.modulus);
         ui.add_space(4.0);
 
-        ui.subheading("Coefficients");
-        ui.label("The coefficients are given starting with the constant term as is standard in computer science.");
-        for i in 0..5 {
-            ui.u32_drag_value_dec(&mut self.rng.coefs[i]);
-        }
+        ui.subheading("Polynomial");
+        ui.label("Note that coefficients are given starting with the constant term as is standard in computer science. Unusued coefficients should be set to zero. In principle the polynomial may be of any degree but a maximum of fourth degree is allowed for here.");
+        ui.horizontal(|ui| {
+            ui.u32_drag_value_dec(&mut self.rng.coefs[0]);
+            ui.label(" +");
+            ui.u32_drag_value_dec(&mut self.rng.coefs[1]);
+            ui.label("x +");
+            ui.u32_drag_value_dec(&mut self.rng.coefs[2]);
+            ui.label("x² +");
+            ui.u32_drag_value_dec(&mut self.rng.coefs[3]);
+            ui.label("x³ +");
+            ui.u32_drag_value_dec(&mut self.rng.coefs[4]);
+            ui.label("x⁴");
+        });
+
         ui.add_space(8.0);
 
         if ui.button("step").clicked() {
