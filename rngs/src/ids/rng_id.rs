@@ -46,6 +46,7 @@ rng_ids_and_names!(
     Kiss, "KISS";
     Kiss11, "KISS11";
     Lcg, "Linear Congruential Generator";
+    Lehmer, "Lehmer";
     Lfg, "Lagged Fibonacci Generator";
     Lfsr, "Linear Feedback Shift Register";
     MersenneTwister, "Mersenne Twister";

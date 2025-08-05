@@ -19,6 +19,7 @@ pub mod jsf;
 pub mod kiss;
 pub mod kiss11;
 pub mod lcg;
+pub mod lehmer;
 pub mod lfg;
 pub mod lfsr;
 pub mod lfsr_small;

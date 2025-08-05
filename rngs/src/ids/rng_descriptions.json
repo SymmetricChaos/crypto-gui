@@ -153,6 +153,14 @@
       "LFSR-based"
     ]
   },
+  "Lehmer": {
+    "Description": "A Lehmer random number generator is among the simplest possible designs.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "LCG-based"
+    ]
+  },
   "Linear Congruential Generator": {
     "Description": "LCGs are among the simplest forms of pseduorandom number generators using the well known arithmetic operations of multiplication, addition, and division. At each step the current state is multiplied by a constant, then has a constant added, and finally is divided by a constant and the remainder taken. The increment must be coprime to the modulus and the multiplier must be greater than one. LCGs and their generalizations, the Polynomial Congruential Generators, are all known to be insecure. See also the Combined Linear Congruential Generator.",
     "Authors": null,
