@@ -154,7 +154,7 @@
     ]
   },
   "Lehmer": {
-    "Description": "A Lehmer random number generator is among the simplest possible designs using just a single multiplication, essentially a Linear Congruential Generator with an addition of zero. The design here is a slight modification due to Daniel Lemire. The state is a 128-bit number and the output is the upper 64 bits of the state while the multiplier is an odd 128-bit number. By taking the upper bit the biggest weakness of a typical Lehmer generator is avoided. With the default constant (also due to Lemire) this generator passes the Big Crush suite of statistical tests and is probably the conceptually simplest PRNG that does.",
+    "Description": "A Lehmer random number generator is among the simplest possible designs using just a single multiplication, essentially a Linear Congruential Generator with an addition of zero. The design here is a slight modification due to Daniel Lemire. The state is a 128-bit number and the output is the upper 64 bits of the state while the multiplier is an odd 128-bit number. By taking the upper bits the biggest weakness of a typical Lehmer generator, simple linear behavior in lower bits, is avoided. With the default constant (also due to Lemire) this generator passes the Big Crush suite of statistical tests and is probably the conceptually simplest PRNG that does.",
     "Authors": "D. H. Lehmer and L'Ecuyer",
     "Publication": "1951",
     "Traits": [
