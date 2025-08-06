@@ -17,7 +17,7 @@ impl Default for LfsrFrame {
             rng: Default::default(),
             vector_length: 16,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

@@ -17,7 +17,7 @@ impl Default for Hc256Frame {
             rng: Default::default(),
             key: [0; 8],
             iv: [0; 8],
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
         }
     }

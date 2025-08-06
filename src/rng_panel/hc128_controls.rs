@@ -17,7 +17,7 @@ impl Default for Hc128Frame {
             rng: Default::default(),
             key: [0; 4],
             iv: [0; 4],
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
         }
     }

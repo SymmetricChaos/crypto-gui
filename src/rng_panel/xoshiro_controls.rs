@@ -43,7 +43,7 @@ impl Default for XoshiroFrame {
             _rng512: Default::default(),
             _state_size: XoshiroSize::W256,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

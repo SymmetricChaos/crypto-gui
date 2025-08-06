@@ -34,7 +34,7 @@ impl Default for PhiloxFrame {
             rng4_64: Default::default(),
             variant: Variant::P2_32,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             rounds: 10,
         }
     }

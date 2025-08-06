@@ -33,7 +33,7 @@ impl Default for VmpcrFrame {
             random_bytes: String::new(),
             randoms: String::new(),
             n_random_bytes: 5,
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

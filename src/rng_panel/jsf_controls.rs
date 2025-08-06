@@ -19,7 +19,7 @@ impl Default for JsfFrame {
             rng64: Default::default(),
             big: false,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

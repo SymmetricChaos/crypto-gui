@@ -16,7 +16,7 @@ impl Default for RanduFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
         }
     }

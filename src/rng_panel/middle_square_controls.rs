@@ -17,7 +17,7 @@ impl Default for MiddleSquareFrame {
             rng: MiddleSquare::default(),
             position: 3,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

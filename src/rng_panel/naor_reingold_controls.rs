@@ -25,7 +25,7 @@ impl Default for NaorReingoldFrame {
     fn default() -> Self {
         Self {
             rng: NaorReingold::default(),
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
             p: 1223,
             q: 47,

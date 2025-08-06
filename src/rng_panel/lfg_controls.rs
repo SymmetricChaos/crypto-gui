@@ -27,7 +27,7 @@ impl Default for LfgFrame {
             vector_length,
             state_strings: VecDeque::from([]),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         };
         s.set_state_strings();
         s

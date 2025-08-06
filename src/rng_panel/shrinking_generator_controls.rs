@@ -21,7 +21,7 @@ impl Default for ShrinkingGeneratorFrame {
             vector_length_a: 32,
             vector_length_s: 29,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             err: false,
         }
     }

@@ -30,7 +30,7 @@ impl Default for BlumBlumShubFrame {
             q,
             local_state: 2,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             valid_m: true,
         }
     }

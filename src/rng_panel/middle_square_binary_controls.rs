@@ -17,7 +17,7 @@ impl Default for MiddleSquareBinaryFrame {
             rng: MiddleSquareBinary::default(),
             seed_state: 255,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

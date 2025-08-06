@@ -34,7 +34,7 @@ impl Default for WeylSequenceFrame {
             incr_err: false,
             variant: Variant::W,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

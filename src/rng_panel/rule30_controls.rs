@@ -18,7 +18,7 @@ impl Default for Rule30Frame {
     fn default() -> Self {
         Self {
             rng: Rule30::default(),
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
             seed: 12345,
             rule: WolframCode::R30,

@@ -24,7 +24,7 @@ impl Default for DualEcFrame {
             entropy: U256::from_u64(1),
             personalization: String::new(),
             nonce: 0,
-            n_random: 5,
+            n_random: 1,
             randoms: String::new(),
         }
     }

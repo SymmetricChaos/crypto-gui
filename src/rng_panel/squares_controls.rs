@@ -14,7 +14,7 @@ impl Default for SquaresFrame {
         Self {
             rng: Default::default(),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

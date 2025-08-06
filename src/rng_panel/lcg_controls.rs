@@ -23,7 +23,7 @@ impl Default for LcgFrame {
             increment_string: String::from("1013904223"),
             modulus_string: String::from("4294967295"),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

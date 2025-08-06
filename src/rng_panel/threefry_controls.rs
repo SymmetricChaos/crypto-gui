@@ -34,7 +34,7 @@ impl Default for ThreefryFrame {
             rng4_64: Default::default(),
             variant: Variant::T4_64,
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             rounds: 20,
         }
     }

@@ -17,7 +17,7 @@ impl Default for GeffeFrame {
             rng: Default::default(),
             vector_lengths: [16, 16, 16],
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

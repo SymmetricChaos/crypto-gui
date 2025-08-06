@@ -19,9 +19,9 @@ impl Default for WichmannHillFrame {
         Self {
             rng: Default::default(),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             wh_randoms: String::new(),
-            wh_n_random: 5,
+            wh_n_random: 1,
         }
     }
 }

@@ -27,7 +27,7 @@ impl Default for MTFrame {
             key_32: String::from("00001571"),
             key_64: String::from("0000000000001571"),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             mt64: false,
         }
     }

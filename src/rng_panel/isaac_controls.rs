@@ -33,7 +33,7 @@ impl Default for IsaacFrame {
             selector: IsaacSelector::Isaac,
             key: String::from("DEADBEEF42"),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
         }
     }
 }

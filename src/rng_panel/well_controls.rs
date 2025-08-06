@@ -25,7 +25,7 @@ impl Default for WellFrame {
             rng512a: Default::default(),
             rng1024a: Default::default(),
             randoms: String::new(),
-            n_random: 5,
+            n_random: 1,
             variant: Variant::Well512a,
         }
     }
