@@ -12,6 +12,7 @@ mod isaac_controls;
 mod jsf_controls;
 mod kiss_controls;
 mod lcg_controls;
+mod lehmer_controls;
 mod lfg_controls;
 mod lfsr_controls;
 mod mersenne_twister_controls;

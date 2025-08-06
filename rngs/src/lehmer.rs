@@ -15,11 +15,8 @@ impl Default for Lehmer {
 }
 
 impl Lehmer {
-    pub fn new(state: u64, multiplier: u64) -> Self {
-        Self {
-            state: state as u128,
-            multiplier: multiplier as u128,
-        }
+    pub fn new(state: u128, multiplier: u128) -> Self {
+        Self { state, multiplier }
     }
 }
 
