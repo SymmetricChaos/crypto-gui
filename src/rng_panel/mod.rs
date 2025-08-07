@@ -1,5 +1,3 @@
-mod a51_controls;
-mod a52_controls;
 mod alternating_step_controls;
 mod blum_blum_shub_controls;
 mod chacha_controls;
@@ -78,8 +76,6 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct RngInterface {
-    a51: a51_controls::A51Frame,
-    a52: a52_controls::A52Frame,
     alternating_step: alternating_step_controls::AlternatingStepFrame,
     blumblumshub: blum_blum_shub_controls::BlumBlumShubFrame,
     chacha: chacha_controls::ChaChaFrame,
@@ -168,8 +164,6 @@ impl RngInterface {
 
         combox_box(
             &[
-                RngId::A51,
-                RngId::A52,
                 RngId::BlumBlumShub,
                 RngId::ChaCha,
                 RngId::DualEcDrbg,
@@ -190,8 +184,6 @@ impl RngInterface {
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
-            RngId::A51 => &mut self.a51,
-            RngId::A52 => &mut self.a52,
             RngId::AlternatingStep => &mut self.alternating_step,
             RngId::BlumBlumShub => &mut self.blumblumshub,
             RngId::ChaCha => &mut self.chacha,

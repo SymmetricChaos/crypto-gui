@@ -1,24 +1,4 @@
 ﻿{
-  "A5/1": {
-    "Description": "The A5/1 stream cipher was created in the late 1980s for cellular telephones. The algorithm works be using three LFSRs that mutually control their stepping by majority vote of their middle bits. Although originally a secret algorithm A5/1 was reverse engineered and found to be quite weak. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
-    "Authors": null,
-    "Publication": "1987",
-    "Traits": [
-      "Stream Cipher",
-      "Cryptographic",
-      "Broken"
-    ]
-  },
-  "A5/2": {
-    "Description": "The A5/2 stream cipher was created as a \"export grade\" version of the A5/1 cipher. It is interally similar to A5/1 but with modifications that drastically weaken it. When the algorithm was reverse engineered and analyzed it proved so weak that A5/2 was banned. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
-    "Authors": null,
-    "Publication": "1989",
-    "Traits": [
-      "Stream Cipher",
-      "Cryptographic",
-      "Broken"
-    ]
-  },
   "Alternating Step Generator": {
     "Description": "An alternating step generator uses three LFSRs to produce a more secure stream of bits. The first LFSR is stepped and its output selects one of the others to be stepped. Then the last output bit from each of the other LSFRs are XORed together.",
     "Authors": null,
