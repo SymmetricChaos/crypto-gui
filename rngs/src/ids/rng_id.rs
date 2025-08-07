@@ -73,6 +73,7 @@ rng_ids_and_names!(
     Well, "WELL";
     Weyl, "Weyl";
     WichmannHill, "Wichmann-Hill";
+    WyRand, "WyRand";
     Xorshift64, "Xorshift64";
     Xoroshiro, "Xoroshiro";
     Xoshiro, "Xoshiro";

@@ -47,6 +47,7 @@ pub mod vmpcr;
 pub mod well;
 pub mod weyl;
 pub mod wichmann_hill;
+pub mod wyrand;
 pub mod xorshift;
 
 pub use traits::ClassicRng;
