@@ -1,11 +1,11 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
+use crate::ui_elements::{filter_and_parse_u64, generate_randoms_box, UiElements};
 use egui::TextStyle;
 use rand::{thread_rng, Rng};
-use rngs::{lcg::Lcg32, ClassicRng};
+use rngs::{lcg::LcgM, ClassicRng};
 
 pub struct LcgFrame {
-    rng: Lcg32,
+    rng: LcgM,
     state_string: String,
     multiplier_string: String,
     increment_string: String,
@@ -29,7 +29,7 @@ impl Default for LcgFrame {
 }
 
 impl LcgFrame {
-    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u32) {
+    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u64) {
         if ui
             .add_sized(
                 [40.0, 20.0],
@@ -39,7 +39,7 @@ impl LcgFrame {
             )
             .changed()
         {
-            filter_and_parse_u32(n, string);
+            filter_and_parse_u64(n, string);
         }
     }
 

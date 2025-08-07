@@ -169,6 +169,14 @@
       "LCG-based"
     ]
   },
+  "Linear Congruential Generator (Binary)": {
+    "Description": "Linear Congruential Generators can be defined with a modulus of any value but on a computer the fastest modulus is exactly equal to the maximum value of the hardware word size because the reduction will happen without any computation. Most modern computers use a wide size of 32 bits or 64 bits.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "LCG-based"
+    ]
+  },
   "Linear Feedback Shift Register": {
     "Description": "LFRSs are simple pseudorandom number generators that can be implented very easily and efficiently in hardware. It consists of a register of bits and several \"taps\" that check the state of certain bits. The values of those taps are combined to determine a new bit. The rest of the bits are then shifted to accomodate the new bit and the oldest bit is discarded. The maximum period of an LFSR is achieved only when the taps correspond to a primitive polynomial.",
     "Authors": null,
@@ -191,7 +199,7 @@
     "Publication": "1949",
     "Traits": null
   },
-  "Middle Square Binary": {
+  "Middle Square (Binary)": {
     "Description": "While the middle square method can be calculated by hand it is also a possible computer PRNG. When doing this on on modern computer hardware performance is much increased by specifiying the state size in bits (as this allows the middle bits to be extracted with a shift and mask) and to choose a state not more than half the size of the CPU register (as this prevents overflow when squaring). Mathematically these is no difference between these PRNGs and the other middle square PRNG defined on this site so quality is low and depends almost entirely on the size of the state space.",
     "Authors": null,
     "Publication": null,

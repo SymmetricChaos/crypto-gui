@@ -2,7 +2,6 @@ use crate::traits::ClassicRng;
 
 pub struct Lcg32 {
     pub state: u32,
-    pub modulus: u32,
     pub multiplier: u32,
     pub increment: u32,
 }
@@ -11,7 +10,6 @@ impl Default for Lcg32 {
     fn default() -> Self {
         Self {
             state: 1257924810,
-            modulus: 4294967295,
             multiplier: 1664525,
             increment: 1013904223,
         }
@@ -19,10 +17,9 @@ impl Default for Lcg32 {
 }
 
 impl Lcg32 {
-    pub fn new(state: u32, modulus: u32, multiplier: u32, increment: u32) -> Self {
+    pub fn new(state: u32, multiplier: u32, increment: u32) -> Self {
         Self {
             state,
-            modulus,
             multiplier,
             increment,
         }
@@ -31,25 +28,63 @@ impl Lcg32 {
 
 impl ClassicRng for Lcg32 {
     fn next_u32(&mut self) -> u32 {
-        let m = (self.state as u64 * self.multiplier as u64) % self.modulus as u64;
-        self.state = ((m + self.increment as u64) % self.modulus as u64) as u32;
+        self.state = self
+            .state
+            .wrapping_mul(self.multiplier)
+            .wrapping_add(self.increment);
         self.state
-    }
-
-    // Default method is meaningless here
-    fn next_u64(&mut self) -> u64 {
-        self.next_u32() as u64
     }
 }
 
 pub struct Lcg64 {
+    pub state: u64,
+    pub multiplier: u64,
+    pub increment: u64,
+}
+
+impl Default for Lcg64 {
+    fn default() -> Self {
+        Self {
+            state: 1257924810,
+            multiplier: 1664525,
+            increment: 1013904223,
+        }
+    }
+}
+
+impl Lcg64 {
+    pub fn new(state: u64, multiplier: u64, increment: u64) -> Self {
+        Self {
+            state,
+            multiplier,
+            increment,
+        }
+    }
+}
+
+impl ClassicRng for Lcg64 {
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        self.state = self
+            .state
+            .wrapping_mul(self.multiplier)
+            .wrapping_add(self.increment);
+        self.state
+    }
+}
+
+// LCG with a selectable modulus
+pub struct LcgM {
     pub state: u64,
     pub modulus: u64,
     pub multiplier: u64,
     pub increment: u64,
 }
 
-impl Default for Lcg64 {
+impl Default for LcgM {
     fn default() -> Self {
         Self {
             state: 1257924810,
@@ -60,7 +95,7 @@ impl Default for Lcg64 {
     }
 }
 
-impl Lcg64 {
+impl LcgM {
     pub fn new(state: u64, modulus: u64, multiplier: u64, increment: u64) -> Self {
         Self {
             state,
@@ -71,7 +106,7 @@ impl Lcg64 {
     }
 }
 
-impl ClassicRng for Lcg64 {
+impl ClassicRng for LcgM {
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }
@@ -88,18 +123,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn outputs32() {
-        let mut rng = Lcg32::new(0, 2147483648, 1103515245, 12345);
-        assert_eq!(12345, rng.next_u32());
-        assert_eq!(1406932606, rng.next_u32());
-        assert_eq!(654583775, rng.next_u32());
-        assert_eq!(1449466924, rng.next_u32());
-        assert_eq!(229283573, rng.next_u32());
-    }
-
-    #[test]
-    fn outputs64() {
-        let mut rng = Lcg64::new(0, 2147483648, 1103515245, 12345);
+    fn outputs() {
+        let mut rng = LcgM::new(0, 2147483648, 1103515245, 12345);
         assert_eq!(12345, rng.next_u32());
         assert_eq!(1406932606, rng.next_u32());
         assert_eq!(654583775, rng.next_u32());

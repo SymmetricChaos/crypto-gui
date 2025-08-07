@@ -46,12 +46,13 @@ rng_ids_and_names!(
     Kiss, "KISS";
     Kiss11, "KISS11";
     Lcg, "Linear Congruential Generator";
+    LcgBinary, "Linear Congruential Generator (Binary)";
     Lehmer, "Lehmer";
     Lfg, "Lagged Fibonacci Generator";
     Lfsr, "Linear Feedback Shift Register";
     MersenneTwister, "Mersenne Twister";
     MiddleSquare, "Middle Square";
-    MiddleSquareBinary, "Middle Square Binary";
+    MiddleSquareBinary, "Middle Square (Binary)";
     MultipleRecursive, "Multiple Recursive Generator";
     Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";

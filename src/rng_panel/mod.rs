@@ -11,6 +11,7 @@ mod hc256_controls;
 mod isaac_controls;
 mod jsf_controls;
 mod kiss_controls;
+mod lcg_binary_contols;
 mod lcg_controls;
 mod lehmer_controls;
 mod lfg_controls;
@@ -90,6 +91,7 @@ pub struct RngInterface {
     jsf: jsf_controls::JsfFrame,
     kiss: kiss_controls::KissFrame,
     lcg: lcg_controls::LcgFrame,
+    lcg_bin: lcg_binary_contols::LcgBinaryFrame,
     lehmer: lehmer_controls::LehmerFrame,
     lfg: lfg_controls::LfgFrame,
     lfsr: lfsr_controls::LfsrFrame,
@@ -127,6 +129,7 @@ impl RngInterface {
                 RngId::Jsf,
                 RngId::Kiss,
                 RngId::Lcg,
+                RngId::LcgBinary,
                 RngId::Lehmer,
                 RngId::Lfg,
                 RngId::Lfsr,
@@ -200,6 +203,7 @@ impl RngInterface {
             RngId::Jsf => &mut self.jsf,
             RngId::Kiss => &mut self.kiss,
             RngId::Lcg => &mut self.lcg,
+            RngId::LcgBinary => &mut self.lcg_bin,
             RngId::Lehmer => &mut self.lehmer,
             RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
