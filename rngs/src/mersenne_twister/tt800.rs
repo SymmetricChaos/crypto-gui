@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub const N: usize = 25;
 pub const M: usize = 7;
@@ -91,7 +91,7 @@ impl Tt800 {
     // }
 }
 
-impl ClassicRng for Tt800 {
+impl SimpleRng for Tt800 {
     fn next_u32(&mut self) -> u32 {
         // index should never be zero here but if it is use the default key schedule
         if self.index == 0 {

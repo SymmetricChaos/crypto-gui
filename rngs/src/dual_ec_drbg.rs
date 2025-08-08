@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use crypto_bigint::U256;
 use std::sync::LazyLock;
 use utils::elliptic_curves::{EcPoint, FiniteEllipticCurve};
@@ -46,7 +46,7 @@ impl DualEcDrbgP256 {
     }
 }
 
-impl ClassicRng for DualEcDrbgP256 {
+impl SimpleRng for DualEcDrbgP256 {
     fn next_u32(&mut self) -> u32 {
         if self.buffer.len() < 4 {
             self.step();

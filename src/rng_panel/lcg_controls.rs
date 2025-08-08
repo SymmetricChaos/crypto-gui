@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{filter_and_parse_u64, generate_randoms_box, UiElements};
 use egui::TextStyle;
 use rand::{thread_rng, Rng};
-use rngs::{lcg::LcgM, ClassicRng};
+use rngs::{lcg::LcgM, SimpleRng};
 
 pub struct LcgFrame {
     rng: LcgM,
@@ -101,7 +101,7 @@ impl ClassicRngFrame for LcgFrame {
         self.state_string = self.rng.state.to_string();
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

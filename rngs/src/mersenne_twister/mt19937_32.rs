@@ -1,6 +1,6 @@
 use std::cmp::max;
 
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub const N: usize = 624;
 pub const M: usize = 397;
@@ -108,7 +108,7 @@ impl Mt19937_32 {
     }
 }
 
-impl ClassicRng for Mt19937_32 {
+impl SimpleRng for Mt19937_32 {
     fn next_u32(&mut self) -> u32 {
         // index should never be zero here but if it is use the default key schedule
         if self.index == 0 {

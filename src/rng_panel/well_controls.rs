@@ -91,7 +91,7 @@ impl ClassicRngFrame for WellFrame {
         }
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.variant {
             Variant::Well512a => &mut self.rng512a,
             Variant::Well1024a => &mut self.rng1024a,

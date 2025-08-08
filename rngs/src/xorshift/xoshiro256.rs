@@ -1,5 +1,5 @@
 use super::XoshiroScrambler;
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct Xoshiro256 {
     pub state: [u64; 4],
@@ -96,7 +96,7 @@ impl Xoshiro256 {
     }
 }
 
-impl ClassicRng for Xoshiro256 {
+impl SimpleRng for Xoshiro256 {
     fn next_u32(&mut self) -> u32 {
         let out = (self.next_u64() >> 32) as u32;
         self.step();

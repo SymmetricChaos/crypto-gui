@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 const MASK16: u32 = 0xffff;
 
@@ -73,7 +73,7 @@ impl Kiss {
     }
 }
 
-impl ClassicRng for Kiss {
+impl SimpleRng for Kiss {
     fn next_u32(&mut self) -> u32 {
         (self.mwc() ^ self.cong()).wrapping_add(self.shr3())
     }

@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use std::num::Wrapping;
 
 const SIZE: usize = 256;
@@ -120,27 +120,9 @@ impl Isaac64 {
     pub fn next_ascii(&mut self) -> u8 {
         (self.next_u32() % 95 + 32) as u8
     }
-
-    pub fn next_u64(&mut self) -> u64 {
-        if self.ctr >= SIZE {
-            self.isaac();
-        }
-        let n = self.rand_rsl[self.ctr].0;
-        self.ctr += 1;
-        n
-    }
 }
 
-impl ClassicRng for Isaac64 {
-    fn next_u32(&mut self) -> u32 {
-        if self.ctr >= SIZE {
-            self.isaac();
-        }
-        let n = self.rand_rsl[self.ctr].0;
-        self.ctr += 1;
-        n as u32
-    }
-
+impl SimpleRng for Isaac64 {
     fn next_u64(&mut self) -> u64 {
         if self.ctr >= SIZE {
             self.isaac();

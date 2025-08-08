@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{errors::RngError, traits::ClassicRng};
+use crate::{errors::RngError, traits::SimpleRng};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum FibOp32 {
@@ -68,7 +68,7 @@ impl Lfg32 {
     }
 }
 
-impl ClassicRng for Lfg32 {
+impl SimpleRng for Lfg32 {
     // Will panic if tap is invalid
     fn next_u32(&mut self) -> u32 {
         let m = (self
@@ -113,7 +113,7 @@ impl Lfg64 {
     }
 }
 
-impl ClassicRng for Lfg64 {
+impl SimpleRng for Lfg64 {
     // Will panic if tap is invalid
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32

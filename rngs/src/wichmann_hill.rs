@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 pub struct WichmannHill {
     pub s1: u32,
@@ -35,7 +35,7 @@ impl WichmannHill {
     }
 }
 
-impl ClassicRng for WichmannHill {
+impl SimpleRng for WichmannHill {
     /// Closer to 31 bits of entropy
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;

@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use egui::{DragValue, TextStyle};
 use rngs::{
     lfg::{FibOp32, Lfg32},
-    ClassicRng,
+    SimpleRng,
 };
 
 use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
@@ -119,7 +119,7 @@ impl ClassicRngFrame for LfgFrame {
         self.set_state_strings();
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

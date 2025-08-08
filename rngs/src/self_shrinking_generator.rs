@@ -1,4 +1,4 @@
-use crate::{lfsr::Lfsr, ClassicRng};
+use crate::{lfsr::Lfsr, SimpleRng};
 use utils::bits::{
     bits_to_u32_upper, bits_to_u64_upper,
     Bit::{self, One, Zero},
@@ -40,7 +40,7 @@ impl SelfShrinkingGenerator {
     }
 }
 
-impl ClassicRng for SelfShrinkingGenerator {
+impl SimpleRng for SelfShrinkingGenerator {
     fn next_u32(&mut self) -> u32 {
         let mut output_bits = Vec::with_capacity(32);
         for _ in 0..32 {

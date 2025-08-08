@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 use super::XoshiroScrambler;
 
@@ -112,7 +112,7 @@ impl Xoshiro512 {
     }
 }
 
-impl ClassicRng for Xoshiro512 {
+impl SimpleRng for Xoshiro512 {
     fn next_u32(&mut self) -> u32 {
         let out = (self.next_u64() >> 32) as u32;
         self.step();

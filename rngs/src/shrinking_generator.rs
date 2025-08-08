@@ -1,4 +1,4 @@
-use crate::{lfsr::Lfsr, ClassicRng};
+use crate::{lfsr::Lfsr, SimpleRng};
 use utils::bits::{bits_to_u32_upper, bits_to_u64_upper, Bit};
 
 pub struct ShrinkingGenerator {
@@ -37,7 +37,7 @@ impl ShrinkingGenerator {
     }
 }
 
-impl ClassicRng for ShrinkingGenerator {
+impl SimpleRng for ShrinkingGenerator {
     fn next_u32(&mut self) -> u32 {
         let mut output_bits = Vec::with_capacity(32);
         for _ in 0..32 {

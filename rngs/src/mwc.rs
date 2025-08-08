@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 const A1: u128 = 0xffeb_b71d_94fc_daf9;
 // const MOD: u128 = (A1 - 1) << 64 | 0xffff_ffff_ffff_ffff;
@@ -47,13 +47,7 @@ impl MultiplyWithCarry128 {
     }
 }
 
-impl ClassicRng for MultiplyWithCarry128 {
-    fn next_u32(&mut self) -> u32 {
-        let out = self.x;
-        self.step();
-        out as u32
-    }
-
+impl SimpleRng for MultiplyWithCarry128 {
     fn next_u64(&mut self) -> u64 {
         let out = self.x;
         self.step();

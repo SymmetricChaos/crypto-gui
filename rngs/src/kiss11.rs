@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 /*
 static unsigned long Q[4194304],carry=0;
@@ -64,7 +64,7 @@ impl Kiss11 {
     }
 }
 
-impl ClassicRng for Kiss11 {
+impl SimpleRng for Kiss11 {
     fn next_u32(&mut self) -> u32 {
         self.b32mwc()
             .wrapping_add(self.cng())

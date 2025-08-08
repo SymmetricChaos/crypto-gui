@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use num_prime::nt_funcs::is_prime64;
 use utils::{
     bits::u64_to_bit_vec,
@@ -99,11 +99,7 @@ impl NaorReingold {
     }
 }
 
-impl ClassicRng for NaorReingold {
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for NaorReingold {
     fn next_u64(&mut self) -> u64 {
         // Get the bits of the counter
         let bits = u64_to_bit_vec(self.ctr);

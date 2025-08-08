@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct WeylSequence {
     pub state: u64,
@@ -16,12 +16,7 @@ impl Default for WeylSequence {
     }
 }
 
-impl ClassicRng for WeylSequence {
-    fn next_u32(&mut self) -> u32 {
-        self.state = (self.state + self.increment) % self.modulus;
-        self.state as u32
-    }
-
+impl SimpleRng for WeylSequence {
     fn next_u64(&mut self) -> u64 {
         self.state = (self.state + self.increment) % self.modulus;
         self.state
@@ -42,7 +37,7 @@ impl Default for WeylSequence32 {
     }
 }
 
-impl ClassicRng for WeylSequence32 {
+impl SimpleRng for WeylSequence32 {
     fn next_u32(&mut self) -> u32 {
         self.state = self.state.wrapping_add(self.increment);
         self.state
@@ -63,7 +58,7 @@ impl Default for WeylSequence64 {
     }
 }
 
-impl ClassicRng for WeylSequence64 {
+impl SimpleRng for WeylSequence64 {
     fn next_u32(&mut self) -> u32 {
         self.state = self.state.wrapping_add(self.increment);
         self.state as u32

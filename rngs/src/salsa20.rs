@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 // https://cr.yp.to/snuffle/salsafamily-20071225.pdf
 pub struct Salsa20 {
@@ -101,7 +101,7 @@ impl Salsa20 {
     }
 }
 
-impl ClassicRng for Salsa20 {
+impl SimpleRng for Salsa20 {
     fn next_u32(&mut self) -> u32 {
         if self.saved_keystream.is_empty() {
             self.next_block();

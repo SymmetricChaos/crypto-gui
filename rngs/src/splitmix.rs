@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 fn mix64(mut t: u64) -> u64 {
     t ^= t >> 33;
@@ -57,11 +57,7 @@ impl Splitmix {
     }
 }
 
-impl ClassicRng for Splitmix {
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Splitmix {
     fn next_u64(&mut self) -> u64 {
         self.next_state();
         mix64_variant_13(self.state)

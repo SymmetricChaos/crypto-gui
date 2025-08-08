@@ -1,4 +1,4 @@
-use crate::{errors::RngError, ClassicRng};
+use crate::{errors::RngError, SimpleRng};
 use num::BigUint;
 use num_prime::nt_funcs::is_safe_prime;
 
@@ -46,7 +46,7 @@ impl BlumBlumShub {
     }
 }
 
-impl ClassicRng for BlumBlumShub {
+impl SimpleRng for BlumBlumShub {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
         // Extract 32 bits using the parity of 32 consecutive states

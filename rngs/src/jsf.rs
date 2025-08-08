@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct Jsf32 {
     pub state: [u32; 4],
@@ -23,7 +23,7 @@ impl Jsf32 {
     }
 }
 
-impl ClassicRng for Jsf32 {
+impl SimpleRng for Jsf32 {
     fn next_u32(&mut self) -> u32 {
         self.step();
         self.state[3]
@@ -58,7 +58,7 @@ impl Jsf64 {
     }
 }
 
-impl ClassicRng for Jsf64 {
+impl SimpleRng for Jsf64 {
     fn next_u32(&mut self) -> u32 {
         self.step();
         self.state[3] as u32

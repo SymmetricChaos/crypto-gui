@@ -43,12 +43,12 @@ use egui::Ui;
 
 use rngs::{
     ids::{rng_categories::RngCategory, RngId},
-    ClassicRng,
+    SimpleRng,
 };
 
 pub trait ClassicRngFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn rng(&mut self) -> &mut dyn ClassicRng;
+    fn rng(&mut self) -> &mut dyn SimpleRng;
     fn randomize(&mut self);
     fn reset(&mut self);
 }

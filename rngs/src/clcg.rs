@@ -1,4 +1,4 @@
-use crate::{lcg::LcgM, traits::ClassicRng};
+use crate::{lcg::LcgM, traits::SimpleRng};
 
 pub struct ClcgM {
     pub lcgs: Vec<LcgM>,
@@ -12,7 +12,7 @@ impl Default for ClcgM {
     }
 }
 
-impl ClassicRng for ClcgM {
+impl SimpleRng for ClcgM {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
         let modulus = (self.lcgs[0].modulus - 1) as u64;

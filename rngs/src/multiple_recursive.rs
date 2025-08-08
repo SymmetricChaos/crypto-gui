@@ -1,4 +1,4 @@
-use crate::{errors::RngError, ClassicRng};
+use crate::{errors::RngError, SimpleRng};
 
 pub struct MRG32k3a {
     state: [u32; 6],
@@ -23,7 +23,7 @@ impl MRG32k3a {
     }
 }
 
-impl ClassicRng for MRG32k3a {
+impl SimpleRng for MRG32k3a {
     fn next_u32(&mut self) -> u32 {
         todo!()
     }
@@ -64,7 +64,7 @@ impl MRG63k3a {
     }
 }
 
-impl ClassicRng for MRG63k3a {
+impl SimpleRng for MRG63k3a {
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }

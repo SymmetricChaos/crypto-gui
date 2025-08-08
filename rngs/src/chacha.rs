@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use itertools::Itertools;
 use std::num::Wrapping;
 
@@ -110,7 +110,7 @@ impl ChaCha {
     }
 }
 
-impl ClassicRng for ChaCha {
+impl SimpleRng for ChaCha {
     fn next_u32(&mut self) -> u32 {
         if self.saved_keystream.is_empty() {
             self.saved_keystream = self.next_block();

@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use std::num::Wrapping;
 
 // https://burtleburtle.net/bob/rand/isaac.html
@@ -93,7 +93,7 @@ impl Ia {
     }
 }
 
-impl ClassicRng for Ia {
+impl SimpleRng for Ia {
     fn next_u32(&mut self) -> u32 {
         if self.ctr >= SIZE {
             self.ia();

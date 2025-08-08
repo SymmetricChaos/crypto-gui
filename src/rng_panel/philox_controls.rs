@@ -130,7 +130,7 @@ impl ClassicRngFrame for PhiloxFrame {
         );
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.variant {
             Variant::P2_32 => &mut self.rng2_32,
             Variant::P2_64 => &mut self.rng2_64,

@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 pub struct Randu {
     pub state: u32,
@@ -10,7 +10,7 @@ impl Default for Randu {
     }
 }
 
-impl ClassicRng for Randu {
+impl SimpleRng for Randu {
     fn next_u32(&mut self) -> u32 {
         let out = self.state;
         self.state = ((self.state as u64 * 65539 as u64) % 0x80000000) as u32;

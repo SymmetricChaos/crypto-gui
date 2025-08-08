@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::UiElements;
 use egui::DragValue;
 use rand::{thread_rng, Rng};
-use rngs::{halton::HaltonSequence, ClassicRng};
+use rngs::{halton::HaltonSequence, SimpleRng};
 
 pub struct HaltonFrame {
     rng: HaltonSequence,
@@ -82,7 +82,7 @@ impl ClassicRngFrame for HaltonFrame {
         ui.text_edit_multiline(&mut self.randoms);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

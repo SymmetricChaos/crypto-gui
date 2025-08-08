@@ -39,7 +39,7 @@
 //   return ((double) STATE[state_i]  * FACT);
 // }
 
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 const M1: usize = 3;
 const M2: usize = 24;
@@ -100,7 +100,7 @@ impl Well1024a {
     }
 }
 
-impl ClassicRng for Well1024a {
+impl SimpleRng for Well1024a {
     fn next_u32(&mut self) -> u32 {
         let z0 = self.vrm1();
         let z1 = self.v0() ^ mat0pos(8, self.vm1());

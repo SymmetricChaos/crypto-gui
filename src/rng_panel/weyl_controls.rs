@@ -5,7 +5,7 @@ use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{
     weyl::{WeylSequence, WeylSequence32, WeylSequence64},
-    ClassicRng,
+    SimpleRng,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -166,7 +166,7 @@ impl ClassicRngFrame for WeylSequenceFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.variant {
             Variant::W => &mut self.rng,
             Variant::W32 => &mut self.rng32,

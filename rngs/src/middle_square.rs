@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct MiddleSquare {
     pub state: u64,
@@ -14,7 +14,7 @@ impl Default for MiddleSquare {
     }
 }
 
-impl ClassicRng for MiddleSquare {
+impl SimpleRng for MiddleSquare {
     fn next_u32(&mut self) -> u32 {
         let sq = self.state * self.state;
         let digits = format!("{:0w$}", sq, w = self.width * 2);

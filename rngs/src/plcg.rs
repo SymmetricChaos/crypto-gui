@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct Plcg32 {
     pub state: u32,
@@ -26,7 +26,7 @@ impl Plcg32 {
     }
 }
 
-impl ClassicRng for Plcg32 {
+impl SimpleRng for Plcg32 {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
         let s = self.state as u64;
@@ -71,11 +71,7 @@ impl Plcg64 {
     }
 }
 
-impl ClassicRng for Plcg64 {
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Plcg64 {
     fn next_u64(&mut self) -> u64 {
         let mut out = 0;
         let s = self.state as u128;

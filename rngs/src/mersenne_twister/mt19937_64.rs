@@ -1,6 +1,6 @@
 use std::cmp::max;
 
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub const N: usize = 312;
 pub const M: usize = 156;
@@ -106,7 +106,7 @@ impl Mt19937_64 {
     }
 }
 
-impl ClassicRng for Mt19937_64 {
+impl SimpleRng for Mt19937_64 {
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }

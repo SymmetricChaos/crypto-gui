@@ -2,7 +2,7 @@
 mod mt32 {
     use crate::{
         mersenne_twister::mt19937_32::{Mt19937_32, N},
-        ClassicRng,
+        SimpleRng,
     };
 
     static TEST_OUTPUT: [u32; 1000] = [
@@ -360,7 +360,7 @@ mod mt_64 {
 
     use crate::{
         mersenne_twister::mt19937_64::{Mt19937_64, N},
-        ClassicRng,
+        SimpleRng,
     };
 
     static STATE_SEEDED_BY_U64: [u64; N] = [

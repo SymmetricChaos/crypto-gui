@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::{Button, DragValue, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{middle_square::MiddleSquare, ClassicRng};
+use rngs::{middle_square::MiddleSquare, SimpleRng};
 
 pub struct MiddleSquareFrame {
     rng: MiddleSquare,
@@ -88,7 +88,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

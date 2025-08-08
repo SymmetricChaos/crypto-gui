@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::{FontId, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{isaac::ia::Ia, isaac::ibaa::Ibaa, isaac::isaac::Isaac, ClassicRng};
+use rngs::{isaac::ia::Ia, isaac::ibaa::Ibaa, isaac::isaac::Isaac, SimpleRng};
 use std::num::ParseIntError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -285,7 +285,7 @@ impl ClassicRngFrame for IsaacFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.selector {
             IsaacSelector::Isaac => &mut self.isaac,
             IsaacSelector::Ia => &mut self.ia,

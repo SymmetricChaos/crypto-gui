@@ -136,7 +136,7 @@ impl ClassicRngFrame for ThreefryFrame {
         );
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.variant {
             Variant::T2_32 => &mut self.rng2_32,
             Variant::T2_64 => &mut self.rng2_64,

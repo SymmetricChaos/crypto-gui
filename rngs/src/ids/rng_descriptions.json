@@ -337,6 +337,12 @@
       "LCG-based"
     ]
   },
+  "WyRand": {
+    "Description": "WyRand is a PRNG based on the compression function of WyHash v4.2, the final released version.",
+    "Authors": "Wang Yi",
+    "Publication": "~2021",
+    "Traits": null
+  },
   "Xorshift64": {
     "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there. The model xorshift here has just 64 bits of state for simplicity, larger state is needed for most purposes.",
     "Authors": "George Marsaglia and Sebastiano Vigna",

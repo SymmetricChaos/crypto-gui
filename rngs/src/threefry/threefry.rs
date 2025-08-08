@@ -1,6 +1,6 @@
 use crate::{
     threefry::{threefry_2_32_r, threefry_2_64_r, threefry_4_32_r, threefry_4_64_r},
-    ClassicRng,
+    SimpleRng,
 };
 
 pub struct Threefry2_32 {
@@ -37,9 +37,7 @@ impl Threefry2_32 {
     }
 }
 
-impl ClassicRng for Threefry2_32 {
-    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
+impl SimpleRng for Threefry2_32 {
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -88,7 +86,7 @@ impl Threefry4_32 {
     }
 }
 
-impl ClassicRng for Threefry4_32 {
+impl SimpleRng for Threefry4_32 {
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -143,13 +141,7 @@ impl Threefry2_64 {
     }
 }
 
-impl ClassicRng for Threefry2_64 {
-    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Threefry2_64 {
     fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -198,13 +190,7 @@ impl Threefry4_64 {
     }
 }
 
-impl ClassicRng for Threefry4_64 {
-    /// The 64-bit Threefry is meant to produce 64-bit random numbers and this methods ignores the upper bits
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Threefry4_64 {
     fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();

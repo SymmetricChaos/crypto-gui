@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct Rc4 {
     pub arr: [u8; 256],
@@ -35,7 +35,12 @@ impl Rc4 {
             j = j.wrapping_add(arr[i]).wrapping_add(*k);
             arr.swap(i, j as usize)
         }
-        Self { arr, i: 0, j: 0, big_endian: true }
+        Self {
+            arr,
+            i: 0,
+            j: 0,
+            big_endian: true,
+        }
     }
 
     pub fn ksa(&mut self, key: &[u8]) {
@@ -70,7 +75,7 @@ impl Rc4 {
     }
 }
 
-impl ClassicRng for Rc4 {
+impl SimpleRng for Rc4 {
     fn next_u32(&mut self) -> u32 {
         let mut bytes = [0u8; 4];
         for i in 0..4 {
@@ -128,7 +133,7 @@ mod rc4_tests {
             0xe9, 0x36, 0x04, 0xa9,
         ] {
             let b = rng.next_byte();
-            assert_eq!(b,byte);
+            assert_eq!(b, byte);
             // print!("{:02x} {:02x}", byte, b);
             // if b != byte {
             //     println!(" ERROR")

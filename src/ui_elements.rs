@@ -10,7 +10,7 @@ use egui_extras::{Column, TableBuilder};
 use rand::{distributions::Standard, prelude::Distribution, thread_rng, Fill, Rng};
 use rngs::{
     lfsr::{Lfsr, LfsrMode},
-    ClassicRng,
+    SimpleRng,
 };
 use std::fmt::Display;
 use strum::IntoEnumIterator;
@@ -432,7 +432,7 @@ filter_and_parse_int!(filter_and_parse_u64, u64);
 
 pub fn generate_randoms_box(
     ui: &mut Ui,
-    rng: &mut dyn ClassicRng,
+    rng: &mut dyn SimpleRng,
     n_random: &mut usize,
     randoms: &mut String,
 ) {

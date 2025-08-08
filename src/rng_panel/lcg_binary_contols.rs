@@ -3,7 +3,7 @@ use crate::ui_elements::{generate_randoms_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::{
     lcg::{Lcg32, Lcg64},
-    ClassicRng,
+    SimpleRng,
 };
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -92,7 +92,7 @@ impl ClassicRngFrame for LcgBinaryFrame {
         );
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         match self.selector {
             Selector::L32 => &mut self.rng32,
             Selector::L64 => &mut self.rng64,

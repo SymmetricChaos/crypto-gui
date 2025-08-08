@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 pub struct Acorn60 {
     state: u64,
@@ -14,7 +14,7 @@ impl Default for Acorn60 {
     }
 }
 
-impl ClassicRng for Acorn60 {
+impl SimpleRng for Acorn60 {
     fn next_u32(&mut self) -> u32 {
         todo!()
     }

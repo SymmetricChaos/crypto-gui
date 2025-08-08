@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct HaltonSequence {
     pub bases: Vec<u32>,
@@ -32,7 +32,7 @@ impl HaltonSequence {
     }
 }
 
-impl ClassicRng for HaltonSequence {
+impl SimpleRng for HaltonSequence {
     fn next_u32(&mut self) -> u32 {
         for ((num, den), base) in self
             .nums

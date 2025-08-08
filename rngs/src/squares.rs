@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 pub struct Squares {
     pub key: u64,
@@ -16,7 +16,7 @@ impl Default for Squares {
 
 impl Squares {}
 
-impl ClassicRng for Squares {
+impl SimpleRng for Squares {
     fn next_u32(&mut self) -> u32 {
         let mut x = self.ctr.wrapping_mul(self.key);
         self.ctr = self.ctr.wrapping_add(1);

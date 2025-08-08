@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use std::num::Wrapping;
 
 const SIZE: usize = 256;
@@ -107,7 +107,7 @@ impl Isaac {
     }
 }
 
-impl ClassicRng for Isaac {
+impl SimpleRng for Isaac {
     fn next_u32(&mut self) -> u32 {
         if self.ctr >= SIZE {
             self.isaac();

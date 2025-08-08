@@ -109,7 +109,7 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

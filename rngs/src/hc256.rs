@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 fn f1(n: u32) -> u32 {
     n.rotate_right(7) ^ n.rotate_right(18) ^ (n >> 3)
@@ -105,7 +105,7 @@ impl Hc256 {
     }
 }
 
-impl ClassicRng for Hc256 {
+impl SimpleRng for Hc256 {
     fn next_u32(&mut self) -> u32 {
         let j = (self.ctr % 1024) as usize;
         let out: u32;

@@ -1,6 +1,6 @@
 use utils::byte_formatting::u32s_to_bytes_be;
 
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 const A: [u32; 8] = [
     0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3, 0x34D34D34, 0x4D34D34D, 0xD34D34D3,
@@ -167,7 +167,7 @@ impl Rabbit {
     }
 }
 
-impl ClassicRng for Rabbit {
+impl SimpleRng for Rabbit {
     fn next_u32(&mut self) -> u32 {
         if self.ptr > 4 {
             self.refill_cache();

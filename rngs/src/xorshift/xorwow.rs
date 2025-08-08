@@ -1,6 +1,6 @@
 use num::Integer;
 
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 pub struct Xorwow {
     pub state: [u32; 5],
@@ -24,7 +24,7 @@ impl Default for Xorwow {
     }
 }
 
-impl ClassicRng for Xorwow {
+impl SimpleRng for Xorwow {
     fn next_u32(&mut self) -> u32 {
         assert!(self.weyl.is_odd());
 

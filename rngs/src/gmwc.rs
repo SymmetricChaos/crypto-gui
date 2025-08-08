@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 const MINUSA0: u128 = 0x7d084a4d80885f;
 const A0INV: u128 = 0x9b1eea3792a42c61;
@@ -33,12 +33,7 @@ impl GeneralizedMultiplyWithCarry128 {
     }
 }
 
-impl ClassicRng for GeneralizedMultiplyWithCarry128 {
-    fn next_u32(&mut self) -> u32 {
-        self.step();
-        self.x as u32
-    }
-
+impl SimpleRng for GeneralizedMultiplyWithCarry128 {
     fn next_u64(&mut self) -> u64 {
         self.step();
         self.x as u64

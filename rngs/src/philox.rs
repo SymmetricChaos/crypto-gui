@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 // 64 bit
 const PHILOX_M2_64: u64 = 0xD2B74407B1CE6E93;
@@ -70,7 +70,7 @@ impl Philox2_32 {
     }
 }
 
-impl ClassicRng for Philox2_32 {
+impl SimpleRng for Philox2_32 {
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -133,7 +133,7 @@ impl Philox4_32 {
     }
 }
 
-impl ClassicRng for Philox4_32 {
+impl SimpleRng for Philox4_32 {
     fn next_u32(&mut self) -> u32 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -199,13 +199,7 @@ impl Philox2_64 {
     }
 }
 
-impl ClassicRng for Philox2_64 {
-    /// The 64-bit Philox is meant to produce 64-bit random numbers and this methods ignores the upper bits.
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Philox2_64 {
     fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();
@@ -268,13 +262,7 @@ impl Philox4_64 {
     }
 }
 
-impl ClassicRng for Philox4_64 {
-    /// The 64-bit Philox is meant to produce 64-bit random numbers and this methods ignores the upper bits.
-    /// To make use of all the bits for smaller values extract them from .next_u64() or from .array()
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Philox4_64 {
     fn next_u64(&mut self) -> u64 {
         if self.idx == 0 {
             self.saved = self.array();

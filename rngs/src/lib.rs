@@ -48,4 +48,4 @@ pub mod wichmann_hill;
 pub mod wyrand;
 pub mod xorshift;
 
-pub use traits::ClassicRng;
+pub use traits::SimpleRng;

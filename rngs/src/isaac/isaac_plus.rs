@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use std::num::Wrapping;
 
 pub struct IsaacPlus {
@@ -106,7 +106,7 @@ impl IsaacPlus {
     }
 }
 
-impl ClassicRng for IsaacPlus {
+impl SimpleRng for IsaacPlus {
     fn next_u32(&mut self) -> u32 {
         if self.ctr > 255 {
             self.isaac();

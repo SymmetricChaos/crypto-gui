@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 
 // values for the the Star scrambler From Vigna: An experimental exploration of Marsaglia’s xorshift generators, scrambled
 // in principle any odd constant other than 1 is valid, values were chosen empirically
@@ -120,7 +120,7 @@ impl Xorshift64 {
     }
 }
 
-impl ClassicRng for Xorshift64 {
+impl SimpleRng for Xorshift64 {
     fn next_u32(&mut self) -> u32 {
         let out = match self.scrambler {
             XorshiftScrambler::None => (self.state >> 32) as u32,

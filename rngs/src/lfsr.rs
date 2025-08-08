@@ -2,7 +2,7 @@ use itertools::Itertools;
 use num::Zero;
 use utils::bits::{bits_from_str, bits_to_u32_upper, bits_to_u64_upper, bools_from_str, Bit};
 
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LfsrMode {
@@ -107,7 +107,7 @@ impl Lfsr {
     }
 }
 
-impl ClassicRng for Lfsr {
+impl SimpleRng for Lfsr {
     fn next_u32(&mut self) -> u32 {
         let mut output_bits = Vec::with_capacity(32);
         for _ in 0..32 {

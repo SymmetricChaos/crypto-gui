@@ -1,4 +1,4 @@
-use crate::ClassicRng;
+use crate::SimpleRng;
 use num::Integer;
 
 const W: usize = 128;
@@ -135,7 +135,7 @@ impl Rule30 {
     }
 }
 
-impl ClassicRng for Rule30 {
+impl SimpleRng for Rule30 {
     fn next_u32(&mut self) -> u32 {
         let mut n = 0;
         for _ in 0..32 {

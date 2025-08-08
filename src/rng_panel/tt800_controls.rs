@@ -59,7 +59,7 @@ impl ClassicRngFrame for Tt800Frame {
         ui.add_space(16.0);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

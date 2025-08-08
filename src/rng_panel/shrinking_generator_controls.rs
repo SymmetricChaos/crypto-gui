@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{lfsr_grid_controls, UiElements};
 use egui::DragValue;
 use rand::{thread_rng, Rng};
-use rngs::{shrinking_generator::ShrinkingGenerator, ClassicRng};
+use rngs::{shrinking_generator::ShrinkingGenerator, SimpleRng};
 use utils::bits::Bit::{self};
 
 pub struct ShrinkingGeneratorFrame {
@@ -98,7 +98,7 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
         }
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

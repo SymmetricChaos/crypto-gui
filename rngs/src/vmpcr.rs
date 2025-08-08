@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 // https://www.vmpcfunction.com/VMPC-R.pdf
 pub struct Vmpcr {
@@ -125,7 +125,7 @@ impl Vmpcr {
     }
 }
 
-impl ClassicRng for Vmpcr {
+impl SimpleRng for Vmpcr {
     fn next_u32(&mut self) -> u32 {
         let mut bytes = [0u8; 4];
         for i in 0..4 {

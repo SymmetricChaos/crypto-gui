@@ -1,4 +1,4 @@
-use crate::{lfsr::Lfsr, ClassicRng};
+use crate::{lfsr::Lfsr, SimpleRng};
 use utils::bits::Bit;
 
 pub struct Geffe {
@@ -35,7 +35,7 @@ impl Geffe {
     }
 }
 
-impl ClassicRng for Geffe {
+impl SimpleRng for Geffe {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
         for _ in 0..32 {

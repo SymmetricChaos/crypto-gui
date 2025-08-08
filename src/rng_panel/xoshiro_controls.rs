@@ -5,7 +5,7 @@ use rngs::{
     xorshift::{
         xoshiro128::Xoshiro128, xoshiro256::Xoshiro256, xoshiro512::Xoshiro512, XoshiroScrambler,
     },
-    ClassicRng,
+    SimpleRng,
 };
 use strum::IntoEnumIterator;
 
@@ -116,7 +116,7 @@ impl ClassicRngFrame for XoshiroFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng256
     }
 

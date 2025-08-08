@@ -1,7 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{plcg::Plcg32, ClassicRng};
+use rngs::{plcg::Plcg32, SimpleRng};
 
 pub struct PlcgFrame {
     rng: Plcg32,
@@ -66,7 +66,7 @@ impl ClassicRngFrame for PlcgFrame {
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
-    fn rng(&mut self) -> &mut dyn rngs::ClassicRng {
+    fn rng(&mut self) -> &mut dyn rngs::SimpleRng {
         &mut self.rng
     }
 

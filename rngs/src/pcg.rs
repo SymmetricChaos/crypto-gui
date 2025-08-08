@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 use strum::{Display, EnumIter};
 
 #[derive(Debug, PartialEq, Eq, EnumIter, Display, Clone, Copy)]
@@ -51,11 +51,7 @@ impl Default for Pcg {
     }
 }
 
-impl ClassicRng for Pcg {
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+impl SimpleRng for Pcg {
     fn next_u64(&mut self) -> u64 {
         self.state = (self.state)
             .wrapping_mul(self.multiplier)

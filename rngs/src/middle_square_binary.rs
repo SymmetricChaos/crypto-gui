@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::SimpleRng;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum MSBSize {
@@ -67,7 +67,7 @@ impl MiddleSquareBinary {
     }
 }
 
-impl ClassicRng for MiddleSquareBinary {
+impl SimpleRng for MiddleSquareBinary {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
         match self.width {

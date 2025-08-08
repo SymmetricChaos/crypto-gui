@@ -5,7 +5,7 @@ use hashers::{sha::Sha256, traits::StatefulHasher};
 use rand::{thread_rng, Rng};
 use rngs::{
     dual_ec_drbg::{DualEcDrbgP256, P, P256, Q},
-    ClassicRng,
+    SimpleRng,
 };
 
 pub struct DualEcFrame {
@@ -132,7 +132,7 @@ impl ClassicRngFrame for DualEcFrame {
         ui.add_space(16.0);
     }
 
-    fn rng(&mut self) -> &mut dyn ClassicRng {
+    fn rng(&mut self) -> &mut dyn SimpleRng {
         &mut self.rng
     }
 
