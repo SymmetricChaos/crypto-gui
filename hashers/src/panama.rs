@@ -1,7 +1,5 @@
 // https://github.com/bitbandi/all-hash-python/blob/master/sph/panama.c
 
-use std::ops::Deref;
-
 use crate::traits::StatefulHasher;
 
 struct Buffer([[u32; 8]; 32]);
@@ -115,6 +113,4 @@ impl StatefulHasher for Panama {
     fn finalize(self) -> Vec<u8> {
         todo!()
     }
-
-    
 }
