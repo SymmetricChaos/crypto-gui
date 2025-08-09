@@ -182,7 +182,7 @@ impl TextPrepPage {
                 self.counts();
             };
             if ui.button("📋").clicked() {
-                ui.output_mut(|o| o.copied_text = self.text.to_string());
+                ui.ctx().copy_text(self.text.to_string());
             };
             ui.label(format!("Bytes:      {}", self.num_bytes))
                 .on_hover_text_at_pointer(

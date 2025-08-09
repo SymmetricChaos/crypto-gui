@@ -127,7 +127,7 @@ impl IOPanel {
                 ui.label("INPUT");
                 text_manip_menu(ui, input);
                 if ui.button("📋").clicked() {
-                    ui.output_mut(|o| o.copied_text = input.clone());
+                    ui.ctx().copy_text(input.clone());
                 };
             });
             ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
@@ -136,7 +136,7 @@ impl IOPanel {
                 ui.label("OUTPUT");
                 text_manip_menu(ui, output);
                 if ui.button("📋").clicked() {
-                    ui.output_mut(|o| o.copied_text = input.clone());
+                    ui.ctx().copy_text(output.clone());
                 };
             });
             ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));

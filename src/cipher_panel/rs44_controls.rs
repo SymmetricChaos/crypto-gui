@@ -174,16 +174,17 @@ impl CipherFrame for Rs44Frame {
             });
 
         if ui.button("Copy Stencil to Clipboard").clicked() {
-            ui.output_mut(|o| o.copied_text = self.cipher.stencil_to_text());
+            ui.ctx().copy_text(self.cipher.stencil_to_text());
         }
+        ui.add_space(4.0);
 
-        ui.text_edit_singleline(&mut self.cipher.imported_stencil);
         if ui.button("Import Stencil").clicked() {
             match self.cipher.text_to_stencil() {
                 Ok(_) => (),
                 Err(e) => *errors = e.to_string(),
             }
         }
+        ui.text_edit_singleline(&mut self.cipher.imported_stencil);
         ui.add_space(16.0);
     }
 
