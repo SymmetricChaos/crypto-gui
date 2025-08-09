@@ -1,7 +1,13 @@
 use crate::SimpleRng;
 
 pub struct WyRand {
-    state: u64,
+    pub state: u64,
+}
+
+impl Default for WyRand {
+    fn default() -> Self {
+        Self { state: 1234567890 }
+    }
 }
 
 impl SimpleRng for WyRand {
