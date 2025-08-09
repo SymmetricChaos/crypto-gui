@@ -37,6 +37,7 @@ mod well_controls;
 mod weyl_controls;
 mod wichmann_hill;
 mod wyrand_controls;
+mod xoroshiro128_controls;
 mod xorshift64_controls;
 mod xoshiro_controls;
 
@@ -115,6 +116,7 @@ pub struct RngInterface {
     weyl: weyl_controls::WeylSequenceFrame,
     wichmann_hill: wichmann_hill::WichmannHillFrame,
     wyrand: wyrand_controls::WyRandFrame,
+    xoroshiro128: xoroshiro128_controls::XoshiroFrame,
     xorshift64: xorshift64_controls::Xorshift64Frame,
     xoshiro: xoshiro_controls::XoshiroFrame,
 }
@@ -150,6 +152,7 @@ impl RngInterface {
                 RngId::WichmannHill,
                 RngId::WyRand,
                 RngId::Vmpcr,
+                RngId::Xoroshiro,
                 RngId::Xorshift64,
                 RngId::Xoshiro,
             ],
@@ -225,6 +228,7 @@ impl RngInterface {
             RngId::Weyl => &mut self.weyl,
             RngId::WichmannHill => &mut self.wichmann_hill,
             RngId::WyRand => &mut self.wyrand,
+            RngId::Xoroshiro => &mut self.xoroshiro128,
             RngId::Xorshift64 => &mut self.xorshift64,
             RngId::Xoshiro => &mut self.xoshiro,
             _ => todo!("<<<RNG NOT FOUND>>>"),

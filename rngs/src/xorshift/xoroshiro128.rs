@@ -19,7 +19,11 @@ impl Xoroshiro128 {
     const JUMP: [u64; 2] = [0xdf900294d8f554a5, 0x170865df4b3201fc];
     const LONG_JUMP: [u64; 2] = [0xd2a98b26625eee7b, 0xdddf9b1090aa7ac1];
 
+    const JUMP_PP: [u64; 2] = [0x2bd7a6a6e99c2ddc, 0x0992ccaf6a6fca05];
+    const LONG_JUMP_PP: [u64; 2] = [0x360fd5f2cf8d5d99, 0x9c6e6877736c46e3];
+
     fn step(&mut self) {
+        // Unclear why the PlusPlus version steps differently
         if self.scrambler == XoshiroScrambler::PlusPlus {
             self.state[1] ^= self.state[0];
             self.state[0] = self.state[0].rotate_left(49) ^ self.state[1] ^ (self.state[1] << 21);
@@ -49,15 +53,27 @@ impl Xoroshiro128 {
     // Jumps forward by 2^64 steps
     pub fn jump(&mut self) {
         let mut s = [0; 4];
-
-        for j in Self::JUMP {
-            for b in 0..64 {
-                if j & (1 << b) != 0 {
-                    for n in 0..4 {
-                        s[n] ^= self.state[n]
+        if self.scrambler == XoshiroScrambler::PlusPlus {
+            for j in Self::JUMP_PP {
+                for b in 0..64 {
+                    if j & (1 << b) != 0 {
+                        for n in 0..4 {
+                            s[n] ^= self.state[n]
+                        }
                     }
+                    self.step()
                 }
-                self.step()
+            }
+        } else {
+            for j in Self::JUMP {
+                for b in 0..64 {
+                    if j & (1 << b) != 0 {
+                        for n in 0..4 {
+                            s[n] ^= self.state[n]
+                        }
+                    }
+                    self.step()
+                }
             }
         }
         for n in 0..4 {
@@ -68,16 +84,30 @@ impl Xoroshiro128 {
     // Jumps forward by 2^96 steps
     pub fn long_jump(&mut self) {
         let mut s = [0; 4];
-        for j in Self::LONG_JUMP {
-            for b in 0..64 {
-                if j & (1 << b) != 0 {
-                    for n in 0..4 {
-                        s[n] ^= self.state[n]
+        if self.scrambler == XoshiroScrambler::PlusPlus {
+            for j in Self::LONG_JUMP_PP {
+                for b in 0..64 {
+                    if j & (1 << b) != 0 {
+                        for n in 0..4 {
+                            s[n] ^= self.state[n]
+                        }
                     }
+                    self.step()
                 }
-                self.step()
+            }
+        } else {
+            for j in Self::LONG_JUMP {
+                for b in 0..64 {
+                    if j & (1 << b) != 0 {
+                        for n in 0..4 {
+                            s[n] ^= self.state[n]
+                        }
+                    }
+                    self.step()
+                }
             }
         }
+
         for n in 0..4 {
             self.state[n] = s[n];
         }
