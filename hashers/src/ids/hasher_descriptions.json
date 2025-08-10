@@ -372,6 +372,15 @@
       "XOF"
     ]
   },
+  "Rapidhash": {
+    "Description": "Rapidhash is a high performance non-cryptographic hash function that is the official successor of wyhash. Like many extremely fast hashers rapidhash is adaptive, applying faster but weaker hashing to short inputs where additional mixing offers no benefit. To allow users and implementors to optimize as much as possible there are three variants: rapidhash, rapidhash-micro, and rapidhash-nano. The micro and nano version can be complied into less than 200 instructions while retaining high speed and quality for short inputs but degrading peformance on long inputs.",
+    "Authors": null,
+    "Publication": null,
+    "Hash Length": null,
+    "Traits": [
+      "Keyed"
+    ]
+  },
   "RIPEMD": {
     "Description": "RIPEMD is a family of five hash functions. The original RIPEMD is 128-bit hash function with three rounds which was found to have a low security margin. Four improved versions were proposed. RIPEMD-128 and the extended RIPEMD-256 have four rounds. RIPEMD-160 and the extended RIPEMD-320 have five rounds. The extended versions do not claim any increased security.",
     "Authors": "Dobbertin, Bosselaers, and Preneel",
