@@ -2,10 +2,12 @@
 // https://github.com/hoxxep/rapidhash/tree/master/rapidhash
 
 // A "proper" implementation of any of these should be as optimized as possible.
+// The reference above, in fact, is designed to compile to highly specific
+// variations to reduce size and increase speed.
 // However that is a non-goal for this project and they are presented to be as
 // easy to understand as possible.
 
-// TODO: Can this be implemented as a stateful hasher?
+// TODO: Can this be implemented as a stateful hasher? I don't think so.
 
 // Wide multiply then return the lower half and upper half
 fn rapid_mum(a: u64, b: u64, protected: bool) -> (u64, u64) {
@@ -40,8 +42,130 @@ fn read_u32(slice: &[u8], offset: usize) -> u32 {
     u32::from_le_bytes(slice[offset..offset + 4].try_into().unwrap())
 }
 
-fn rapidhash_core_cold(bytes: &[u8], seed: u64, avalanche: bool, protected: bool) -> u64 {
-    todo!()
+fn rapidhash_core_cold(
+    bytes: &[u8],
+    seed: u64,
+    avalanche: bool,
+    protected: bool,
+    secrets: &[u64; 7],
+) -> u64 {
+    let mut a = 0;
+    let mut b = 0;
+
+    let mut slice = bytes;
+    let mut s0 = seed;
+
+    if bytes.len() > 112 {
+        let mut s1 = seed;
+        let mut s2 = seed;
+        let mut s3 = seed;
+        let mut s4 = seed;
+        let mut s5 = seed;
+        let mut s6 = seed;
+        while bytes.len() > 112 {
+            s0 = rapid_mix(
+                read_u64(slice, 0) ^ secrets[0],
+                read_u64(slice, 8) ^ s0,
+                protected,
+            );
+            s1 = rapid_mix(
+                read_u64(slice, 16) ^ secrets[1],
+                read_u64(slice, 24) ^ s1,
+                protected,
+            );
+            s2 = rapid_mix(
+                read_u64(slice, 32) ^ secrets[2],
+                read_u64(slice, 40) ^ s2,
+                protected,
+            );
+            s3 = rapid_mix(
+                read_u64(slice, 48) ^ secrets[3],
+                read_u64(slice, 56) ^ s3,
+                protected,
+            );
+            s4 = rapid_mix(
+                read_u64(slice, 64) ^ secrets[4],
+                read_u64(slice, 72) ^ s4,
+                protected,
+            );
+            s5 = rapid_mix(
+                read_u64(slice, 80) ^ secrets[5],
+                read_u64(slice, 88) ^ s5,
+                protected,
+            );
+            s6 = rapid_mix(
+                read_u64(slice, 96) ^ secrets[6],
+                read_u64(slice, 104) ^ s6,
+                protected,
+            );
+            let (_, split) = slice.split_at(112);
+            slice = split;
+        }
+
+        s0 ^= s1;
+        s2 ^= s3;
+        s4 ^= s5;
+        s0 ^= s6;
+        s2 ^= s4;
+        s0 ^= s2;
+    }
+
+    if slice.len() > 16 {
+        s0 = rapid_mix(
+            read_u64(slice, 0) ^ secrets[2],
+            read_u64(slice, 8) ^ s0,
+            protected,
+        );
+        if slice.len() > 32 {
+            s0 = rapid_mix(
+                read_u64(slice, 16) ^ secrets[2],
+                read_u64(slice, 24) ^ s0,
+                protected,
+            );
+            if slice.len() > 48 {
+                s0 = rapid_mix(
+                    read_u64(slice, 32) ^ secrets[1],
+                    read_u64(slice, 40) ^ s0,
+                    protected,
+                );
+                if slice.len() > 64 {
+                    s0 = rapid_mix(
+                        read_u64(slice, 48) ^ secrets[1],
+                        read_u64(slice, 56) ^ s0,
+                        protected,
+                    );
+                    if slice.len() > 80 {
+                        s0 = rapid_mix(
+                            read_u64(slice, 64) ^ secrets[2],
+                            read_u64(slice, 72) ^ s0,
+                            protected,
+                        );
+                        if slice.len() > 96 {
+                            s0 = rapid_mix(
+                                read_u64(slice, 80) ^ secrets[1],
+                                read_u64(slice, 88) ^ s0,
+                                protected,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    a ^= read_u64(bytes, bytes.len() - 16) ^ (slice.len() as u64);
+    b ^= read_u64(bytes, bytes.len() - 8);
+
+    a ^= secrets[1];
+    b ^= s0;
+
+    (a, b) = rapid_mum(a, b, protected);
+
+    if avalanche {
+        rapidhash_finish(a, b, slice.len() as u64, protected, secrets)
+    } else {
+        a ^ b
+    }
 }
 
 fn rapidhash_finish(a: u64, b: u64, rem: u64, protected: bool, secrets: &[u64; 7]) -> u64 {
@@ -81,7 +205,13 @@ impl RapidHash {
                 b ^= bytes[len >> 1] as u64;
             }
         } else {
-            return rapidhash_core_cold(bytes, self.seed, self.avalanche, self.protected);
+            return rapidhash_core_cold(
+                bytes,
+                self.seed,
+                self.avalanche,
+                self.protected,
+                &self.secrets,
+            );
         }
 
         a ^= self.secrets[1];
