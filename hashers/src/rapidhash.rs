@@ -3,7 +3,8 @@
 
 // A "proper" implementation of any of these should be as optimized as possible.
 // The reference above, in fact, is designed to compile to highly specific
-// variations to reduce size and increase speed.
+// variations to reduce size and increase speed, especially for fixed size
+// inputs.
 // However that is a non-goal for this project and they are presented to be as
 // easy to understand as possible.
 
@@ -236,16 +237,116 @@ pub struct RapidHashMicro {
 
 impl RapidHashMicro {
     pub fn hash(&self, bytes: &[u8]) -> u64 {
-        todo!()
-        // let mut a = 0;
-        // let mut b = 0;
-        // let rem;
+        let len = bytes.len();
+        let mut a = 0;
+        let mut b = 0;
+        let mut rem = len as u64;
+        let mut s0 = self.seed;
 
-        // if self.avalanche {
-        //     rapidhash_finish(a, b, rem, self.protected, &self.secrets)
-        // } else {
-        //     a ^ b
-        // }
+        if bytes.len() <= 16 {
+            if bytes.len() >= 4 {
+                s0 ^= rem;
+                if bytes.len() >= 8 {
+                    // XOR in the first full word and the last full word, these may overlap
+                    a ^= read_u64(bytes, 0);
+                    b ^= read_u64(bytes, len - 8);
+                } else {
+                    // XOR in the first full word and the last full word, these may overlap
+                    a ^= read_u32(bytes, 0) as u64;
+                    b ^= read_u32(bytes, len - 4) as u64;
+                }
+            // Three or fewer bytes
+            } else if !bytes.is_empty() {
+                a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
+                b ^= bytes[len >> 1] as u64;
+            }
+        } else {
+            let mut slice = bytes;
+            if slice.len() > 80 {
+                let mut s1 = s0;
+                let mut s2 = s0;
+                let mut s3 = s0;
+                let mut s4 = s0;
+
+                while bytes.len() > 112 {
+                    s0 = rapid_mix(
+                        read_u64(slice, 0) ^ self.secrets[0],
+                        read_u64(slice, 8) ^ s0,
+                        self.protected,
+                    );
+                    s1 = rapid_mix(
+                        read_u64(slice, 16) ^ self.secrets[1],
+                        read_u64(slice, 24) ^ s1,
+                        self.protected,
+                    );
+                    s2 = rapid_mix(
+                        read_u64(slice, 32) ^ self.secrets[2],
+                        read_u64(slice, 40) ^ s2,
+                        self.protected,
+                    );
+                    s3 = rapid_mix(
+                        read_u64(slice, 48) ^ self.secrets[3],
+                        read_u64(slice, 56) ^ s3,
+                        self.protected,
+                    );
+                    s4 = rapid_mix(
+                        read_u64(slice, 64) ^ self.secrets[4],
+                        read_u64(slice, 72) ^ s4,
+                        self.protected,
+                    );
+
+                    let (_, split) = slice.split_at(80);
+                    slice = split;
+                }
+
+                s0 ^= s1;
+                s2 ^= s3;
+                s0 ^= s4;
+                s0 ^= s2;
+            }
+            if slice.len() > 16 {
+                s0 = rapid_mix(
+                    read_u64(slice, 0) ^ self.secrets[2],
+                    read_u64(slice, 8) ^ s0,
+                    self.protected,
+                );
+                if slice.len() > 32 {
+                    s0 = rapid_mix(
+                        read_u64(slice, 16) ^ self.secrets[2],
+                        read_u64(slice, 24) ^ s0,
+                        self.protected,
+                    );
+                    if slice.len() > 48 {
+                        s0 = rapid_mix(
+                            read_u64(slice, 32) ^ self.secrets[1],
+                            read_u64(slice, 40) ^ s0,
+                            self.protected,
+                        );
+                        if slice.len() > 64 {
+                            s0 = rapid_mix(
+                                read_u64(slice, 48) ^ self.secrets[1],
+                                read_u64(slice, 56) ^ s0,
+                                self.protected,
+                            );
+                        }
+                    }
+                }
+            }
+            rem = slice.len() as u64;
+            a ^= read_u64(bytes, len - 16) ^ rem;
+            b ^= read_u64(bytes, len - 8) ^ rem;
+        }
+
+        a ^= self.secrets[1];
+        b ^= s0;
+
+        (a, b) = rapid_mum(a, b, self.protected);
+
+        if self.avalanche {
+            rapidhash_finish(a, b, rem, self.protected, &self.secrets)
+        } else {
+            a ^ b
+        }
     }
 }
 
@@ -258,15 +359,89 @@ pub struct RapidHashNano {
 
 impl RapidHashNano {
     pub fn hash(&self, bytes: &[u8]) -> u64 {
-        todo!()
-        // let mut a = 0;
-        // let mut b = 0;
-        // let rem;
+        let len = bytes.len();
+        let mut a = 0;
+        let mut b = 0;
+        let mut rem = len as u64;
+        let mut s0 = self.seed;
 
-        // if self.avalanche {
-        //     rapidhash_finish(a, b, rem, self.protected, &self.secrets)
-        // } else {
-        //     a ^ b
-        // }
+        if bytes.len() <= 16 {
+            if bytes.len() >= 4 {
+                s0 ^= rem;
+                if bytes.len() >= 8 {
+                    // XOR in the first full word and the last full word, these may overlap
+                    a ^= read_u64(bytes, 0);
+                    b ^= read_u64(bytes, len - 8);
+                } else {
+                    // XOR in the first full word and the last full word, these may overlap
+                    a ^= read_u32(bytes, 0) as u64;
+                    b ^= read_u32(bytes, len - 4) as u64;
+                }
+            // Three or fewer bytes
+            } else if !bytes.is_empty() {
+                a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
+                b ^= bytes[len >> 1] as u64;
+            }
+        } else {
+            let mut slice = bytes;
+
+            if slice.len() > 48 {
+                let mut s1 = s0;
+                let mut s2 = s0;
+
+                while slice.len() > 48 {
+                    s0 = rapid_mix(
+                        read_u64(slice, 0) ^ self.secrets[0],
+                        read_u64(slice, 8) ^ s0,
+                        self.protected,
+                    );
+                    s1 = rapid_mix(
+                        read_u64(slice, 16) ^ self.secrets[1],
+                        read_u64(slice, 24) ^ s1,
+                        self.protected,
+                    );
+                    s2 = rapid_mix(
+                        read_u64(slice, 32) ^ self.secrets[2],
+                        read_u64(slice, 40) ^ s2,
+                        self.protected,
+                    );
+                    let (_, split) = slice.split_at(48);
+                    slice = split;
+                }
+
+                s0 ^= s1;
+                s0 ^= s2;
+            }
+
+            if slice.len() > 16 {
+                s0 = rapid_mix(
+                    read_u64(slice, 0) ^ self.secrets[2],
+                    read_u64(slice, 8) ^ s0,
+                    self.protected,
+                );
+                if slice.len() > 32 {
+                    s0 = rapid_mix(
+                        read_u64(slice, 16) ^ self.secrets[2],
+                        read_u64(slice, 24) ^ s0,
+                        self.protected,
+                    );
+                }
+            }
+
+            rem = slice.len() as u64;
+            a ^= read_u64(bytes, bytes.len() - 16) ^ rem;
+            b ^= read_u64(bytes, bytes.len() - 8);
+        }
+
+        a ^= self.secrets[1];
+        b ^= s0;
+
+        (a, b) = rapid_mum(a, b, self.protected);
+
+        if self.avalanche {
+            rapidhash_finish(a, b, rem, self.protected, &self.secrets)
+        } else {
+            a ^ b
+        }
     }
 }
