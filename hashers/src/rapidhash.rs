@@ -8,7 +8,9 @@
 // However that is a non-goal for this project and they are presented to be as
 // easy to understand as possible.
 
-// TODO: Can this be implemented as a stateful hasher? I don't think so.
+// TODO: Can this be implemented as a stateful hasher? Yes, by only using the short optimization during finalize if the bytes taken are zero
+
+use crate::traits::StatefulHasher;
 
 const DEFAULT_SECRETS: [u64; 7] = [
     0x2d358dccaa6c78a5,
@@ -62,6 +64,27 @@ fn finalize(
     } else {
         a ^ b
     }
+}
+
+fn short_hash(bytes: &[u8], mut a: u64, mut b: u64, mut s0: u64, len: usize) -> (u64, u64, u64) {
+    assert!(bytes.len() <= 16); // guard against accidental misue
+    if bytes.len() >= 4 {
+        s0 ^= len as u64;
+        if bytes.len() >= 8 {
+            // XOR in the first full word and the last full word, these may overlap
+            a ^= read_u64(bytes, 0);
+            b ^= read_u64(bytes, len - 8);
+        } else {
+            // XOR in the first full word and the last full word, these may overlap
+            a ^= read_u32(bytes, 0) as u64;
+            b ^= read_u32(bytes, len - 4) as u64;
+        }
+    // Three or fewer bytes
+    } else if !bytes.is_empty() {
+        a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
+        b ^= bytes[len >> 1] as u64;
+    }
+    (a, b, s0)
 }
 
 // Little endian
@@ -196,6 +219,7 @@ pub struct RapidHash {
     pub avalanche: bool,
     pub protected: bool,
     pub secrets: [u64; 7],
+    // pub buffer: Vec<u8>,
 }
 
 impl Default for RapidHash {
@@ -205,6 +229,7 @@ impl Default for RapidHash {
             avalanche: true,
             protected: true,
             secrets: DEFAULT_SECRETS,
+            // buffer: Vec::new(),
         }
     }
 }
@@ -218,22 +243,7 @@ impl RapidHash {
         let rem = len as u64;
 
         if bytes.len() <= 16 {
-            if bytes.len() >= 4 {
-                s0 ^= rem;
-                if bytes.len() >= 8 {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u64(bytes, 0);
-                    b ^= read_u64(bytes, len - 8);
-                } else {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u32(bytes, 0) as u64;
-                    b ^= read_u32(bytes, len - 4) as u64;
-                }
-            // Three or fewer bytes
-            } else if !bytes.is_empty() {
-                a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
-                b ^= bytes[len >> 1] as u64;
-            }
+            (a, b, s0) = short_hash(bytes, a, b, s0, len);
         } else {
             return rapidhash_core_cold(bytes, s0, self.avalanche, self.protected, &self.secrets);
         }
@@ -241,6 +251,16 @@ impl RapidHash {
         finalize(a, b, rem, s0, self.avalanche, self.protected, &self.secrets)
     }
 }
+
+// impl StatefulHasher for RapidHash {
+//     fn update(&mut self, bytes: &[u8]) {
+//         todo!()
+//     }
+
+//     fn finalize(self) -> Vec<u8> {
+//         todo!()
+//     }
+// }
 
 pub struct RapidHashMicro {
     pub seed: u64,
@@ -269,22 +289,7 @@ impl RapidHashMicro {
         let mut s0 = self.seed;
 
         if bytes.len() <= 16 {
-            if bytes.len() >= 4 {
-                s0 ^= rem;
-                if bytes.len() >= 8 {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u64(bytes, 0);
-                    b ^= read_u64(bytes, len - 8);
-                } else {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u32(bytes, 0) as u64;
-                    b ^= read_u32(bytes, len - 4) as u64;
-                }
-            // Three or fewer bytes
-            } else if !bytes.is_empty() {
-                a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
-                b ^= bytes[len >> 1] as u64;
-            }
+            (a, b, s0) = short_hash(bytes, a, b, s0, len);
         } else {
             let mut slice = bytes;
             if slice.len() > 80 {
@@ -393,22 +398,7 @@ impl RapidHashNano {
         let mut s0 = self.seed;
 
         if bytes.len() <= 16 {
-            if bytes.len() >= 4 {
-                s0 ^= rem;
-                if bytes.len() >= 8 {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u64(bytes, 0);
-                    b ^= read_u64(bytes, len - 8);
-                } else {
-                    // XOR in the first full word and the last full word, these may overlap
-                    a ^= read_u32(bytes, 0) as u64;
-                    b ^= read_u32(bytes, len - 4) as u64;
-                }
-            // Three or fewer bytes
-            } else if !bytes.is_empty() {
-                a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
-                b ^= bytes[len >> 1] as u64;
-            }
+            (a, b, s0) = short_hash(bytes, a, b, s0, len);
         } else {
             let mut slice = bytes;
 
