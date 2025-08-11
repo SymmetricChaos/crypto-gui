@@ -10,6 +10,16 @@
 
 // TODO: Can this be implemented as a stateful hasher? I don't think so.
 
+const DEFAULT_SECRETS: [u64; 7] = [
+    0x2d358dccaa6c78a5,
+    0x8bb84b93962eacc9,
+    0x4b33a62ed433d4a3,
+    0x4d5a2da51de1aa47,
+    0xa0761d6478bd642f,
+    0xe7037ed1a0b428db,
+    0x90ed1765281c388c,
+];
+
 // Wide multiply then return the lower half and upper half
 fn rapid_mum(a: u64, b: u64, protected: bool) -> (u64, u64) {
     let r = (a as u128).wrapping_mul(b as u128);
@@ -30,6 +40,27 @@ fn rapid_mix(a: u64, b: u64, protected: bool) -> u64 {
         (a ^ r as u64) ^ (b ^ (r >> 64) as u64)
     } else {
         (r as u64) ^ (r >> 64) as u64
+    }
+}
+
+fn finalize(
+    mut a: u64,
+    mut b: u64,
+    rem: u64,
+    seed: u64,
+    avalanche: bool,
+    protected: bool,
+    secrets: &[u64; 7],
+) -> u64 {
+    a ^= secrets[1];
+    b ^= seed;
+
+    (a, b) = rapid_mum(a, b, protected);
+
+    if avalanche {
+        rapid_mix(a ^ 0xaaaaaaaaaaaaaaaa, b ^ secrets[1] ^ rem, protected)
+    } else {
+        a ^ b
     }
 }
 
@@ -157,20 +188,7 @@ fn rapidhash_core_cold(
     a ^= read_u64(bytes, bytes.len() - 16) ^ (slice.len() as u64);
     b ^= read_u64(bytes, bytes.len() - 8);
 
-    a ^= secrets[1];
-    b ^= s0;
-
-    (a, b) = rapid_mum(a, b, protected);
-
-    if avalanche {
-        rapidhash_finish(a, b, slice.len() as u64, protected, secrets)
-    } else {
-        a ^ b
-    }
-}
-
-fn rapidhash_finish(a: u64, b: u64, rem: u64, protected: bool, secrets: &[u64; 7]) -> u64 {
-    rapid_mix(a ^ 0xaaaaaaaaaaaaaaaa, b ^ secrets[1] ^ rem, protected)
+    finalize(a, b, slice.len() as u64, s0, avalanche, protected, &secrets)
 }
 
 pub struct RapidHash {
@@ -180,17 +198,28 @@ pub struct RapidHash {
     pub secrets: [u64; 7],
 }
 
+impl Default for RapidHash {
+    fn default() -> Self {
+        Self {
+            seed: 0,
+            avalanche: true,
+            protected: true,
+            secrets: DEFAULT_SECRETS,
+        }
+    }
+}
+
 impl RapidHash {
     pub fn hash(&self, bytes: &[u8]) -> u64 {
         let len = bytes.len();
-        let mut seed = self.seed;
+        let mut s0 = self.seed;
         let mut a = 0;
         let mut b = 0;
         let rem = len as u64;
 
         if bytes.len() <= 16 {
             if bytes.len() >= 4 {
-                seed ^= rem;
+                s0 ^= rem;
                 if bytes.len() >= 8 {
                     // XOR in the first full word and the last full word, these may overlap
                     a ^= read_u64(bytes, 0);
@@ -206,25 +235,10 @@ impl RapidHash {
                 b ^= bytes[len >> 1] as u64;
             }
         } else {
-            return rapidhash_core_cold(
-                bytes,
-                self.seed,
-                self.avalanche,
-                self.protected,
-                &self.secrets,
-            );
+            return rapidhash_core_cold(bytes, s0, self.avalanche, self.protected, &self.secrets);
         }
 
-        a ^= self.secrets[1];
-        b ^= seed;
-
-        (a, b) = rapid_mum(a, b, self.protected);
-
-        if self.avalanche {
-            rapidhash_finish(a, b, rem, self.protected, &self.secrets)
-        } else {
-            a ^ b
-        }
+        finalize(a, b, rem, s0, self.avalanche, self.protected, &self.secrets)
     }
 }
 
@@ -233,6 +247,17 @@ pub struct RapidHashMicro {
     pub avalanche: bool,
     pub protected: bool,
     pub secrets: [u64; 7],
+}
+
+impl Default for RapidHashMicro {
+    fn default() -> Self {
+        Self {
+            seed: 0,
+            avalanche: true,
+            protected: true,
+            secrets: DEFAULT_SECRETS,
+        }
+    }
 }
 
 impl RapidHashMicro {
@@ -337,16 +362,7 @@ impl RapidHashMicro {
             b ^= read_u64(bytes, len - 8) ^ rem;
         }
 
-        a ^= self.secrets[1];
-        b ^= s0;
-
-        (a, b) = rapid_mum(a, b, self.protected);
-
-        if self.avalanche {
-            rapidhash_finish(a, b, rem, self.protected, &self.secrets)
-        } else {
-            a ^ b
-        }
+        finalize(a, b, rem, s0, self.avalanche, self.protected, &self.secrets)
     }
 }
 
@@ -355,6 +371,17 @@ pub struct RapidHashNano {
     pub avalanche: bool,
     pub protected: bool,
     pub secrets: [u64; 7],
+}
+
+impl Default for RapidHashNano {
+    fn default() -> Self {
+        Self {
+            seed: 0,
+            avalanche: true,
+            protected: true,
+            secrets: DEFAULT_SECRETS,
+        }
+    }
 }
 
 impl RapidHashNano {
@@ -433,15 +460,6 @@ impl RapidHashNano {
             b ^= read_u64(bytes, bytes.len() - 8);
         }
 
-        a ^= self.secrets[1];
-        b ^= s0;
-
-        (a, b) = rapid_mum(a, b, self.protected);
-
-        if self.avalanche {
-            rapidhash_finish(a, b, rem, self.protected, &self.secrets)
-        } else {
-            a ^ b
-        }
+        finalize(a, b, rem, s0, self.avalanche, self.protected, &self.secrets)
     }
 }
