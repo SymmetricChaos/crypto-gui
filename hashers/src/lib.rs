@@ -39,6 +39,7 @@ pub mod polyval;
 pub mod poseidon;
 pub mod radio_gatun;
 pub mod rapidhash;
+pub mod rapidhash_stateful;
 pub mod ripemd;
 pub mod scrypt;
 pub mod sha;

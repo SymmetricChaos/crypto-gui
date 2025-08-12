@@ -50,15 +50,6 @@ pub trait HasherFrame {
     fn hash_string(&self, text: &str) -> Result<String, HasherError>;
 }
 
-#[macro_export]
-macro_rules! hash_string {
-    () => {
-        fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
-            hashers::traits::ClassicHasher::hash_bytes_from_string(&self.hasher, text)
-        }
-    };
-}
-
 // Quick simple combo box builder
 fn combox_box(
     hasher: &[HasherId],

@@ -10,8 +10,6 @@
 
 // TODO: Can this be implemented as a stateful hasher? Yes, by only using the short optimization during finalize if the bytes taken are zero
 
-use crate::traits::StatefulHasher;
-
 const DEFAULT_SECRETS: [u64; 7] = [
     0x2d358dccaa6c78a5,
     0x8bb84b93962eacc9,
@@ -219,7 +217,6 @@ pub struct RapidHash {
     pub avalanche: bool,
     pub protected: bool,
     pub secrets: [u64; 7],
-    // pub buffer: Vec<u8>,
 }
 
 impl Default for RapidHash {
@@ -229,7 +226,6 @@ impl Default for RapidHash {
             avalanche: true,
             protected: true,
             secrets: DEFAULT_SECRETS,
-            // buffer: Vec::new(),
         }
     }
 }
@@ -251,16 +247,6 @@ impl RapidHash {
         finalize(a, b, rem, s0, self.avalanche, self.protected, &self.secrets)
     }
 }
-
-// impl StatefulHasher for RapidHash {
-//     fn update(&mut self, bytes: &[u8]) {
-//         todo!()
-//     }
-
-//     fn finalize(self) -> Vec<u8> {
-//         todo!()
-//     }
-// }
 
 pub struct RapidHashMicro {
     pub seed: u64,
