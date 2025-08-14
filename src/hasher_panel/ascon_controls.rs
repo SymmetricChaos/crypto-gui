@@ -5,7 +5,6 @@ use hashers::{
     errors::HasherError,
 };
 use rand::{thread_rng, Rng};
-use strum::IntoEnumIterator;
 use utils::byte_formatting::{u64s_to_bytes_be, ByteFormat};
 
 pub struct AsconFrame {
@@ -39,12 +38,30 @@ impl HasherFrame for AsconFrame {
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(4.0);
 
-        for variant in Variant::iter() {
-            ui.selectable_value(&mut self.variant, variant, variant.to_string());
-        }
+        ui.subheading("Variant");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::Hash, Variant::Hash.to_string());
+            ui.selectable_value(
+                &mut self.variant,
+                Variant::Hasha,
+                Variant::Hasha.to_string(),
+            );
+        });
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::Xof, Variant::Xof.to_string());
+            ui.selectable_value(&mut self.variant, Variant::Xofa, Variant::Xofa.to_string());
+        });
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::Mac, Variant::Mac.to_string());
+            ui.selectable_value(&mut self.variant, Variant::Maca, Variant::Maca.to_string());
+        });
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::Prf, Variant::Prf.to_string());
+            ui.selectable_value(&mut self.variant, Variant::Prfa, Variant::Prfa.to_string());
+        });
+
         ui.add_space(4.0);
 
-        ui.subheading("Variant");
         match self.variant {
             Variant::Hash => {
                 ui.label("Ascon-Hash absorbs 64 bits of input at a time and returns a 256-bit hash. There are 12 rounds for initialization, absorbing, and squeezing.");
@@ -54,11 +71,13 @@ impl HasherFrame for AsconFrame {
             }
             Variant::Xof => {
                 ui.label("Ascon-XOF absorbs 64 bits of input at a time and returns any amount of data. There are 12 rounds for initialization, absorbing, and squeezing.");
-                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=1024));
+                ui.label("Output Length");
+                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=2048));
             }
             Variant::Xofa => {
                 ui.label("Ascon-XOFa absorbs 64 bits of input at a time and returns any amount of data. There are 12 initialization rounds and 8 rounds for all other steps.");
-                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=1024));
+                ui.label("Output Length");
+                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=2048));
             }
             Variant::Mac => {
                 ui.label("Ascon-MAC returns a 128-bit Message Authentication Code on the key and message. It applies 12 rounds for initialization, absorbing, and squeezing. It absorbs 256-bits at a time.");
@@ -68,11 +87,13 @@ impl HasherFrame for AsconFrame {
             }
             Variant::Prf => {
                 ui.label("Ascon-PRF returns any amount of data based on the key and message. It applies 12 rounds for initialization, absorbing, and squeezing. It absorbs 256-bits at a time.");
-                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=1024));
+                ui.label("Output Length");
+                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=2048));
             }
             Variant::Prfa => {
                 ui.label("Ascon-PRFa returns any amount of data based on the key and message. It applies 12 initialization rounds but only 8 rounds for absorbing and squeezing. Output length is unlimited. It absorbs 320-bits at a time.");
-                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=1024));
+                ui.label("Output Length");
+                ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=2048));
             } // Variant::AsconPrfShort => {
               //     ui.label("Ascon-PRFshort is significantly unlike the other variants in order to process small inputs very quickly. Inputs are limited to 128-bits and the initial state incorporates the input itself. Both message length and the chosen output length are used for domain separation. Most unusually no absorbing rounds are applied. Instead after the 12 initialization rounds the key is XORed into the state and the hash (limited to 128-bits) is immediately extracted.");
               //     self.hasher.hash_len = self.hasher.hash_len.clamp(1, 16);
