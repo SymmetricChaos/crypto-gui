@@ -156,29 +156,32 @@ fn mix_seed(mut seed: u64, i: usize) -> u64 {
     seed
 }
 
-pub struct RapidHash {
+pub struct RapidHashV3 {
     state: [u64; 7],
     pub avalanche: bool,
     pub protected: bool,
     secrets: [u64; 7],
     buffer: Vec<u8>,
+    last_read: Vec<u8>,
     long_hash: bool,
 }
 
-impl Default for RapidHash {
+impl Default for RapidHashV3 {
     fn default() -> Self {
         Self {
             state: [0; 7],
             avalanche: true,
-            protected: true,
+            protected: false,
             secrets: DEFAULT_SECRETS,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(112),
+            last_read: Vec::with_capacity(112),
             long_hash: false,
         }
     }
 }
 
-impl RapidHash {
+impl RapidHashV3 {
+    // Reference spec
     pub fn with_seed(seed: u64) -> Self {
         let seed = mix_seed(seed, 0);
         let mut secrets = [0; 7];
@@ -191,11 +194,9 @@ impl RapidHash {
         secrets[6] = mix_seed(secrets[5], 6);
         Self {
             state: [seed; 7],
-            avalanche: true,
-            protected: true,
-            secrets: secrets,
             buffer: Vec::with_capacity(112),
-            long_hash: false,
+            secrets: secrets,
+            ..Default::default()
         }
     }
 
@@ -204,11 +205,8 @@ impl RapidHash {
         let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
         Self {
             state: [seed; 7],
-            avalanche: true,
-            protected: true,
-            secrets: DEFAULT_SECRETS,
             buffer: Vec::with_capacity(112),
-            long_hash: false,
+            ..Default::default()
         }
     }
 
@@ -223,10 +221,11 @@ impl RapidHash {
     }
 }
 
-impl StatefulHasher for RapidHash {
+impl StatefulHasher for RapidHashV3 {
     fn update(&mut self, mut bytes: &[u8]) {
         crate::compression_routine!(self.buffer, bytes, 112, {
             self.long_hash = true;
+            self.last_read = self.buffer.clone();
             compress(&self.buffer, &mut self.state, &self.secrets, self.protected)
         });
     }
@@ -241,6 +240,7 @@ impl StatefulHasher for RapidHash {
             (a, b, self.state[0]) = short_hash(&buffer, a, b, self.state[0], buffer.len());
         } else {
             while buffer.len() > 112 {
+                self.last_read = buffer.to_vec();
                 compress(&buffer, &mut self.state, &self.secrets, self.protected);
                 let (_, split) = buffer.split_at(112);
                 buffer = split;
@@ -251,9 +251,6 @@ impl StatefulHasher for RapidHash {
             self.state[0] ^= self.state[6];
             self.state[2] ^= self.state[4];
             self.state[0] ^= self.state[2];
-
-            a ^= read_u64(buffer, buffer.len() - 16) ^ (buffer.len() as u64);
-            b ^= read_u64(buffer, buffer.len() - 8);
 
             if buffer.len() > 16 {
                 self.state[0] = rapid_mix(
@@ -297,6 +294,11 @@ impl StatefulHasher for RapidHash {
                     }
                 }
             }
+
+            self.last_read.extend_from_slice(buffer);
+
+            a ^= read_u64(&self.last_read, self.last_read.len() - 16) ^ (buffer.len() as u64);
+            b ^= read_u64(&self.last_read, self.last_read.len() - 8);
         }
 
         finalize(
@@ -308,13 +310,23 @@ impl StatefulHasher for RapidHash {
             self.protected,
             &self.secrets,
         )
-        .to_le_bytes()
+        .to_be_bytes()
         .to_vec()
     }
 }
 
+// Calculated from reference crate
 crate::stateful_hash_tests!(
-    test0, RapidHash::with_seed(0), b"",
-    "";
-
+    test0, RapidHashV3::with_seed(0x123456), b"hello world",
+    "A1B8913D9926ED57";
+    test1, RapidHashV3::with_seed(0x123456), b"hello",
+    "41C86949D9461B4E";
+    test2, RapidHashV3::with_seed(0x123456), b"he",
+    "59D459F6E4A1BC44";
+    test3, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged",
+    "67F45C74C90B7124";
+    test4, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "183D019073C64BE1";
+    test5, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.",
+    "7A4A4CEA4C05E144";
 );

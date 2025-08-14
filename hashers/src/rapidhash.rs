@@ -95,6 +95,29 @@ fn read_u32(slice: &[u8], offset: usize) -> u32 {
     u32::from_le_bytes(slice[offset..offset + 4].try_into().unwrap())
 }
 
+fn mix_seed(mut seed: u64, i: usize) -> u64 {
+    seed ^= rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[i], false);
+
+    // Force the seed to not be all zeroes
+    const HI: u64 = 0xFFFF << 48;
+    const MI: u64 = 0xFFFF << 24;
+    const LO: u64 = 0xFFFF;
+
+    if (seed & HI) == 0 {
+        seed |= 1u64 << 63;
+    }
+
+    if (seed & MI) == 0 {
+        seed |= 1u64 << 31;
+    }
+
+    if (seed & LO) == 0 {
+        seed |= 1u64;
+    }
+
+    seed
+}
+
 fn rapidhash_core_cold(
     bytes: &[u8],
     seed: u64,
@@ -231,6 +254,36 @@ impl Default for RapidHash {
 }
 
 impl RapidHash {
+    // Reference spec
+    pub fn with_seed(seed: u64) -> Self {
+        let seed = mix_seed(seed, 0);
+        let mut secrets = [0; 7];
+        secrets[0] = mix_seed(seed, 0);
+        secrets[1] = mix_seed(secrets[0], 1);
+        secrets[2] = mix_seed(secrets[1], 2);
+        secrets[3] = mix_seed(secrets[2], 3);
+        secrets[4] = mix_seed(secrets[3], 4);
+        secrets[5] = mix_seed(secrets[4], 5);
+        secrets[6] = mix_seed(secrets[5], 6);
+        Self {
+            seed: seed,
+            avalanche: true,
+            protected: true,
+            secrets: secrets,
+        }
+    }
+
+    // Original spec
+    pub fn with_seed_simple(seed: u64) -> Self {
+        let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
+        Self {
+            seed: seed,
+            avalanche: true,
+            protected: true,
+            secrets: DEFAULT_SECRETS,
+        }
+    }
+
     pub fn hash(&self, bytes: &[u8]) -> u64 {
         let len = bytes.len();
         let mut s0 = self.seed;
