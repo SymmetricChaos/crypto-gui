@@ -133,12 +133,35 @@ fn compress(bytes: &[u8], state: &mut [u64; 7], secrets: &[u64; 7], protected: b
     );
 }
 
+fn mix_seed(mut seed: u64, i: usize) -> u64 {
+    seed ^= rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[i], false);
+
+    // Force the seed to not be all zeroes
+    const HI: u64 = 0xFFFF << 48;
+    const MI: u64 = 0xFFFF << 24;
+    const LO: u64 = 0xFFFF;
+
+    if (seed & HI) == 0 {
+        seed |= 1u64 << 63;
+    }
+
+    if (seed & MI) == 0 {
+        seed |= 1u64 << 31;
+    }
+
+    if (seed & LO) == 0 {
+        seed |= 1u64;
+    }
+
+    seed
+}
+
 pub struct RapidHash {
     state: [u64; 7],
     pub avalanche: bool,
     pub protected: bool,
-    pub secrets: [u64; 7],
-    pub buffer: Vec<u8>,
+    secrets: [u64; 7],
+    buffer: Vec<u8>,
     long_hash: bool,
 }
 
@@ -152,6 +175,51 @@ impl Default for RapidHash {
             buffer: Vec::new(),
             long_hash: false,
         }
+    }
+}
+
+impl RapidHash {
+    pub fn with_seed(seed: u64) -> Self {
+        let seed = mix_seed(seed, 0);
+        let mut secrets = [0; 7];
+        secrets[0] = mix_seed(seed, 0);
+        secrets[1] = mix_seed(secrets[0], 1);
+        secrets[2] = mix_seed(secrets[1], 2);
+        secrets[3] = mix_seed(secrets[2], 3);
+        secrets[4] = mix_seed(secrets[3], 4);
+        secrets[5] = mix_seed(secrets[4], 5);
+        secrets[6] = mix_seed(secrets[5], 6);
+        Self {
+            state: [seed; 7],
+            avalanche: true,
+            protected: true,
+            secrets: secrets,
+            buffer: Vec::with_capacity(112),
+            long_hash: false,
+        }
+    }
+
+    // Original spec
+    pub fn with_seed_simple(seed: u64) -> Self {
+        let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
+        Self {
+            state: [seed; 7],
+            avalanche: true,
+            protected: true,
+            secrets: DEFAULT_SECRETS,
+            buffer: Vec::with_capacity(112),
+            long_hash: false,
+        }
+    }
+
+    pub fn avalanche(mut self, avalanche: bool) -> Self {
+        self.avalanche = avalanche;
+        self
+    }
+
+    pub fn protected(mut self, protected: bool) -> Self {
+        self.protected = protected;
+        self
     }
 }
 
@@ -244,3 +312,9 @@ impl StatefulHasher for RapidHash {
         .to_vec()
     }
 }
+
+crate::stateful_hash_tests!(
+    test0, RapidHash::with_seed(0), b"",
+    "";
+
+);
