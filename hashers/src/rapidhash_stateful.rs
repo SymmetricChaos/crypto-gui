@@ -162,7 +162,7 @@ pub struct RapidHashV3 {
     pub protected: bool,
     secrets: [u64; 7],
     buffer: Vec<u8>,
-    last_read: Vec<u8>,
+    last_read: Vec<u8>, // this is awkward but the stateful reference version does the same thing
     long_hash: bool,
 }
 
@@ -222,12 +222,23 @@ impl RapidHashV3 {
 }
 
 impl StatefulHasher for RapidHashV3 {
-    fn update(&mut self, mut bytes: &[u8]) {
-        crate::compression_routine!(self.buffer, bytes, 112, {
+    // This can't use the typical macro because compression is only called when
+    // the buffer is GREATER than 112 bytes, rather than equal to 112 bytes
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend(bytes);
+
+        while self.buffer.len() > 112 {
+            // println!("{} {:02x?}", self.buffer.len(), self.buffer);
             self.long_hash = true;
-            self.last_read = self.buffer.clone();
-            compress(&self.buffer, &mut self.state, &self.secrets, self.protected)
-        });
+            self.last_read = self.buffer[..112].to_vec();
+            compress(
+                &self.buffer[..112],
+                &mut self.state,
+                &self.secrets,
+                self.protected,
+            );
+            self.buffer = self.buffer[112..].to_vec();
+        }
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -317,16 +328,67 @@ impl StatefulHasher for RapidHashV3 {
 
 // Calculated from reference crate
 crate::stateful_hash_tests!(
-    test0, RapidHashV3::with_seed(0x123456), b"hello world",
-    "A1B8913D9926ED57";
-    test1, RapidHashV3::with_seed(0x123456), b"hello",
-    "41C86949D9461B4E";
-    test2, RapidHashV3::with_seed(0x123456), b"he",
+    // All of the short paths
+    test_2, RapidHashV3::with_seed(0x123456), b"he",
     "59D459F6E4A1BC44";
-    test3, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged",
+    test_5, RapidHashV3::with_seed(0x123456), b"hello",
+    "41C86949D9461B4E";
+    test_11, RapidHashV3::with_seed(0x123456), b"hello world",
+    "A1B8913D9926ED57";
+
+    // Long path with no update compressions
+    test_38, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged",
     "67F45C74C90B7124";
-    test4, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    // Long path with one update compressions
+    test_117, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
     "183D019073C64BE1";
-    test5, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.",
+    // Long path with multiple update compressions
+    test_378, RapidHashV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.",
     "7A4A4CEA4C05E144";
+
+    // Exactly one block
+    test_112, RapidHashV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "51FAD441F875C85F";
+    // Exactly two blocks
+    test_224, RapidHashV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "6991311E06DC4856";
+
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_vectors() {
+        use rapidhash::v3::{rapidhash_v3_seeded, RapidSecrets};
+        use std::hash::{BuildHasher, Hasher};
+
+        /// Set your global hashing secrets.
+        /// - For HashDoS resistance, choose a randomised secret.
+        /// - For C++ compatibility, use the `seed_cpp` method or `DEFAULT_RAPID_SECRETS`.
+        const RAPID_SECRETS: RapidSecrets = RapidSecrets::seed(0x123456);
+
+        /// A helper function for your chosen rapidhash version and secrets.
+        #[inline]
+        pub fn rapidhash(data: &[u8]) -> u64 {
+            rapidhash_v3_seeded(data, &RAPID_SECRETS)
+        }
+
+        let bytes = vec![0x61; 300];
+
+        for i in 1..=300 {
+            let ex = rapidhash(&bytes[0..i]);
+            let ca = u64::from_be_bytes(
+                RapidHashV3::with_seed(0x123456)
+                    .hash(&bytes[0..i])
+                    .try_into()
+                    .unwrap(),
+            );
+            if i == 224 || i == 300 {
+                println!("{i} {:08X?}", ex);
+            }
+            assert_eq!(ex, ca);
+        }
+    }
+}
