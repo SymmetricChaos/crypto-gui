@@ -1,5 +1,6 @@
 pub mod rapidhash;
 pub mod rapidhash_micro;
+pub mod rapidhash_nano;
 
 // based on
 // https://github.com/hoxxep/rapidhash/tree/master/rapidhash

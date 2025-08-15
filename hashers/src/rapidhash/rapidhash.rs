@@ -113,7 +113,6 @@ impl StatefulHasher for RapidHashV3 {
         self.buffer.extend(bytes);
 
         while self.buffer.len() > 112 {
-            // println!("{} {:02x?}", self.buffer.len(), self.buffer);
             self.long_hash = true;
             self.last_read = self.buffer[..112].to_vec();
             compress(

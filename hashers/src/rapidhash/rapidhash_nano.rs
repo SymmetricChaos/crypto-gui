@@ -3,7 +3,7 @@ use crate::{
     traits::StatefulHasher,
 };
 
-fn compress(bytes: &[u8], state: &mut [u64; 5], secrets: &[u64; 7], protected: bool) {
+fn compress(bytes: &[u8], state: &mut [u64; 3], secrets: &[u64; 7], protected: bool) {
     state[0] = rapid_mix(
         read_u64(bytes, 0) ^ secrets[0],
         read_u64(bytes, 8) ^ state[0],
@@ -19,20 +19,10 @@ fn compress(bytes: &[u8], state: &mut [u64; 5], secrets: &[u64; 7], protected: b
         read_u64(bytes, 40) ^ state[2],
         protected,
     );
-    state[3] = rapid_mix(
-        read_u64(bytes, 48) ^ secrets[3],
-        read_u64(bytes, 56) ^ state[3],
-        protected,
-    );
-    state[4] = rapid_mix(
-        read_u64(bytes, 64) ^ secrets[4],
-        read_u64(bytes, 72) ^ state[4],
-        protected,
-    );
 }
 
-pub struct RapidHashMicroV3 {
-    state: [u64; 5],
+pub struct RapidHashNanoV3 {
+    state: [u64; 3],
     pub avalanche: bool,
     pub protected: bool,
     secrets: [u64; 7],
@@ -41,10 +31,10 @@ pub struct RapidHashMicroV3 {
     long_hash: bool,
 }
 
-impl Default for RapidHashMicroV3 {
+impl Default for RapidHashNanoV3 {
     fn default() -> Self {
         Self {
-            state: [0; 5],
+            state: [0; 3],
             avalanche: true,
             protected: false,
             secrets: super::DEFAULT_SECRETS,
@@ -55,7 +45,7 @@ impl Default for RapidHashMicroV3 {
     }
 }
 
-impl RapidHashMicroV3 {
+impl RapidHashNanoV3 {
     // Reference spec
     pub fn with_seed(seed: u64) -> Self {
         let seed = mix_seed(seed, 0);
@@ -68,7 +58,7 @@ impl RapidHashMicroV3 {
         secrets[5] = mix_seed(secrets[4], 5);
         secrets[6] = mix_seed(secrets[5], 6);
         Self {
-            state: [seed; 5],
+            state: [seed; 3],
             buffer: Vec::with_capacity(112),
             secrets: secrets,
             ..Default::default()
@@ -79,7 +69,7 @@ impl RapidHashMicroV3 {
     pub fn with_seed_simple(seed: u64) -> Self {
         let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
         Self {
-            state: [seed; 5],
+            state: [seed; 3],
             buffer: Vec::with_capacity(112),
             ..Default::default()
         }
@@ -96,22 +86,22 @@ impl RapidHashMicroV3 {
     }
 }
 
-impl StatefulHasher for RapidHashMicroV3 {
+impl StatefulHasher for RapidHashNanoV3 {
     // This can't use the typical macro because compression is only called when
-    // the buffer is GREATER than 80 bytes, rather than equal to 80 bytes
+    // the buffer is GREATER than 48 bytes, rather than equal to 48 bytes
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend(bytes);
 
-        while self.buffer.len() > 80 {
+        while self.buffer.len() > 48 {
             self.long_hash = true;
-            self.last_read = self.buffer[..80].to_vec();
+            self.last_read = self.buffer[..48].to_vec();
             compress(
-                &self.buffer[..80],
+                &self.buffer[..48],
                 &mut self.state,
                 &self.secrets,
                 self.protected,
             );
-            self.buffer = self.buffer[80..].to_vec();
+            self.buffer = self.buffer[48..].to_vec();
         }
     }
 
@@ -124,15 +114,13 @@ impl StatefulHasher for RapidHashMicroV3 {
         if !self.long_hash && buffer.len() <= 16 {
             (a, b, self.state[0]) = short_hash(&buffer, a, b, self.state[0], buffer.len());
         } else {
-            while buffer.len() > 80 {
+            while buffer.len() > 48 {
                 self.last_read = buffer.to_vec();
                 compress(&buffer, &mut self.state, &self.secrets, self.protected);
-                let (_, split) = buffer.split_at(80);
+                let (_, split) = buffer.split_at(48);
                 buffer = split;
             }
             self.state[0] ^= self.state[1];
-            self.state[2] ^= self.state[3];
-            self.state[0] ^= self.state[4];
             self.state[0] ^= self.state[2];
 
             if buffer.len() > 16 {
@@ -147,20 +135,6 @@ impl StatefulHasher for RapidHashMicroV3 {
                         read_u64(&buffer, 24) ^ self.state[0],
                         self.protected,
                     );
-                    if buffer.len() > 48 {
-                        self.state[0] = rapid_mix(
-                            read_u64(&buffer, 32) ^ self.secrets[1],
-                            read_u64(&buffer, 40) ^ self.state[0],
-                            self.protected,
-                        );
-                        if buffer.len() > 64 {
-                            self.state[0] = rapid_mix(
-                                read_u64(&buffer, 48) ^ self.secrets[1],
-                                read_u64(&buffer, 56) ^ self.state[0],
-                                self.protected,
-                            );
-                        }
-                    }
                 }
             }
 
@@ -187,29 +161,29 @@ impl StatefulHasher for RapidHashMicroV3 {
 // Calculated from reference crate
 crate::stateful_hash_tests!(
     // All of the short paths
-    test_2, RapidHashMicroV3::with_seed(0x123456), b"he",
+    test_2, RapidHashNanoV3::with_seed(0x123456), b"he",
     "59D459F6E4A1BC44";
-    test_5, RapidHashMicroV3::with_seed(0x123456), b"hello",
+    test_5, RapidHashNanoV3::with_seed(0x123456), b"hello",
     "F77D91FAA1CFFEAC";
-    test_11, RapidHashMicroV3::with_seed(0x123456), b"hello world",
+    test_11, RapidHashNanoV3::with_seed(0x123456), b"hello world",
     "A1B8913D9926ED57";
 
     // Long path with no update compressions
-    test_38, RapidHashMicroV3::with_seed(0x123456), b"It is a truth universally acknowledged",
+    test_38, RapidHashNanoV3::with_seed(0x123456), b"It is a truth universally acknowledged",
     "67F45C74C90B7124";
     // Long path with one update compressions
-    test_117, RapidHashMicroV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
-    "5288D9B4A84B247D";
+    test_117, RapidHashNanoV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "6CAA66288DF8BF00";
     // Long path with multiple update compressions
-    test_378, RapidHashMicroV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.",
-    "A367D53553BA1BEA";
+    test_378, RapidHashNanoV3::with_seed(0x123456), b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.",
+    "7093C0D49CCD3F49";
 
     // Exactly one block
-    test_80, RapidHashMicroV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "9531B038F5B1842E";
+    test_48, RapidHashNanoV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "D72D72B69419BEDE";
     // Exactly two blocks
-    test_160, RapidHashMicroV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "E437D2DEBCE3CCE6";
+    test_96, RapidHashNanoV3::with_seed(0x123456), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "6E51198F2F035CFB";
 
 );
 
@@ -219,7 +193,7 @@ mod tests {
 
     #[test]
     fn test_vectors() {
-        use rapidhash::v3::{rapidhash_v3_micro_inline, rapidhash_v3_seeded, RapidSecrets};
+        use rapidhash::v3::{rapidhash_v3_nano_inline, rapidhash_v3_seeded, RapidSecrets};
         use std::hash::{BuildHasher, Hasher};
 
         /// Set your global hashing secrets.
@@ -230,7 +204,7 @@ mod tests {
         /// A helper function for your chosen rapidhash version and secrets.
         #[inline]
         pub fn rapidhash_m(data: &[u8]) -> u64 {
-            rapidhash_v3_micro_inline::<true, false>(data, &RAPID_SECRETS)
+            rapidhash_v3_nano_inline::<true, false>(data, &RAPID_SECRETS)
         }
 
         #[inline]
@@ -240,33 +214,33 @@ mod tests {
 
         // assert_eq!(rapidhash_m(b"hello"), rapidhash(b"hello"));
 
-        println!("{:08X?}", rapidhash_m(b"he"));
-        println!("{:08X?}", rapidhash_m(b"hello"));
-        println!("{:08X?}", rapidhash_m(b"hello world"));
-        println!(
-            "{:08X?}",
-            rapidhash_m(b"It is a truth universally acknowledged")
-        );
-        println!(
-            "{:08X?}",
-            rapidhash_m(b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.")
-        );
-        println!(
-            "{:08X?}",
-            rapidhash_m(b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.")
-        );
+        // println!("{:08X?}", rapidhash_m(b"he"));
+        // println!("{:08X?}", rapidhash_m(b"hello"));
+        // println!("{:08X?}", rapidhash_m(b"hello world"));
+        // println!(
+        //     "{:08X?}",
+        //     rapidhash_m(b"It is a truth universally acknowledged")
+        // );
+        // println!(
+        //     "{:08X?}",
+        //     rapidhash_m(b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.")
+        // );
+        // println!(
+        //     "{:08X?}",
+        //     rapidhash_m(b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.")
+        // );
 
         let bytes = vec![0x61; 300];
 
         for i in 1..=300 {
             let ex = rapidhash_m(&bytes[0..i]);
             let ca = u64::from_be_bytes(
-                RapidHashMicroV3::with_seed(0x123456)
+                RapidHashNanoV3::with_seed(0x123456)
                     .hash(&bytes[0..i])
                     .try_into()
                     .unwrap(),
             );
-            if i == 80 || i == 160 {
+            if i == 48 || i == 96 {
                 println!("{i} {:08X?}", ex);
             }
             assert_eq!(ex, ca);
