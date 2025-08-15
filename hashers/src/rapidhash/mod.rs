@@ -83,6 +83,7 @@ pub fn short_hash(
             b ^= read_u64(bytes, len - 8);
         } else {
             // XOR in the first full word and the last full word, these may overlap
+            // The constants are reversed in some versions of rapidhash
             a ^= read_u32(bytes, 0) as u64;
             b ^= read_u32(bytes, len - 4) as u64;
         }
