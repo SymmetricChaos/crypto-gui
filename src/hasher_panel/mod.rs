@@ -32,6 +32,7 @@ mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
+mod rapidhash_controls;
 mod ripemd_controls;
 mod scrypt_controls;
 mod sha0_controls;
