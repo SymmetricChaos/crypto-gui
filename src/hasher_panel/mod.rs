@@ -31,7 +31,7 @@ mod pbkdf1_controls;
 mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
-mod radio_gatun;
+mod radio_gatun_controls;
 mod rapidhash_controls;
 mod ripemd_controls;
 mod scrypt_controls;
@@ -101,7 +101,8 @@ pub struct HasherInterface {
     pbkdf2: pbkdf2_controls::Pbkdf2Frame,
     pearson: pearson_controls::PearsonFrame,
     poly1305: poly1305_controls::Poly1305Frame,
-    radiogatun: radio_gatun::RadioGatunFrame,
+    radiogatun: radio_gatun_controls::RadioGatunFrame,
+    rapidhash: rapidhash_controls::RapidhashFrame,
     ripe_md: ripemd_controls::RipeMdFrame,
     siphash: siphash_controls::SipHashFrame,
     sha0: sha0_controls::Sha0Frame,
@@ -163,6 +164,7 @@ impl HasherInterface {
                 HasherId::FxHash,
                 HasherId::Lm,
                 HasherId::MurmurHash3,
+                HasherId::Rapidhash,
                 HasherId::OneAtATime,
                 HasherId::Pearson,
                 HasherId::SipHash,
@@ -203,6 +205,7 @@ impl HasherInterface {
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
             HasherId::RadioGatun => &mut self.radiogatun,
+            HasherId::Rapidhash => &mut self.rapidhash,
             HasherId::RipeMd => &mut self.ripe_md,
             HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,

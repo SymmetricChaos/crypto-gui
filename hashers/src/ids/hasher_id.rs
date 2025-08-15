@@ -62,6 +62,7 @@ hasher_ids_and_names!(
     Pearson, "Pearson";
     Poly1305, "Poly1305";
     RadioGatun, "RadioGatún";
+    Rapidhash, "Rapidhash";
     RipeMd, "RIPEMD";
     Scrypt, "scrypt";
     Sha0, "SHA-0";
