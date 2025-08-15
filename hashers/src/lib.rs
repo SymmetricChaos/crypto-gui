@@ -39,7 +39,6 @@ pub mod polyval;
 pub mod poseidon;
 pub mod radio_gatun;
 pub mod rapidhash;
-pub mod rapidhash_stateful;
 pub mod ripemd;
 pub mod scrypt;
 pub mod sha;
@@ -51,50 +50,6 @@ pub mod snefru;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
-
-// Template
-// use utils::byte_formatting::ByteFormat;
-// use crate::traits::ClassicHasher;
-// pub struct HASHERNAME {
-//     pub input_format: ByteFormat,
-//     pub output_format: ByteFormat,
-// }
-
-// impl Default for HASHERNAME {
-//     fn default() -> Self {
-//         Self {
-//             input_format: ByteFormat::Utf8,
-//             output_format: ByteFormat::Hex,
-//         }
-//     }
-// }
-
-// impl HASHERNAME {
-//     pub fn input(mut self, input: ByteFormat) -> Self {
-//         self.input_format = input;
-//         self
-//     }
-
-//     pub fn output(mut self, output: ByteFormat) -> Self {
-//         self.output_format = output;
-//         self
-//     }
-// }
-
-// impl ClassicHasher for HASHERNAME {
-//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-//         todo!()
-//     }
-
-//     crate::hash_bytes_from_string! {}
-// }
-
-// crate::basic_hash_tests!(
-//     test1,
-//     HASHERNAME::default(),
-//     "INPUT",
-//     "OUTPUT";
-// );
 
 // Template
 // use crate::traits::StatefulHasher;

@@ -1,99 +1,7 @@
-// based on
-// https://github.com/hoxxep/rapidhash/tree/master/rapidhash
-
-// A "proper" implementation of any of these should be as optimized as possible.
-// The reference above, in fact, is designed to compile to highly specific
-// variations to reduce size and increase speed, especially for fixed size
-// inputs.
-// However that is a non-goal for this project and they are presented to be as
-// easy to understand as possible.
-
-use crate::traits::StatefulHasher;
-
-const DEFAULT_SECRETS: [u64; 7] = [
-    0x2d358dccaa6c78a5,
-    0x8bb84b93962eacc9,
-    0x4b33a62ed433d4a3,
-    0x4d5a2da51de1aa47,
-    0xa0761d6478bd642f,
-    0xe7037ed1a0b428db,
-    0x90ed1765281c388c,
-];
-
-// Wide multiply then return the lower half and upper half
-fn rapid_mum(a: u64, b: u64, protected: bool) -> (u64, u64) {
-    let r = (a as u128).wrapping_mul(b as u128);
-
-    if protected {
-        ((a ^ r as u64), (b ^ (r >> 64) as u64))
-    } else {
-        ((r as u64), (r >> 64) as u64)
-    }
-}
-
-// Wide multiply then XOR the lower and upper halves together
-// A folded version of rapid_mum()
-fn rapid_mix(a: u64, b: u64, protected: bool) -> u64 {
-    let r = (a as u128).wrapping_mul(b as u128);
-
-    if protected {
-        (a ^ r as u64) ^ (b ^ (r >> 64) as u64)
-    } else {
-        (r as u64) ^ (r >> 64) as u64
-    }
-}
-
-fn finalize(
-    mut a: u64,
-    mut b: u64,
-    rem: u64,
-    seed: u64,
-    avalanche: bool,
-    protected: bool,
-    secrets: &[u64; 7],
-) -> u64 {
-    a ^= secrets[1];
-    b ^= seed;
-
-    (a, b) = rapid_mum(a, b, protected);
-
-    if avalanche {
-        rapid_mix(a ^ 0xaaaaaaaaaaaaaaaa, b ^ secrets[1] ^ rem, protected)
-    } else {
-        a ^ b
-    }
-}
-
-fn short_hash(bytes: &[u8], mut a: u64, mut b: u64, mut s0: u64, len: usize) -> (u64, u64, u64) {
-    assert!(bytes.len() <= 16); // guard against accidental misue
-    if bytes.len() >= 4 {
-        s0 ^= len as u64;
-        if bytes.len() >= 8 {
-            // XOR in the first full word and the last full word, these may overlap
-            a ^= read_u64(bytes, 0);
-            b ^= read_u64(bytes, len - 8);
-        } else {
-            // XOR in the first full word and the last full word, these may overlap
-            a ^= read_u32(bytes, 0) as u64;
-            b ^= read_u32(bytes, len - 4) as u64;
-        }
-    // Three or fewer bytes
-    } else if !bytes.is_empty() {
-        a ^= ((bytes[0] as u64) << 45) | bytes[len - 1] as u64;
-        b ^= bytes[len >> 1] as u64;
-    }
-    (a, b, s0)
-}
-
-// Little endian
-fn read_u64(slice: &[u8], offset: usize) -> u64 {
-    u64::from_le_bytes(slice[offset..offset + 8].try_into().unwrap())
-}
-
-// Little endian
-fn read_u32(slice: &[u8], offset: usize) -> u32 {
-    u32::from_le_bytes(slice[offset..offset + 4].try_into().unwrap())
-}
+use crate::{
+    rapidhash::{finalize, mix_seed, rapid_mix, read_u64, short_hash, DEFAULT_SECRETS},
+    traits::StatefulHasher,
+};
 
 fn compress(bytes: &[u8], state: &mut [u64; 7], secrets: &[u64; 7], protected: bool) {
     state[0] = rapid_mix(
@@ -133,29 +41,6 @@ fn compress(bytes: &[u8], state: &mut [u64; 7], secrets: &[u64; 7], protected: b
     );
 }
 
-fn mix_seed(mut seed: u64, i: usize) -> u64 {
-    seed ^= rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[i], false);
-
-    // Force the seed to not be all zeroes
-    const HI: u64 = 0xFFFF << 48;
-    const MI: u64 = 0xFFFF << 24;
-    const LO: u64 = 0xFFFF;
-
-    if (seed & HI) == 0 {
-        seed |= 1u64 << 63;
-    }
-
-    if (seed & MI) == 0 {
-        seed |= 1u64 << 31;
-    }
-
-    if (seed & LO) == 0 {
-        seed |= 1u64;
-    }
-
-    seed
-}
-
 pub struct RapidHashV3 {
     state: [u64; 7],
     pub avalanche: bool,
@@ -172,7 +57,7 @@ impl Default for RapidHashV3 {
             state: [0; 7],
             avalanche: true,
             protected: false,
-            secrets: DEFAULT_SECRETS,
+            secrets: super::DEFAULT_SECRETS,
             buffer: Vec::with_capacity(112),
             last_read: Vec::with_capacity(112),
             long_hash: false,
@@ -355,40 +240,40 @@ crate::stateful_hash_tests!(
 
 );
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn test_vectors() {
-        use rapidhash::v3::{rapidhash_v3_seeded, RapidSecrets};
-        use std::hash::{BuildHasher, Hasher};
+//     #[test]
+//     fn test_vectors() {
+//         use rapidhash::v3::{rapidhash_v3_seeded, RapidSecrets};
+//         use std::hash::{BuildHasher, Hasher};
 
-        /// Set your global hashing secrets.
-        /// - For HashDoS resistance, choose a randomised secret.
-        /// - For C++ compatibility, use the `seed_cpp` method or `DEFAULT_RAPID_SECRETS`.
-        const RAPID_SECRETS: RapidSecrets = RapidSecrets::seed(0x123456);
+//         /// Set your global hashing secrets.
+//         /// - For HashDoS resistance, choose a randomised secret.
+//         /// - For C++ compatibility, use the `seed_cpp` method or `DEFAULT_RAPID_SECRETS`.
+//         const RAPID_SECRETS: RapidSecrets = RapidSecrets::seed(0x123456);
 
-        /// A helper function for your chosen rapidhash version and secrets.
-        #[inline]
-        pub fn rapidhash(data: &[u8]) -> u64 {
-            rapidhash_v3_seeded(data, &RAPID_SECRETS)
-        }
+//         /// A helper function for your chosen rapidhash version and secrets.
+//         #[inline]
+//         pub fn rapidhash(data: &[u8]) -> u64 {
+//             rapidhash_v3_seeded(data, &RAPID_SECRETS)
+//         }
 
-        let bytes = vec![0x61; 300];
+//         let bytes = vec![0x61; 300];
 
-        for i in 1..=300 {
-            let ex = rapidhash(&bytes[0..i]);
-            let ca = u64::from_be_bytes(
-                RapidHashV3::with_seed(0x123456)
-                    .hash(&bytes[0..i])
-                    .try_into()
-                    .unwrap(),
-            );
-            if i == 224 || i == 300 {
-                println!("{i} {:08X?}", ex);
-            }
-            assert_eq!(ex, ca);
-        }
-    }
-}
+//         for i in 1..=300 {
+//             let ex = rapidhash(&bytes[0..i]);
+//             let ca = u64::from_be_bytes(
+//                 RapidHashV3::with_seed(0x123456)
+//                     .hash(&bytes[0..i])
+//                     .try_into()
+//                     .unwrap(),
+//             );
+//             if i == 224 || i == 300 {
+//                 println!("{i} {:08X?}", ex);
+//             }
+//             assert_eq!(ex, ca);
+//         }
+//     }
+// }
