@@ -50,6 +50,7 @@ pub mod snefru;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
+pub mod wyhash;
 
 // Template
 // use crate::traits::StatefulHasher;

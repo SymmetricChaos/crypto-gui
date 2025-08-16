@@ -77,6 +77,7 @@ hasher_ids_and_names!(
     Streebog, "Streebog";
     Tiger, "Tiger";
     Vsh, "VSH";
+    Wyhash, "Whyhash";
 );
 
 impl Default for HasherId {

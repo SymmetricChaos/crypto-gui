@@ -542,5 +542,16 @@
     "Traits": [
       "Crytographic"
     ]
+  },
+  "Whyhash": {
+    "Description": "Whyhash is a high speed non-cryptographic hash function meant for creating hash tables. It has been officially superceded by Rapidhash.",
+    "Authors": "Wang Yi",
+    "Publication": null,
+    "Hash Length": [
+      64
+    ],
+    "Traits": [
+      "Keyed"
+    ]
   }
 }
