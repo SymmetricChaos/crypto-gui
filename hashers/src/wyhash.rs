@@ -45,6 +45,8 @@ fn compress(bytes: &[u8], state: &mut [u64; 3], secrets: &[u64; 4]) {
 
 const P0: u64 = 0xa076_1d64_78bd_642f;
 const P1: u64 = 0xe703_7ed1_a0b4_28db;
+const P2: u64 = 0x8ebc_6af0_9c88_c6e3;
+const P3: u64 = 0x5899_65cc_7537_4cc3;
 
 const C: [u8; 70] = [
     15, 23, 27, 29, 30, 39, 43, 45, 46, 51, 53, 54, 57, 58, 60, 71, 75, 77, 78, 83, 85, 86, 89, 90,
@@ -64,7 +66,7 @@ pub struct Wyhash {
     last_read: Vec<u8>,
     state: [u64; 3],
     secrets: [u64; 4],
-    long_hash: bool,
+    bytes_taken: u64,
 }
 
 impl Default for Wyhash {
@@ -73,17 +75,13 @@ impl Default for Wyhash {
             buffer: Vec::with_capacity(48),
             last_read: Vec::with_capacity(48),
             state: [0; 3],
-            secrets: [0; 4],
-            long_hash: false,
+            secrets: [P0, P1, P2, P3],
+            bytes_taken: 0,
         }
     }
 }
 
 impl Wyhash {
-    pub fn init() -> Self {
-        Self::with_seed(0)
-    }
-
     pub fn with_seed(seed: u64) -> Self {
         let mut secrets = [0; 4];
         let mut tseed = seed;
@@ -121,7 +119,7 @@ impl StatefulHasher for Wyhash {
         self.buffer.extend(bytes);
 
         while self.buffer.len() > 48 {
-            self.long_hash = true;
+            self.bytes_taken += 48;
             self.last_read = self.buffer[..48].to_vec();
             compress(&self.buffer[..48], &mut self.state, &self.secrets);
             self.buffer = self.buffer[48..].to_vec();
@@ -131,9 +129,9 @@ impl StatefulHasher for Wyhash {
     fn finalize(mut self) -> Vec<u8> {
         let mut a: u64 = 0;
         let mut b: u64 = 0;
-        let mut rem = self.buffer.len() as u64;
+        self.bytes_taken += self.buffer.len() as u64;
 
-        if !self.long_hash && self.buffer.len() <= 16 {
+        if self.bytes_taken <= 16 {
             let len = self.buffer.len();
             if len >= 4 {
                 a = read_u32(&self.buffer) << 32 | read_u32(&self.buffer[((len >> 3) << 2)..]);
@@ -143,7 +141,12 @@ impl StatefulHasher for Wyhash {
                 a = read_u24(&self.buffer);
             }
         } else {
-            // TODO: COMPRESS
+            while self.buffer.len() > 48 {
+                self.bytes_taken += 48;
+                self.last_read = self.buffer[..48].to_vec();
+                compress(&self.buffer[..48], &mut self.state, &self.secrets);
+                self.buffer = self.buffer[48..].to_vec();
+            }
             self.state[0] ^= self.state[1];
             self.state[0] ^= self.state[2];
             while self.buffer.len() > 16 {
@@ -154,11 +157,11 @@ impl StatefulHasher for Wyhash {
                 let (_, split) = self.buffer.split_at(16);
                 self.buffer = split.to_vec();
             }
-
+            self.last_read.extend_from_slice(&self.buffer);
             a = read_u64(&self.last_read[self.last_read.len() - 16..], 0);
             b = read_u64(&self.last_read[self.last_read.len() - 8..], 0);
         }
-        finalize(a, b, rem, self.state[0], &self.secrets)
+        finalize(a, b, self.bytes_taken, self.state[0], &self.secrets)
             .to_be_bytes()
             .to_vec()
     }
