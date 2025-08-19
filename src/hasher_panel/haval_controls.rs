@@ -22,7 +22,6 @@ impl Default for HavalFrame {
     }
 }
 
-impl HavalFrame {}
 
 impl HasherFrame for HavalFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

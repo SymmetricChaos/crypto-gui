@@ -29,8 +29,6 @@ impl Default for CityHashFrame {
     }
 }
 
-impl CityHashFrame {}
-
 impl HasherFrame for CityHashFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(

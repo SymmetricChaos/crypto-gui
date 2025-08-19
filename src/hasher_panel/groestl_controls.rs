@@ -30,7 +30,6 @@ impl Default for GroestlFrame {
     }
 }
 
-impl GroestlFrame {}
 
 impl HasherFrame for GroestlFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

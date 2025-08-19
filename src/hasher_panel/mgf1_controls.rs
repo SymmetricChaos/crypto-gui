@@ -21,7 +21,6 @@ impl Default for Mgf1Frame {
     }
 }
 
-impl Mgf1Frame {}
 
 impl HasherFrame for Mgf1Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

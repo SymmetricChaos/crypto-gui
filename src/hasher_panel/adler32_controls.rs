@@ -17,8 +17,6 @@ impl Default for Adler32Frame {
     }
 }
 
-impl Adler32Frame {}
-
 impl HasherFrame for Adler32Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(

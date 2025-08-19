@@ -17,7 +17,6 @@ impl Default for Md2Frame {
     }
 }
 
-impl Md2Frame {}
 
 impl HasherFrame for Md2Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

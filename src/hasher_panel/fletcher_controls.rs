@@ -22,8 +22,6 @@ impl Default for FletcherFrame {
     }
 }
 
-impl FletcherFrame {}
-
 impl HasherFrame for FletcherFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(

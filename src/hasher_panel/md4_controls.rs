@@ -17,7 +17,6 @@ impl Default for Md4Frame {
     }
 }
 
-impl Md4Frame {}
 
 impl HasherFrame for Md4Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

@@ -26,7 +26,6 @@ impl Default for RipeMdFrame {
     }
 }
 
-impl RipeMdFrame {}
 
 impl HasherFrame for RipeMdFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

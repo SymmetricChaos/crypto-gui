@@ -22,8 +22,6 @@ impl Default for ShabalFrame {
     }
 }
 
-impl ShabalFrame {}
-
 impl HasherFrame for ShabalFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(

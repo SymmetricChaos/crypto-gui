@@ -31,7 +31,6 @@ impl Default for LmFrame {
     }
 }
 
-impl LmFrame {}
 
 impl HasherFrame for LmFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

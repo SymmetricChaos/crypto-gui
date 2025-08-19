@@ -30,7 +30,6 @@ impl Default for Murmur3Frame {
     }
 }
 
-impl Murmur3Frame {}
 
 impl HasherFrame for Murmur3Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {

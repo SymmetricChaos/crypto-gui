@@ -23,8 +23,6 @@ impl Default for Sha2Frame {
     }
 }
 
-impl Sha2Frame {}
-
 impl HasherFrame for Sha2Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(

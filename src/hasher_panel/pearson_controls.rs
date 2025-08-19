@@ -24,7 +24,6 @@ impl Default for PearsonFrame {
     }
 }
 
-impl PearsonFrame {}
 
 impl HasherFrame for PearsonFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
