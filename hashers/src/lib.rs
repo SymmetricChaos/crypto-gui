@@ -8,7 +8,6 @@ pub mod belt;
 pub mod blake;
 pub mod checksum;
 pub mod cityhash;
-pub mod crypt;
 pub mod errors;
 pub mod fletcher;
 pub mod fnv;
