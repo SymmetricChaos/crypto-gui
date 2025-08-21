@@ -1,12 +1,13 @@
 use crate::traits::StatefulHasher;
 
 // The Art Of Computer Programming Volume 3, Donald E. Knuth
+// Can't find in supposed reference?
 
-pub struct Dek {
+pub struct Knuth {
     buffer: Vec<u8>,
 }
 
-impl StatefulHasher for Dek {
+impl StatefulHasher for Knuth {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
     }
