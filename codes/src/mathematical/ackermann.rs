@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::{errors::CodeError, traits::Code};
 
 // f({}) = 0
@@ -62,6 +64,95 @@ pub fn number_to_set(mut n: u32) -> String {
     out
 }
 
+pub fn valid_parens(s: &str) -> bool {
+    let mut lefts = 0;
+
+    for c in s.chars() {
+        if c == '{' {
+            lefts += 1;
+        } else if c == '}' {
+            if lefts == 0 {
+                return false;
+            } else {
+                lefts -= 1;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    lefts == 0
+}
+
+pub fn paren_ranges(s: &str) -> Result<Vec<(usize, usize)>, CodeError> {
+    let mut starts = Vec::new();
+    let mut pairs = Vec::new();
+
+    for (i, c) in s.chars().enumerate() {
+        if c == '{' {
+            starts.push(i);
+        } else if c == '}' {
+            if starts.is_empty() {
+                return Err(CodeError::input("brackets in the set do not match"));
+            } else {
+                pairs.push((starts.pop().unwrap(), i + 1));
+            }
+        } else {
+            return Err(CodeError::input("invalid character"));
+        }
+    }
+    Ok(pairs)
+}
+
+pub fn paren_ranges_nonoverlapping(s: &str) -> Result<Vec<(usize, usize)>, CodeError> {
+    let mut starts = Vec::new();
+    let mut pairs: Vec<(usize, usize)> = Vec::new();
+
+    for (i, c) in s.chars().enumerate() {
+        if c == '{' {
+            starts.push(i);
+        } else if c == '}' {
+            if starts.is_empty() {
+                return Err(CodeError::input("brackets in the set do not match"));
+            } else {
+                let pair = (starts.pop().unwrap(), i + 1);
+                pairs.retain(|x| x.0 > pair.0);
+                pairs.push(pair);
+            }
+        } else {
+            return Err(CodeError::input("invalid character"));
+        }
+    }
+
+    Ok(pairs)
+}
+
+pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)>, CodeError> {
+    let mut starts = Vec::new();
+    let mut pairs: Vec<(usize, usize)> = Vec::new();
+
+    for (i, c) in s.chars().enumerate() {
+        if c == '{' {
+            starts.push(i);
+        } else if c == '}' {
+            if starts.is_empty() {
+                return Err(CodeError::input("brackets in the set do not match"));
+            } else {
+                let pair = (starts.pop().unwrap(), i + 1);
+                if pair.0 == 0 {
+                    break;
+                }
+                pairs.retain(|x| x.0 < pair.0 && x.1 < pair.1);
+                pairs.push(pair);
+            }
+        } else {
+            return Err(CodeError::input("invalid character"));
+        }
+    }
+
+    Ok(pairs)
+}
+
 pub struct Ackermann {}
 
 impl Default for Ackermann {
@@ -87,7 +178,20 @@ impl Code for Ackermann {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        todo!()
+        let mut out = Vec::new();
+        for set in text.split(",").map(|s| s.trim()) {
+            let mut n = 0;
+            let ranges = paren_ranges_nonoverlapping_subsets(set)?;
+            for range in ranges {
+                n += 2_u32.pow(
+                    SETS.iter()
+                        .position(|x| *x == &set[range.0..range.1])
+                        .unwrap() as u32,
+                )
+            }
+            out.push(n.to_string());
+        }
+        Ok(out.join(", "))
     }
 }
 
@@ -101,16 +205,30 @@ mod tests {
     fn single_encode() {
         let code = Ackermann::default();
 
-        println!("{:?}", code.encode(&(u32::MAX).to_string()))
+        // println!("{:?}", code.encode(&(u32::MAX).to_string()));
+        // println!("{:?}", code.encode(&(23).to_string()));
+
+        let set = "{{}{{}}{{{}}}{{}{{}}}}";
+        let pairs = paren_ranges(set).unwrap();
+        for p in pairs {
+            println!("{:?}", &set[p.0..p.1])
+        }
+        println!("nonoverlapping");
+        let pairs = paren_ranges_nonoverlapping_subsets(set).unwrap();
+        for p in pairs {
+            println!("{:?} {:?}", p, &set[p.0..p.1])
+        }
     }
 
     #[test]
     fn encode_test() {
-        todo!()
+        let code = Ackermann::default();
+        assert_eq!("", code.encode("0, 1, 2, 3").unwrap())
     }
 
     #[test]
     fn decode_test() {
-        todo!()
+        let code = Ackermann::default();
+        assert_eq!("", code.decode("{}, {{}}, {{{}}}, {{}{{}}}").unwrap())
     }
 }
