@@ -416,13 +416,17 @@
     "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The version of RLE presented here encodes text as text (both UTF-8) but this usage is rare in practice. The Run Length Encoding Bytes page shows encoding that operates on arbitrary bytes.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Compression"
+    ]
   },
   "Run Length Encoding Bytes": {
     "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs if they occur. The simple encoding scheme here converts a sequence of bytes into a sequence of pairs of bytes. In these pairs the first byte is the one to be repeated and the second byte is the number of times to be repeated. If a byte is repeated more than 255 times the additional repetitions are encoded more pairs. If bytes are not repeated more than 255 times this is reasonably efficient. However if there are very long runs it performs relatively poorly. The complex encoding works similarly but the count is a variable length integer (LEB-128) which allows runs of enormous length to be compressed.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Compression"
+    ]
   },
   "S\/KEY": {
     "Description": "The full S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
@@ -558,7 +562,7 @@
     ]
   },
   "Von Neumann Ordinals": {
-    "Description": "The von Neumann definition of the ordinals construct each ordinal as \"the well-ordered set of all smaller ordinals\" so that 0 = {} (the empty set, as there are no smaller ordinals), 1 = {0} = {{}} (the set containing zero), 2 = {0,1} = {{},{{}}} (the set containing zero and one) and so on. This definition is sufficient for all finite ordinals (or equivalently the natural numbers) and can be continued for transfinite ordinals. The smallest infinite ordinal is the set that contains all finite ordinals. Mathematicians rarely refer to specific values, instead relying on the properties of ordinals. This is in part because as an encoding the von Neumann ordinals are extraordinarily inefficient. To represent the ordinal 20 about a million symbol are needed. Due to this inefficiency this page limits the size of ordiansls represented, for arbitrary sizes see the linked code.",
+    "Description": "The von Neumann definition of the ordinals constructs each ordinal as \"the well-ordered set of all smaller ordinals\" so that 0 = {} (the empty set), 1 = {0} = {{}} (the set containing zero), 2 = {0,1} = {{},{{}}} (the set containing zero and one) and so on. This process may be continued to produce transfinite ordinals. The size of these sets increases rapidly when written as pure sets so the sizes available through this interface are limited.",
     "Authors": "John von Neumann",
     "Publication": null,
     "Traits": [

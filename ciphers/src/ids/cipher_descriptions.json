@@ -124,7 +124,7 @@
     ],
     "Description": "Ascon-128 and Ascon-128a are AEAD (authenticated encryption with additional data) block ciphers derived from the Ascon sponge function. This sponge function is similar to Keccak, though with a smaller 320-bit state and a simpler round. Both ciphers create a 128-bit tag to autheticate the message and the additional unencrypted data. Ascon-128 has a 64-bit block size while Ascon-128a has a 128-bit block size. Ascon is also used to create a family of hash functions.",
     "Authors": "Christoph Dobraunig, Maria Eichlseder, Florian Mendel, Martin Schläffer",
-    "Publication": 2014,
+    "Publication": "2014",
     "Traits": [
       "AEAD",
       "Block Cipher",
@@ -140,7 +140,7 @@
     ],
     "Description": "Ascon-80pq is an AEAD (authenticated encryption with additional data) block ciphers derived from the Ascon sponge function. The increased key size of 160 bits is a defense against quantum computers attacking the key space using Grover's algorithm hence the \"post quantum\" designation. Despite the larger key size it does not claim increased security over Ascon-128 as the internal state and transformation are the same.",
     "Authors": "Christoph Dobraunig, Maria Eichlseder, Florian Mendel, Martin Schläffer",
-    "Publication": 2014,
+    "Publication": "2014",
     "Traits": [
       "AEAD",
       "Block Cipher",
