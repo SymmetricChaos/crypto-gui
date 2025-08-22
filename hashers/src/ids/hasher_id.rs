@@ -48,6 +48,7 @@ hasher_ids_and_names!(
     Hkdf, "HKDF";
     Hmac, "HMAC";
     Jh, "JH";
+    Keccak, "Keccak";
     Lm, "LM";
     Lsh, "LSH";
     Md2,"MD2";
@@ -60,6 +61,7 @@ hasher_ids_and_names!(
     Pbkdf1, "PBKDF1";
     Pbkdf2, "PBKDF2";
     Pearson, "Pearson";
+    Pjw, "PJW";
     Poly1305, "Poly1305";
     RadioGatun, "RadioGatún";
     Rapidhash, "Rapidhash";
@@ -68,7 +70,7 @@ hasher_ids_and_names!(
     Sha0, "SHA-0";
     Sha1, "SHA-1";
     Sha2, "SHA-2";
-    Sha3, "SHA-3 (Keccak)";
+    Sha3, "SHA-3";
     Shabal, "Shabal";
     SipHash, "SipHash";
     Skein, "Skein";
@@ -101,6 +103,10 @@ impl HasherId {
 
     pub fn traits(&self) -> &JsonValue {
         &HASHER_INFORMATION[self.to_string()]["Traits"]
+    }
+
+    pub fn length(&self) -> &JsonValue {
+        &HASHER_INFORMATION[self.to_string()]["Hash Length"]
     }
 }
 

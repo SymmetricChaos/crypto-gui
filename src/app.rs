@@ -261,11 +261,9 @@ impl ClassicCryptoApp {
                         &mut self.active_code,
                         &mut self.active_rng,
                         &mut self.active_hasher,
-                        // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         &mut self.rng_interface,
-                        // &mut self.attack_interface,
                         &mut self.hasher_interface,
                     );
                 });
@@ -348,11 +346,9 @@ impl ClassicCryptoApp {
                         &mut self.active_code,
                         &mut self.active_rng,
                         &mut self.active_hasher,
-                        // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         &mut self.rng_interface,
-                        // &mut self.attack_interface,
                         &mut self.hasher_interface,
                     );
                 });
@@ -454,6 +450,9 @@ impl ClassicCryptoApp {
                             };
                             if let Some(s) = hasher.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
+                            };
+                            if !hasher.length().is_null() {
+                                ui.label(RichText::new(format!("Tag Lengths: {}", hasher.length().members().map(|j| j.as_str().unwrap()).join(", "))).size(12.0));
                             };
                             if !hasher.traits().is_null() {
                                 ui.label(RichText::new(format!("Traits: {}", hasher.traits().members().map(|j| j.as_str().unwrap()).join(", "))).size(12.0));

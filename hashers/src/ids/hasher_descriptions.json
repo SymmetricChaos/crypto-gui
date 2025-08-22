@@ -3,8 +3,10 @@
     "Description": "Adler-32 is a very fast a simple hash, usually classified as a checksum. It produces a 32-bit hash by concatenating two 16-bit counters.",
     "Authors": "Mark Adler",
     "Publication": "1995",
-    "Hash Length": 32,
-    "Traits": []
+    "Hash Length": [
+      32
+    ],
+    "Traits": null
   },
   "Ascon": {
     "Description": "A variety of cryptographic tools are derived from the Ascon sponge function. Ascon-Hash is a ordinary hash function. Ascon-XOF is an Extensible Output Function. Ascon-MAC is a keyed hash that can produce a Message Authentication Hash. Ascon-PRF is a Pseudorandom Function. Each has version that runs more quickly in exchange for a lower security margin. The sponge construction is similar to Keccak, though with a smaller state and simpler round. The same primitive is also used in the ASCON cipher.",
@@ -97,7 +99,7 @@
       32,
       64
     ],
-    "Traits": []
+    "Traits": null
   },
   "FNV Hash": {
     "Description": "The FNV hash family is meant to run very quickly while avoiding collisions but not to provide cryptographic security. Its compression function consits of a single multiplication and a single XOR operation for each byte. ",
@@ -111,7 +113,7 @@
       512,
       1024
     ],
-    "Traits": []
+    "Traits": null
   },
   "FxHash": {
     "Description": "FxHash is inspired by the FNV family of hash functions in its goal of extreme speed. Unlike FNV it takes the message in larger chunks rather than one byte at a time and uses a rotation rather than an XOR.",
@@ -121,7 +123,7 @@
       32,
       64
     ],
-    "Traits": []
+    "Traits": null
   },
   "GHASH": {
     "Description": "GHASH is a universal hash function created for use in Galois/Counter Mode forblock ciphers with a 128-bit block size. It treats the data as a coefficients of a polynomial, then evaluates that polynomial at a chosen point. This polynomial calculated over a Galois field for efficiency to avoid leaking information if used securely. The constant term of the polynomial is the key.",
@@ -248,7 +250,7 @@
     ]
   },
   "MD4": {
-    "Description": "The MD4 hash function is an obsolete hash algorithm that influenced the design of later hash functions. It produces a 128 bit hash.",
+    "Description": "The MD4 hash function is an obsolete hash algorithm that influenced the design of later hash functions.",
     "Authors": "Rivest",
     "Publication": "1990",
     "Hash Length": [
@@ -259,7 +261,7 @@
     ]
   },
   "MD5": {
-    "Description": "The MD5 hash function is among the best known and most widely used in history. It produces a 128 bit hash. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is used to verify message integrity against accidental changes.",
+    "Description": "The MD5 hash function is among the best known and most widely used in history. It produces a 128 bit hash. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is only used to verify message integrity against accidental changes.",
     "Authors": "Rivest",
     "Publication": "1991",
     "Hash Length": [
@@ -296,7 +298,7 @@
       32,
       128
     ],
-    "Traits": []
+    "Traits": null
   },
   "OneAtATime": {
     "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
@@ -305,7 +307,9 @@
     "Hash Length": [
       32
     ],
-    "Traits": []
+    "Traits": [
+      "Byte-by-byte"
+    ]
   },
   "PBKDF1": {
     "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
@@ -334,7 +338,20 @@
     "Hash Length": [
       8
     ],
-    "Traits": []
+    "Traits": [
+      "Byte-by-byte"
+    ]
+  },
+  "PJW": {
+    "Description": "Named for its creator the PJW hash function is an early hash function that processed input byte by byte using a shift and an addition. It uses the upper byte of its 32-bit state as a seperate variable so only 24 bits are available as output.",
+    "Authors": "Peter J. Weinberger",
+    "Publication": null,
+    "Hash Length": [
+      24
+    ],
+    "Traits": [
+      "Byte-by-byte"
+    ]
   },
   "Poly1305": {
     "Description": "Poly1305 is a universal family of hash functions based on evaluating a polynomial modulo the prime 2^130 - 5. The message is divided into 16 byte blocks which are used to create the coefficients of the polynomial which is evaluated at the point 'r' which serves as the key for the hash. Poly1305 accepts a second key when used a message authenticator. The special value of Poly1305 lies in the fact that a proof exists that when used as an authenticator the security of the system relies only on the security of the cipher (usually AES) used to generate the secondary key.",
@@ -401,7 +418,7 @@
     "Description": "The scrypt (ess-crypt) hash function is used to derive passwords using PBKDF2 (with HMAC-SHA256) and the Salsa20/8 block function internally. It accepts a salt of arbitrary length and can be adjusted to increase difficulty and change the length of the derived key.",
     "Authors": "Colin Percival",
     "Publication": "2009",
-    "Hash Length": [],
+    "Hash Length": null,
     "Traits": [
       "KDF",
       "XOF"
@@ -448,7 +465,7 @@
       "Merkle-Damgård"
     ]
   },
-  "SHA-3 (Keccak)": {
+  "SHA-3": {
     "Description": "The winner of the SHA-3 competition by the American NIST was Keccak, pronounced \"ketchak\", a hash algorithm using a sponge construction. NIST certification includes a variety of modes including as a cryptographic hash functions of various standard lengths, an extensible output function (SHAKE and cSHAKE), a message authentication code (KMAC), a tuple hasher (TupleHash), and a tree based cryptographic hash function (ParallelHash). Variants known as  KangarooTwelve and MarsupilamiFourteen exist and run much faster due to having fewer rounds (and thus a lower security margin) but are not NIST standards.",
     "Authors": "Bertoni, Daemen, Peeters, Van Assche",
     "Publication": "2006",

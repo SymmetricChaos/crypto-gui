@@ -1,5 +1,7 @@
 use crate::traits::StatefulHasher;
 
+// Peter J. Weinberger
+
 pub struct Pjw {
     state: u32,
 }
@@ -16,6 +18,7 @@ impl StatefulHasher for Pjw {
         }
     }
 
+    // Only the lower 24 bits are meant to be used
     fn finalize(self) -> Vec<u8> {
         self.state.to_be_bytes()[1..].to_vec()
     }
