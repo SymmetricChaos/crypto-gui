@@ -26,6 +26,7 @@ macro_rules! code_ids_and_names {
 }
 
 code_ids_and_names!(
+    Ackermann, "Ackermann";
     Ascii, "ASCII";
     Ascii85, "Ascii85";
     Bacon, "Bacon";

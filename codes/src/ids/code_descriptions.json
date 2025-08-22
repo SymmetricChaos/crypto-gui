@@ -1,4 +1,12 @@
 ﻿{
+  "Ackermann": {
+    "Description": "Ackermann's encoding matches each non-negative integer with a pure set. Sets of this form contain only other pure sets, no other kinds of elements are allowed.",
+    "Authors": "Wilhelm Ackermann",
+    "Publication": null,
+    "Traits": [
+      "Integer"
+    ]
+  },
   "ASCII": {
     "Description": "The American Standard Code for Information Interchange (ASCII) was created in the 1960s and consists of 128 characters sufficient to write essentially all English text and to control the printing device. Originally a 7-bit code it is now most often seen as an 8-bit code with the leading bit always set to zero. Although it became a defacto standard the limited character set eventually lead to its replacement by Unicode, indeed the common UTF-8 standard contains the 8-bit ASCII codes.\nThere are 34 ASCII control codes. This page accepts both literal control characters and their Unicode control pictures.",
     "Authors": null,

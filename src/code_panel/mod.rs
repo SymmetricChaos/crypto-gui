@@ -7,6 +7,7 @@ use codes::{
 use eframe::egui;
 use egui::Ui;
 
+mod ackermann_controls;
 mod ascii85_controls;
 mod ascii_controls;
 mod bacon_contols;
@@ -162,6 +163,7 @@ pub struct CodeInterface {
     rle_bytes: rle_byte_controls::RleFrame,
 
     // Integer
+    ackermann: ackermann_controls::AckermannFrame,
     balanced_ternary: balanced_ternary_controls::BalancedTernaryFrame,
     base_n: base_n_controls::BaseNFrame,
     base_n_bij: base_n_bijective_controls::BaseNBijectiveFrame,
@@ -238,6 +240,7 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::Ackermann,
                 CodeId::BalancedTernary,
                 CodeId::BaseN,
                 CodeId::BaseNBijective,
@@ -316,6 +319,7 @@ impl CodeInterface {
 
     pub fn get_active_code(&mut self, active_code: &CodeId) -> &mut dyn CodeFrame {
         match active_code {
+            CodeId::Ackermann => &mut self.ackermann,
             CodeId::Ascii => &mut self.ascii,
             CodeId::Ascii85 => &mut self.ascii85,
             CodeId::Bacon => &mut self.bacon,
