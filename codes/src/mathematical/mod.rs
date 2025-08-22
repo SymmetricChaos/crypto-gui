@@ -1,5 +1,6 @@
 use crate::errors::CodeError;
 
+pub mod ackermann;
 pub mod arithmetic;
 pub mod balanced_ternary;
 pub mod base_n;
