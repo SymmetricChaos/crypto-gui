@@ -3,6 +3,7 @@ use std::{fmt::Display, str::Chars};
 use itertools::Itertools;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// One of several common alphabets
 pub enum Alphabet {
     /// ABCDEFGHIJKLMNOPQRSTUVWXYZ
     BasicLatin,
@@ -18,7 +19,7 @@ pub enum Alphabet {
     Ascii94,
     /// The 95 printing ASCII symbols (including space)
     Ascii95,
-    ///  The 128 ASCII symbols with control pictures for non-printing characters
+    ///  The 128 ASCII symbols with control pictures for non-printing characters and the ASCII space character
     Ascii128,
     /// ABCDEFGHIKLMNOPQRSTVXYZ (lacks J, U, and W)
     ClassicalLatin,
@@ -27,7 +28,7 @@ pub enum Alphabet {
 }
 
 impl Alphabet {
-    // Pointer to a static string slice
+    /// Pointer to a static string slice
     pub const fn slice(&self) -> &'static str {
         match self {
             Alphabet::BasicLatin =>    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -43,31 +44,34 @@ impl Alphabet {
         }
     }
 
-    // Owned string
+    /// Owned string
     pub fn string(&self) -> String {
         self.slice().to_string()
     }
 
-    // Length in Unicode code points
+    /// Length in Unicode code points
     pub fn len(&self) -> usize {
         // This could be a match statement but this is easier
         self.slice().chars().count()
     }
 
-    // Iterate over characters
+    /// Iterate over characters
     pub fn chars(&self) -> Chars<'_> {
         self.slice().chars()
     }
 
+    /// Does the character exist in the alphabet?
     pub fn contains(&self, c: &char) -> bool {
         self.chars().contains(c)
     }
 
+    /// Position of a character in the alphabet
     pub fn position(&self, c: char) -> Option<usize> {
         self.chars().position(|x| c == x)
     }
 
-    pub fn name(&self) -> &str {
+    /// Pretty name
+    pub fn name(&self) -> &'static str {
         match self {
             Alphabet::BasicLatin => "Basic Latin",
             Alphabet::BasicLatinNoC => "Basic Latin, No C",
