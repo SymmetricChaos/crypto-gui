@@ -48,6 +48,12 @@ crate::lazy_bimap!(SEMAPHORE_MAP: BiMap<&'static str, &'static str> =
 
 pub struct Semaphore {}
 
+impl Default for Semaphore {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
 impl Semaphore {
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (&str, &str)> + '_> {
         Box::new(
@@ -55,12 +61,6 @@ impl Semaphore {
                 .into_iter()
                 .zip(SEMAPHORE_POSITIONS.into_iter()),
         )
-    }
-}
-
-impl Default for Semaphore {
-    fn default() -> Self {
-        Self {}
     }
 }
 

@@ -61,6 +61,8 @@ impl CodeFrame for IcsFlagsFrame {
         );
         ui.add_space(8.0);
 
+        ui.label("Public domain flag images from Wikipedia");
+        ui.add_space(2.0);
         egui::Grid::new("ics_flag_grid")
             .num_columns(3)
             .striped(true)
