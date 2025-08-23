@@ -1,4 +1,4 @@
-use utils::errors::GeneralError;
+use utils::{errors::GeneralError, bracket_matching::paren_ranges_nonoverlapping_subsets};
 
 use crate::{ traits::Code};
 
@@ -64,31 +64,6 @@ pub fn number_to_set(mut n: u32) -> String {
     out
 }
 
-pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)>, GeneralError> {
-    let mut starts = Vec::new();
-    let mut pairs: Vec<(usize, usize)> = Vec::new();
-
-    for (i, c) in s.chars().enumerate() {
-        if c == '{' {
-            starts.push(i);
-        } else if c == '}' {
-            if starts.is_empty() {
-                return Err(GeneralError::input("brackets in the set do not match"));
-            } else {
-                let pair = (starts.pop().unwrap(), i + 1);
-                if pair.0 == 0 {
-                    break;
-                }
-                pairs.retain(|x| x.0 < pair.0 && x.1 < pair.1);
-                pairs.push(pair);
-            }
-        } else {
-            return Err(GeneralError::input("invalid character"));
-        }
-    }
-
-    Ok(pairs)
-}
 
 pub struct Ackermann {}
 
@@ -116,12 +91,11 @@ impl Code for Ackermann {
         let mut out = Vec::new();
         for set in text.split(",").map(|s| s.trim()) {
             let mut n = 0;
-            let ranges = paren_ranges_nonoverlapping_subsets(set)?;
-            for range in ranges {
+            for range in paren_ranges_nonoverlapping_subsets(set,'{', '}')? {
                 n += 1_u32
                     << SMALL_SETS
                         .iter()
-                        .position(|x| *x == &set[range.0..range.1])
+                        .position(|x| *x == &set[range.clone()])
                         .unwrap();
             }
             out.push(n.to_string());

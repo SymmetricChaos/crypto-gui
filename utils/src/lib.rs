@@ -1,5 +1,6 @@
 pub mod bit_polynomial;
 pub mod bits;
+pub mod bracket_matching;
 pub mod byte_equality_check;
 pub mod byte_formatting;
 pub mod elliptic_curves;
@@ -10,6 +11,5 @@ pub mod other_word_sizes;
 pub mod padding;
 pub mod polynomial_interpolation;
 pub mod preset_alphabet;
-pub mod sets;
 pub mod text_functions;
 pub mod vecstring;
