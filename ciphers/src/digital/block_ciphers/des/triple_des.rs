@@ -1,8 +1,11 @@
-use utils::byte_formatting::{overwrite_bytes, ByteFormat};
+use utils::{
+    byte_formatting::{overwrite_bytes, ByteFormat},
+    errors::GeneralError,
+};
 
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_cipher_for_block_cipher, CipherError,
+    impl_cipher_for_block_cipher,
 };
 
 use super::des_functions::*;
@@ -32,7 +35,7 @@ impl Default for TripleDes {
 crate::block_cipher_builders! {TripleDes, u64}
 
 impl TripleDes {
-    pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), CipherError> {
+    pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), GeneralError> {
         let mut temp = [[0u64; 16]; 3];
         for (i, key) in keys.into_iter().enumerate() {
             temp[i] = des_ksa(key)?;

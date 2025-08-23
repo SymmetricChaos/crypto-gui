@@ -1,5 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use rand::{thread_rng, Rng};
+use utils::errors::GeneralError;
 
 pub struct Dryad {
     pub cipher_rows: [String; 25],
@@ -62,7 +63,7 @@ impl Dryad {
 }
 
 impl Cipher for Dryad {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let breaks = [0, 4, 7, 10, 12, 14, 17, 19, 21, 23, 25];
         let alphabet = &self.cipher_rows[self.message_key];
 
@@ -71,7 +72,7 @@ impl Cipher for Dryad {
         let mut rng = thread_rng();
         for c in text.chars() {
             if !c.is_ascii_digit() {
-                return Err(CipherError::input("DRYAD only encrypts digits"));
+                return Err(GeneralError::input("DRYAD only encrypts digits"));
             }
             let n = c.to_digit(10).unwrap() as usize;
             let pos = rng.gen_range(breaks[n]..breaks[n + 1]);
@@ -81,7 +82,7 @@ impl Cipher for Dryad {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         let alphabet = &self.cipher_rows[self.message_key];
 

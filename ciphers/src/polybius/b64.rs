@@ -1,7 +1,7 @@
 use super::PolybiusSquare;
+use crate::traits::Cipher;
 use crate::transposition::Columnar;
-use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 pub struct B64 {
     polybius: PolybiusSquare,
@@ -44,7 +44,7 @@ impl B64 {
 }
 
 impl Cipher for B64 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let t1 = self.polybius.encrypt(text)?;
         let t2 = self.columnar1.encrypt(&t1)?;
         let t3 = self.columnar2.encrypt(&t2)?;
@@ -52,7 +52,7 @@ impl Cipher for B64 {
         Ok(t4)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let t1 = self.polybius.encrypt(text)?;
         let t2 = self.columnar2.decrypt(&t1)?;
         let t3 = self.columnar1.decrypt(&t2)?;

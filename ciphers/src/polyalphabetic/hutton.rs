@@ -1,6 +1,6 @@
 use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet, vecstring::VecString};
-
-use crate::{errors::CipherError, traits::Cipher};
+use utils::errors::GeneralError;
+use crate::{traits::Cipher};
 
 #[derive(PartialEq, Eq)]
 pub enum HuttonVersion {
@@ -45,7 +45,7 @@ impl Hutton {
 }
 
 impl Cipher for Hutton {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::with_capacity(text.len());
         // mutable alphabet for use while function runs
         let mut inner_alphabet = self.keyed_alpha.clone();
@@ -72,7 +72,7 @@ impl Cipher for Hutton {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::with_capacity(text.len());
         let mut inner_alphabet = self.keyed_alpha.clone();
         let len = self.plain_alphabet.len();

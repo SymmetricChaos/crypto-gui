@@ -86,22 +86,22 @@ impl CipherFrame for A52Frame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| ciphers::CipherError::general("byte format error"))?;
+            .map_err(|_| utils::errors::GeneralError::general("byte format error"))?;
 
         self.cipher.encrypt_bytes(&mut bytes);
 
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| ciphers::CipherError::general("byte format error"))?;
+            .map_err(|_| utils::errors::GeneralError::general("byte format error"))?;
 
         self.cipher.decrypt_bytes(&mut bytes);
 

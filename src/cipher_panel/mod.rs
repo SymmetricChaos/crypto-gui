@@ -1,7 +1,4 @@
-use ciphers::{
-    errors::CipherError,
-    ids::{cipher_categories::CipherCategory, CipherId},
-};
+use ciphers::ids::{cipher_categories::CipherCategory, CipherId};
 use egui::Ui;
 
 mod a51_controls;
@@ -100,11 +97,11 @@ macro_rules! simple_cipher {
             *self = Self::default()
         }
 
-        fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
             ciphers::Cipher::encrypt(&self.cipher, text)
         }
 
-        fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
             ciphers::Cipher::decrypt(&self.cipher, text)
         }
     };
@@ -117,13 +114,13 @@ macro_rules! simple_block_cipher {
             *self = Self::default()
         }
 
-        fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
             use ciphers::digital::block_ciphers::block_cipher::BlockCipher;
             // Interpret the input
             let mut bytes = self
                 .input_format
                 .text_to_bytes(text)
-                .map_err(|e| ciphers::errors::CipherError::Input(e.to_string()))?;
+                .map_err(|e| ciphers::errors::GeneralError::input(e.to_string()))?;
 
             // Provide the necessary kind and amount of padding
             if self.cipher.mode.padded() {
@@ -159,18 +156,18 @@ macro_rules! simple_block_cipher {
             Ok(self.output_format.byte_slice_to_text(&bytes))
         }
 
-        fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
             use crate::digital::block_ciphers::block_cipher::BlockCipher;
             // Interpret the input
             let mut bytes = self
                 .input_format
                 .text_to_bytes(text)
-                .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
+                .map_err(|e| crate::errors::GeneralError::input(e.to_string()))?;
 
             // If padding is needed return an error if the input for decryption is the wrong size
             if self.mode.padded() {
                 if bytes.len() % $blocksize != 0 {
-                    return Err(crate::errors::CipherError::General(format!(
+                    return Err(crate::errors::GeneralError::General(format!(
                         "decryption requires blocks of exactly {} bytes",
                         $blocksize
                     )));
@@ -217,8 +214,8 @@ pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
     fn randomize(&mut self);
     fn reset(&mut self);
-    fn encrypt_string(&self, text: &str) -> Result<String, CipherError>;
-    fn decrypt_string(&self, text: &str) -> Result<String, CipherError>;
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError>;
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError>;
 }
 
 // Quick simple combo box builder

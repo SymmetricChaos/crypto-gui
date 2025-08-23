@@ -1,6 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use std::char;
-use utils::text_functions::keyed_alphabet;
+use utils::{errors::GeneralError, text_functions::keyed_alphabet};
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
@@ -36,7 +36,7 @@ impl StraddlingCheckerboard {
         self.top_row = keyed_alphabet(row, "0123456789")
     }
 
-    fn char_to_num(&self, c: char) -> Result<usize, CipherError> {
+    fn char_to_num(&self, c: char) -> Result<usize, GeneralError> {
         if let Some(mut n) = self.letter_rows.iter().position(|x| *x == c) {
             if n >= self.gaps.0 {
                 n += 1
@@ -46,18 +46,18 @@ impl StraddlingCheckerboard {
             }
             Ok(n)
         } else {
-            Err(CipherError::invalid_input_char(c))
+            Err(GeneralError::invalid_input_char(c))
         }
     }
 
-    fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(), CipherError> {
+    fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(), GeneralError> {
         let y_digit = num / 10;
         let x_digit = self.top_row.chars().nth(num % 10).unwrap();
         match y_digit {
             0 => output.push_str(&format!("{}", x_digit)),
             1 => output.push_str(&format!("{}{}", self.gap_0_char(), x_digit)),
             2 => output.push_str(&format!("{}{}", self.gap_1_char(), x_digit)),
-            _ => return Err(CipherError::input("invalid character")),
+            _ => return Err(GeneralError::input("invalid character")),
         }
         Ok(())
     }
@@ -109,7 +109,7 @@ impl StraddlingCheckerboard {
 }
 
 impl Cipher for StraddlingCheckerboard {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::with_capacity(text.len());
         let mut digit_mode = false;
 
@@ -119,7 +119,7 @@ impl Cipher for StraddlingCheckerboard {
             if digit_mode {
                 // check that c is a digit and return Error if not
                 if !c.is_ascii_digit() {
-                    return Err(CipherError::input(
+                    return Err(GeneralError::input(
                         "only digits 0 to 9 can be coded as digits",
                     ));
                 }
@@ -139,7 +139,7 @@ impl Cipher for StraddlingCheckerboard {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         let mut digits = text.chars();
 

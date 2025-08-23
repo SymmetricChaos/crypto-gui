@@ -1,8 +1,11 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use num::integer::Roots;
 use std::fmt;
-use utils::{math_functions::is_square, preset_alphabet::Alphabet, text_functions::keyed_alphabet};
+use utils::{
+    errors::GeneralError, math_functions::is_square, preset_alphabet::Alphabet,
+    text_functions::keyed_alphabet,
+};
 
 pub struct Playfair {
     pub square: String,
@@ -35,10 +38,10 @@ impl Playfair {
             .collect_vec()
     }
 
-    pub fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
+    pub fn char_to_position(&self, symbol: char) -> Result<(usize, usize), GeneralError> {
         let num = match self.square.chars().position(|x| x == symbol) {
             Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
+            None => return Err(GeneralError::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -86,14 +89,14 @@ impl Playfair {
         }
     }
 
-    pub fn validate_settings(&self) -> Result<(), CipherError> {
+    pub fn validate_settings(&self) -> Result<(), GeneralError> {
         if !is_square(self.square.chars().count()) {
-            return Err(CipherError::alphabet(
+            return Err(GeneralError::alphabet(
                 "alphabet must have a square number of characters",
             ));
         }
         if !&self.square.contains(self.spacer) {
-            return Err(CipherError::Key(format!(
+            return Err(GeneralError::key(format!(
                 "spacer character {} is not in the alphabet",
                 self.spacer
             )));
@@ -113,14 +116,14 @@ impl Default for Playfair {
 }
 
 impl Cipher for Playfair {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
 
         for (n, (l, r)) in pairs.into_iter().enumerate() {
             if l == r {
-                return Err(CipherError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "found repeated character {l} at pair {n}, a spacer should be inserted",
                 )));
             }
@@ -133,14 +136,14 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
 
         for (l, r) in pairs {
             if l == r {
-                return Err(CipherError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "found repeated character {}, a spacer should be inserted",
                     l
                 )));

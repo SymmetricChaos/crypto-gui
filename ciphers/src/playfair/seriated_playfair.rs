@@ -1,9 +1,7 @@
-use itertools::Itertools;
-use utils::text_functions::string_chunks;
-
-use crate::{Cipher, CipherError};
-
 use super::Playfair;
+use crate::Cipher;
+use itertools::Itertools;
+use utils::{errors::GeneralError, text_functions::string_chunks};
 
 pub struct SeriatedPlayfair {
     pub period: usize,
@@ -47,7 +45,7 @@ impl SeriatedPlayfair {
 }
 
 impl Cipher for SeriatedPlayfair {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let groups = self.groups(text);
         let mut out = String::with_capacity(text.len() + 4); // maximum spacer size is four bytes
         for (l_str, r_str) in groups
@@ -58,7 +56,7 @@ impl Cipher for SeriatedPlayfair {
         {
             for (l, r) in l_str.chars().zip(r_str.chars()) {
                 if l == r {
-                    return Err(CipherError::Input(format!(
+                    return Err(GeneralError::input(format!(
                         "found repeated character {}, a spacer should be inserted",
                         l
                     )));
@@ -74,9 +72,9 @@ impl Cipher for SeriatedPlayfair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if text.chars().count() % 2 != 0 {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "decrypting a seriated playfair requires an even number of characters",
             ));
         }
@@ -91,7 +89,7 @@ impl Cipher for SeriatedPlayfair {
             .map(|c| c.collect_tuple().unwrap())
         {
             if l == r {
-                return Err(CipherError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "found repeated character {}, a spacer should be inserted",
                     l
                 )));

@@ -1,6 +1,6 @@
-use crate::errors::CipherError;
 use std::collections::HashMap;
 use std::hash::Hash;
+use utils::errors::GeneralError;
 
 pub struct Plugboard<A> {
     wiring: HashMap<A, A>,
@@ -15,16 +15,16 @@ impl<A: Hash + Eq + Clone> Default for Plugboard<A> {
 }
 
 impl<A: Hash + Eq + Clone> Plugboard<A> {
-    pub fn build(left: &[A], right: &[A]) -> Result<Plugboard<A>, CipherError> {
+    pub fn build(left: &[A], right: &[A]) -> Result<Plugboard<A>, GeneralError> {
         if left.len() != right.len() {
-            return Err(CipherError::general(
+            return Err(GeneralError::general(
                 "the lists of left and right entries must be the same length",
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
         for (l, r) in std::iter::zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
-                return Err(CipherError::general(
+                return Err(GeneralError::general(
                     "plugboard inputs cannot form chains or cycles",
                 ));
             }
@@ -34,9 +34,9 @@ impl<A: Hash + Eq + Clone> Plugboard<A> {
         Ok(Plugboard { wiring })
     }
 
-    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), CipherError> {
+    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), GeneralError> {
         if left.len() != right.len() {
-            return Err(CipherError::general(
+            return Err(GeneralError::general(
                 "the lists of left and right entries must be the same length",
             ));
         }
@@ -44,7 +44,7 @@ impl<A: Hash + Eq + Clone> Plugboard<A> {
 
         for (l, r) in std::iter::zip(left, right) {
             if l == r || self.wiring.contains_key(l) || self.wiring.contains_key(r) {
-                return Err(CipherError::general(
+                return Err(GeneralError::general(
                     "plugboard inputs cannot form chains or cycles",
                 ));
             }

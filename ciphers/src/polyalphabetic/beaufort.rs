@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
-
+use utils::errors::GeneralError;
 use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 use super::PolyMode;
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 
 pub struct Beaufort {
     pub keywords: Vec<String>,
@@ -87,24 +87,24 @@ impl Beaufort {
         self.alphabet.len()
     }
 
-    fn validate_key(&self) -> Result<(), CipherError> {
+    fn validate_key(&self) -> Result<(), GeneralError> {
         for key in self.keywords.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
-                    return Err(CipherError::invalid_alphabet_char(c));
+                    return Err(GeneralError::invalid_alphabet_char(c));
                 }
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_input(&self, text: &str) -> Result<(), GeneralError> {
         if text.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")));
+            return Err(GeneralError::input(String::from("No input text provided")));
         }
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(GeneralError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -113,7 +113,7 @@ impl Beaufort {
     fn autokey_prep(
         &self,
         text: &str,
-    ) -> Result<(Vec<usize>, VecDeque<usize>, String), CipherError> {
+    ) -> Result<(Vec<usize>, VecDeque<usize>, String), GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let text_nums: Vec<usize> = text
@@ -131,7 +131,7 @@ impl Beaufort {
         *self.alphabet.get_char_offset(k, -(t as i32)).unwrap()
     }
 
-    fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_cyclic(&self, text: &str) -> Result<String, GeneralError> {
         let nums: Vec<usize> = text
             .chars()
             .map(|x| self.alphabet.get_pos(x).unwrap())
@@ -143,11 +143,11 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_cyclic(&self, text: &str) -> Result<String, GeneralError> {
         self.encrypt_cyclic(text)
     }
 
-    fn encrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_auto(&self, text: &str) -> Result<String, GeneralError> {
         let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
@@ -159,7 +159,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_auto(&self, text: &str) -> Result<String, GeneralError> {
         let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
@@ -172,7 +172,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn encrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_prog(&self, text: &str) -> Result<String, GeneralError> {
         let text_nums: Vec<usize> = text
             .chars()
             .map(|x| self.alphabet.get_pos(x).unwrap())
@@ -193,7 +193,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_prog(&self, text: &str) -> Result<String, GeneralError> {
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text
             .chars()
@@ -217,7 +217,7 @@ impl Beaufort {
 }
 
 impl Cipher for Beaufort {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -227,7 +227,7 @@ impl Cipher for Beaufort {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {

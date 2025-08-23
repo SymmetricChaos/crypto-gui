@@ -130,7 +130,7 @@ impl CipherFrame for LeaFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             LeaSelect::Lea128 => self.cipher128.encrypt(text),
             LeaSelect::Lea192 => self.cipher192.encrypt(text),
@@ -138,7 +138,7 @@ impl CipherFrame for LeaFrame {
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             LeaSelect::Lea128 => self.cipher128.decrypt(text),
             LeaSelect::Lea192 => self.cipher192.decrypt(text),

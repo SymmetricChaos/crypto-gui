@@ -1,5 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use std::{iter::Cycle, slice::Iter};
+use utils::errors::GeneralError;
 use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -55,7 +56,7 @@ impl Quagmire {
 
     // Converts the ind_key_string into a vector of i32 that represents how
     // many spaces the ct_alphabet is rotated relative to its starting position
-    pub fn assign_ind_key(&mut self, key: &str) -> Result<(), CipherError> {
+    pub fn assign_ind_key(&mut self, key: &str) -> Result<(), GeneralError> {
         self.ind_key.clear();
         let ind_pos = self.indicator_position()? as i32;
         let len = self.alphabet.len() as i32;
@@ -67,25 +68,25 @@ impl Quagmire {
         };
         for c in key.chars() {
             let sh =
-                len + ind_pos - (ct.get_pos(c).ok_or(CipherError::invalid_key_char(c))? as i32);
+                len + ind_pos - (ct.get_pos(c).ok_or(GeneralError::invalid_key_char(c))? as i32);
             self.ind_key.push(sh % len)
         }
         Ok(())
     }
 
-    pub fn indicator_position(&self) -> Result<usize, CipherError> {
+    pub fn indicator_position(&self) -> Result<usize, GeneralError> {
         match self.version {
             QuagmireVersion::V2 => self
                 .alphabet
                 .get_pos(self.indicator)
-                .ok_or(CipherError::Key(format!(
+                .ok_or(GeneralError::key(format!(
                     "invalid indicator character `{}`",
                     self.indicator
                 ))),
             _ => self
                 .pt_key
                 .get_pos(self.indicator)
-                .ok_or(CipherError::Key(format!(
+                .ok_or(GeneralError::key(format!(
                     "invalid indicator character `{}`",
                     self.indicator
                 ))),
@@ -98,7 +99,7 @@ impl Quagmire {
 }
 
 impl Cipher for Quagmire {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let (pt, ct) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),
@@ -115,7 +116,7 @@ impl Cipher for Quagmire {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let (ct, pt) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),

@@ -1,8 +1,11 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use num::integer::Roots;
 use std::fmt::{self, Formatter};
-use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{
+    errors::GeneralError, math_functions::is_square, preset_alphabet::Alphabet,
+    vecstring::VecString,
+};
 
 pub struct PolybiusSquare {
     pub square: VecString,
@@ -54,26 +57,26 @@ impl PolybiusSquare {
     }
 
     // Cannot fail due to checks in encrypt/decrypt
-    fn position_to_char(&self, position: (char, char)) -> Result<char, CipherError> {
+    fn position_to_char(&self, position: (char, char)) -> Result<char, GeneralError> {
         let y = self
             .labels
             .get_pos(position.0)
-            .ok_or(CipherError::invalid_input_char(position.0))?;
+            .ok_or(GeneralError::invalid_input_char(position.0))?;
         let x = self
             .labels
             .get_pos(position.1)
-            .ok_or(CipherError::invalid_input_char(position.1))?;
+            .ok_or(GeneralError::invalid_input_char(position.1))?;
 
         let num = y * self.side_len + x;
         Ok(self.square.chars().nth(num).unwrap())
     }
 
-    fn check_settings(&self) -> Result<(), CipherError> {
+    fn check_settings(&self) -> Result<(), GeneralError> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"));
+            return Err(GeneralError::key("not enough labels for grid size"));
         }
         if !is_square(self.square.chars().count()) {
-            return Err(CipherError::alphabet(
+            return Err(GeneralError::alphabet(
                 "alphabet must have a square number of characters",
             ));
         }
@@ -103,7 +106,7 @@ impl PolybiusSquare {
 }
 
 impl Cipher for PolybiusSquare {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_settings()?;
 
         let mut out = String::with_capacity(text.chars().count() * 2);
@@ -114,13 +117,13 @@ impl Cipher for PolybiusSquare {
                 *self
                     .labels
                     .get_char(pos.0)
-                    .ok_or(CipherError::invalid_input_char(c))?,
+                    .ok_or(GeneralError::invalid_input_char(c))?,
             );
             out.push(
                 *self
                     .labels
                     .get_char(pos.1)
-                    .ok_or(CipherError::invalid_input_char(c))?,
+                    .ok_or(GeneralError::invalid_input_char(c))?,
             );
             if self.spaced {
                 out.push(' ')
@@ -134,7 +137,7 @@ impl Cipher for PolybiusSquare {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_settings()?;
 
         if text.is_empty() {
@@ -148,7 +151,7 @@ impl Cipher for PolybiusSquare {
                     continue;
                 }
                 if pair.chars().count() != 2 {
-                    return Err(CipherError::input(
+                    return Err(GeneralError::input(
                         "input groups must consists of two symbols",
                     ));
                 }
@@ -158,7 +161,7 @@ impl Cipher for PolybiusSquare {
             Ok(out)
         } else {
             if text.chars().count() % 2 != 0 {
-                return Err(CipherError::input(
+                return Err(GeneralError::input(
                     "Input text must have a length that is a multiple of two.",
                 ));
             }

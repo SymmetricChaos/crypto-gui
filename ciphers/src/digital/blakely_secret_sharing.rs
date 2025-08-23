@@ -1,6 +1,7 @@
 use rand::{thread_rng, Rng};
+use utils::errors::GeneralError;
 
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 
 // https://arxiv.org/pdf/1901.02802
 
@@ -25,9 +26,8 @@ impl Default for BlakelySecretSharing {
 impl BlakelySecretSharing {}
 
 impl Cipher for BlakelySecretSharing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let secret =
-            u64::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
+        let secret = u64::from_str_radix(text, 10).map_err(|e| GeneralError::input(e))?;
 
         let mut rng = thread_rng();
 
@@ -36,7 +36,7 @@ impl Cipher for BlakelySecretSharing {
         todo!()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         todo!()
     }
 }

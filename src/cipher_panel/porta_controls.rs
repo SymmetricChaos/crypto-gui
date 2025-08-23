@@ -31,7 +31,7 @@ impl CipherFrame for PortaFrame {
             match self.cipher.assign_key(&self.key_string) {
                 Ok(_) => (),
                 Err(e) => {
-                    ui.error_text(e.inner());
+                    ui.error_text(e);
                 }
             }
         }

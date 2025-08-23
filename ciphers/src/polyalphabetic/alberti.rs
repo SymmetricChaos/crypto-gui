@@ -1,4 +1,5 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
+use utils::errors::GeneralError;
 use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 
@@ -47,16 +48,16 @@ impl Alberti {
         self.fixed_alphabet.chars().count()
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), GeneralError> {
         if self.fixed_alphabet.len() != self.moving_alphabet.len() {
-            return Err(CipherError::alphabet("alphabets must be of equal length"));
+            return Err(GeneralError::alphabet("alphabets must be of equal length"));
         }
         Ok(())
     }
 }
 
 impl Cipher for Alberti {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut index = 0;
         let mut out = String::with_capacity(text.len());
@@ -67,16 +68,16 @@ impl Cipher for Alberti {
                 index = self
                     .moving_alphabet
                     .get_pos(s)
-                    .ok_or(CipherError::invalid_input_char(s))?;
+                    .ok_or(GeneralError::invalid_input_char(s))?;
                 out.push(*self.fixed_alphabet.get_char(index).unwrap());
             } else {
-                return Err(CipherError::invalid_input_char(s));
+                return Err(GeneralError::invalid_input_char(s));
             }
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut index = 0;
         let mut out = String::with_capacity(text.len());
@@ -87,10 +88,10 @@ impl Cipher for Alberti {
                 index = self
                     .fixed_alphabet
                     .get_pos(s)
-                    .ok_or(CipherError::invalid_input_char(s))?;
+                    .ok_or(GeneralError::invalid_input_char(s))?;
                 out.push(*self.moving_alphabet.get_char(index).unwrap());
             } else {
-                return Err(CipherError::invalid_input_char(s));
+                return Err(GeneralError::invalid_input_char(s));
             }
         }
         Ok(out)

@@ -1,8 +1,8 @@
 use itertools::Itertools;
 use rand::{thread_rng, RngCore};
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 
 pub struct XorSecretSplitting {
     pub input_format: ByteFormat,
@@ -67,9 +67,9 @@ impl XorSecretSplitting {
 }
 
 impl Cipher for XorSecretSplitting {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.n_splits < 2 {
-            return Err(CipherError::state(
+            return Err(GeneralError::state(
                 "secret splitting requires at least two shares",
             ));
         }
@@ -77,7 +77,7 @@ impl Cipher for XorSecretSplitting {
         let bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let out = self.encrypt_bytes(&bytes);
         Ok(out
             .iter()
@@ -85,19 +85,19 @@ impl Cipher for XorSecretSplitting {
             .join(&self.sep))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let splits = text.split(&self.sep).collect_vec();
         let mut split_bytes = Vec::new();
         for split in splits {
             split_bytes.push(
                 self.input_format
                     .text_to_bytes(split.trim())
-                    .map_err(|_| CipherError::input("byte format error"))?,
+                    .map_err(|_| GeneralError::input("byte format error"))?,
             );
         }
         for b in split_bytes.iter() {
             if b.len() != split_bytes[0].len() {
-                return Err(CipherError::input("all splits must be of equal length"));
+                return Err(GeneralError::input("all splits must be of equal length"));
             }
         }
         let out = self.decrypt_splits(&split_bytes);

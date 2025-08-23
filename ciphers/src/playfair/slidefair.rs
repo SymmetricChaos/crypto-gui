@@ -1,8 +1,8 @@
 use std::fmt::{self, Formatter};
 
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
-use utils::{preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{errors::GeneralError, preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
@@ -84,9 +84,9 @@ impl Slidefair {
         rows
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), GeneralError> {
         if !&self.alphabet.contains(self.spacer) {
-            return Err(CipherError::Key(format!(
+            return Err(GeneralError::key(format!(
                 "spacer character `{}` is not in the alphabet",
                 self.spacer
             )));
@@ -96,7 +96,7 @@ impl Slidefair {
 }
 
 impl Cipher for Slidefair {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {
@@ -110,7 +110,7 @@ impl Cipher for Slidefair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {

@@ -1,6 +1,7 @@
 use rand::{thread_rng, Rng};
+use utils::errors::GeneralError;
 
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 
 // https://arxiv.org/pdf/1901.02802
 
@@ -27,15 +28,14 @@ impl Default for AMSecretSharing {
 impl AMSecretSharing {}
 
 impl Cipher for AMSecretSharing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let secret =
-            u64::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
+        let secret = u64::from_str_radix(text, 10).map_err(|e| GeneralError::input(e))?;
 
         // to be filled with an increasing sequence of pairwise coprime numbers
         let mut sequence: Vec<u64> = Vec::with_capacity((self.n + 1) as usize);
 
         if sequence[0] >= secret {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "secret must be less than the first term of the sequence",
             ));
         }
@@ -45,7 +45,7 @@ impl Cipher for AMSecretSharing {
         todo!()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         todo!()
     }
 }

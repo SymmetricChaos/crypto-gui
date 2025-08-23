@@ -8,8 +8,6 @@ pub mod tactical;
 pub mod transposition;
 pub mod vic;
 
-pub mod errors;
-pub use errors::CipherError;
 pub mod ids;
 pub mod rotors;
 pub mod traits;

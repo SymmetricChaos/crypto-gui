@@ -1,8 +1,9 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use rand::thread_rng;
 use std::{collections::HashSet, num::ParseIntError};
 use utils::{
+    errors::GeneralError,
     grid::{Grid, Symbol},
     preset_alphabet::Alphabet,
     vecstring::VecString,
@@ -37,10 +38,10 @@ impl TurningGrille {
     //     a new blocked grid is created
     //     the first quarter of the numbers are used to punch out spaces
     //     then the grid is rotated and the next quarters, and so on
-    pub fn build_grid(&mut self) -> Result<(), CipherError> {
+    pub fn build_grid(&mut self) -> Result<(), GeneralError> {
         // These next two blocks find likely errors
         if self.key_length() != self.subgrille_size() {
-            return Err(CipherError::Key(format!(
+            return Err(GeneralError::key(format!(
                 "there should be {} key values provided but {} were found",
                 self.subgrille_size(),
                 self.key_length()
@@ -51,10 +52,10 @@ impl TurningGrille {
         for key in &self.keys {
             for n in key {
                 if n >= &self.subgrille_size() {
-                    return Err(CipherError::Key(format!("invalid key value found: {}", n)));
+                    return Err(GeneralError::key(format!("invalid key value found: {}", n)));
                 }
                 if !set.insert(n) {
-                    return Err(CipherError::Key(format!(
+                    return Err(GeneralError::key(format!(
                         "duplicate key value found: {}",
                         n
                     )));
@@ -139,9 +140,9 @@ impl TurningGrille {
 }
 
 impl Cipher for TurningGrille {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if text.chars().count() > self.grille_size() {
-            return Err(CipherError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "a {}x{} turning grille cipher can encrypt a maximum of {} characters at a time",
                 self.grille_width(),
                 self.grille_width(),
@@ -183,9 +184,9 @@ impl Cipher for TurningGrille {
         Ok(output_grid.get_cols().collect::<String>())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if text.chars().count() != self.grille_size() {
-            return Err(CipherError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "to decrypt a {}x{} turning grille cipher exactly {} characters are needed",
                 self.grille_width(),
                 self.grille_width(),

@@ -1,4 +1,5 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
+use utils::errors::GeneralError;
 use utils::vecstring::VecString;
 
 pub struct Chaocipher {
@@ -38,14 +39,16 @@ impl Default for Chaocipher {
 }
 
 impl Cipher for Chaocipher {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = right.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
+            let n = right
+                .get_pos(c)
+                .ok_or(GeneralError::invalid_input_char(c))?;
             out.push(*left.get_char(n).unwrap()); // Error will be caught by previous line
             left_permute(&mut left, n);
             right_permute(&mut right, n);
@@ -53,14 +56,14 @@ impl Cipher for Chaocipher {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = left.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
+            let n = left.get_pos(c).ok_or(GeneralError::invalid_input_char(c))?;
             out.push(*right.get_char(n).unwrap()); // Error will be caught by previous line
             left_permute(&mut left, n);
             right_permute(&mut right, n);

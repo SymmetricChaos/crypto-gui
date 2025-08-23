@@ -1,9 +1,12 @@
-use utils::byte_formatting::{fill_u32s_be, make_u32s_be, u32s_to_bytes_be, ByteFormat};
+use utils::{
+    byte_formatting::{fill_u32s_be, make_u32s_be, u32s_to_bytes_be, ByteFormat},
+    errors::GeneralError,
+};
 
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_cipher_for_block_cipher, CipherError,
+    impl_cipher_for_block_cipher,
 };
 
 pub struct Blowfish {
@@ -90,12 +93,12 @@ impl Blowfish {
         }
     }
 
-    pub fn valid_key(&self) -> Result<(), CipherError> {
+    pub fn valid_key(&self) -> Result<(), GeneralError> {
         if self.key.len() < 4 {
-            return Err(CipherError::key("Blowfish key must be at least 4 bytes"));
+            return Err(GeneralError::key("Blowfish key must be at least 4 bytes"));
         }
         if self.key.len() > 72 {
-            return Err(CipherError::key("Blowfish key must be less than 72 bytes"));
+            return Err(GeneralError::key("Blowfish key must be less than 72 bytes"));
         }
         Ok(())
     }

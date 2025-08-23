@@ -19,16 +19,16 @@ pub mod wake;
 macro_rules! impl_cipher_for_stream_cipher {
     ($name:ident) => {
         impl crate::Cipher for $name {
-            fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+            fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|e| crate::CipherError::Input(e.to_string()))?;
+                    .map_err(|e| utils::errors::GeneralError::input(e))?;
                 self.encrypt_bytes(&mut bytes);
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
 
-            fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+            fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 self.encrypt(text)
             }
         }

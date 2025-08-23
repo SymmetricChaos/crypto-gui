@@ -1,26 +1,24 @@
-use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::Alphabet;
-use utils::vecstring::VecString;
-
+use crate::traits::Cipher;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet, vecstring::VecString};
 pub struct Caesar {
     pub shift: i32,
     pub alphabet: VecString,
 }
 
 impl Caesar {
-    fn encrypt_char(&self, c: char) -> Result<char, CipherError> {
+    fn encrypt_char(&self, c: char) -> Result<char, GeneralError> {
         let p = self
             .alphabet
             .get_pos(c)
-            .ok_or(CipherError::invalid_input_char(c))?;
+            .ok_or(GeneralError::invalid_input_char(c))?;
         Ok(*self.alphabet.get_char_offset(p, self.shift).unwrap())
     }
 
-    fn decrypt_char(&self, c: char) -> Result<char, CipherError> {
+    fn decrypt_char(&self, c: char) -> Result<char, GeneralError> {
         let p = self
             .alphabet
             .get_pos(c)
-            .ok_or(CipherError::invalid_input_char(c))?;
+            .ok_or(GeneralError::invalid_input_char(c))?;
         Ok(*self.alphabet.get_char_offset(p, -self.shift).unwrap())
     }
 
@@ -39,7 +37,7 @@ impl Default for Caesar {
 }
 
 impl Cipher for Caesar {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut vec = Vec::new();
         for c in text.chars() {
             vec.push(self.encrypt_char(c)?)
@@ -47,7 +45,7 @@ impl Cipher for Caesar {
         Ok(vec.into_iter().collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut vec = Vec::new();
         for c in text.chars() {
             vec.push(self.decrypt_char(c)?)

@@ -1,7 +1,6 @@
+use crate::{polybius::StraddlingCheckerboard, transposition::Columnar, Cipher};
 use itertools::Itertools;
-use utils::{preset_alphabet::Alphabet, text_functions::rank_str};
-
-use crate::{polybius::StraddlingCheckerboard, transposition::Columnar, Cipher, CipherError};
+use utils::{errors::GeneralError, preset_alphabet::Alphabet, text_functions::rank_str};
 
 pub struct Vic {
     pub key_group: String,
@@ -24,9 +23,9 @@ impl Default for Vic {
 }
 
 impl Vic {
-    fn sequencing(&self, text: &str, alphabet: &str) -> Result<String, CipherError> {
+    fn sequencing(&self, text: &str, alphabet: &str) -> Result<String, GeneralError> {
         Ok(rank_str(&text, alphabet)
-            .map_err(|e| CipherError::Key(format!("{:?}", e)))?
+            .map_err(|e| GeneralError::key(&format!("{:?}", e)))?
             .iter()
             .map(|n| char::from_digit(((n + 1) % 10).try_into().unwrap(), 10).unwrap())
             .join(""))
@@ -72,7 +71,7 @@ impl Vic {
         self.date.chars().filter(|c| c.is_ascii_digit()).collect()
     }
 
-    pub fn key_derivation_string(&self) -> Result<String, CipherError> {
+    pub fn key_derivation_string(&self) -> Result<String, GeneralError> {
         let mut derivation = String::new();
         let date_digits = self.extract_date();
 
@@ -204,7 +203,7 @@ impl Vic {
         Ok(derivation)
     }
 
-    pub fn key_derivation(&self) -> Result<(String, String, String), CipherError> {
+    pub fn key_derivation(&self) -> Result<(String, String, String), GeneralError> {
         let date_digits = self.extract_date();
         let a = &self.key_group[..5];
         let b = &date_digits[..5];
@@ -271,7 +270,7 @@ impl Vic {
 }
 
 impl Cipher for Vic {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let (q, r, s) = self.key_derivation()?;
 
         let mut checkerboard = StraddlingCheckerboard::default();
@@ -290,7 +289,7 @@ impl Cipher for Vic {
         Ok(ctext)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let (q, r, s) = self.key_derivation()?;
 
         let mut diagonal_columnar = Columnar::default();

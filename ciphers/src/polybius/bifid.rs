@@ -1,6 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
-
 use super::PolybiusSquare;
+use crate::traits::Cipher;
+use utils::errors::GeneralError;
 
 /// The Bifid Cipher combines a Polybius Square with a simple transposition
 pub struct Bifid {
@@ -18,10 +18,10 @@ impl Default for Bifid {
 }
 
 impl Bifid {
-    // pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    // pub fn set_alphabet(&mut self) -> Result<(), GeneralError> {
     //     let new_alpha_len = self.polybius.alphabet_string.chars().count();
     //     if !new_alpha_len.is_power_of_two() {
-    //         return Err(CipherError::alphabet(
+    //         return Err(GeneralError::alphabet(
     //             "alphabet length must be a power of two to fill the grid",
     //         ));
     //     }
@@ -31,11 +31,11 @@ impl Bifid {
 }
 
 impl Cipher for Bifid {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if len % self.block_size != 0 {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "Input length must be a multiple of the block size",
             ));
         };
@@ -59,11 +59,11 @@ impl Cipher for Bifid {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if vector.len() % self.block_size != 0 {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "Input length must be a multiple of the block size",
             ));
         };

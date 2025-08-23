@@ -1,7 +1,10 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use num::integer::Roots;
-use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{
+    errors::GeneralError, math_functions::is_square, preset_alphabet::Alphabet,
+    vecstring::VecString,
+};
 
 pub struct TwoSquare {
     pub alphabet: VecString,
@@ -60,10 +63,10 @@ impl TwoSquare {
         &self,
         symbol: char,
         alphabet: &VecString,
-    ) -> Result<(usize, usize), CipherError> {
+    ) -> Result<(usize, usize), GeneralError> {
         let num = match alphabet.get_pos(symbol) {
             Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
+            None => return Err(GeneralError::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -121,9 +124,9 @@ impl TwoSquare {
         out
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), GeneralError> {
         if !is_square(self.alphabet.chars().count()) {
-            return Err(CipherError::alphabet(
+            return Err(GeneralError::alphabet(
                 "alphabet must have a square number of characters",
             ));
         }
@@ -132,7 +135,7 @@ impl TwoSquare {
 }
 
 impl Cipher for TwoSquare {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut out = String::with_capacity(text.len());
 
@@ -147,7 +150,7 @@ impl Cipher for TwoSquare {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         let mut out = String::with_capacity(text.len());
 

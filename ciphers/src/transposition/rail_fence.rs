@@ -1,5 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use std::iter::Iterator;
+use utils::errors::GeneralError;
 
 pub struct RailFence {
     pub num_rails: usize, // the slider to control this should be limited
@@ -42,12 +43,12 @@ impl RailFence {
 }
 
 impl Cipher for RailFence {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.num_rails < 2 {
-            return Err(CipherError::key("Rail Fence must have at least two rails"));
+            return Err(GeneralError::key("Rail Fence must have at least two rails"));
         }
         if self.num_rails <= self.start_rail {
-            return Err(CipherError::key("invalid starting rail"));
+            return Err(GeneralError::key("invalid starting rail"));
         }
 
         let mut rows: Vec<Vec<char>> = vec![Vec::new(); self.num_rails];
@@ -67,12 +68,12 @@ impl Cipher for RailFence {
     }
 
     // There's probably an easier way to do this.
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.num_rails < 2 {
-            return Err(CipherError::key("Rail Fence must have at least two rails"));
+            return Err(GeneralError::key("Rail Fence must have at least two rails"));
         }
         if self.num_rails <= self.start_rail {
-            return Err(CipherError::key("invalid starting rail"));
+            return Err(GeneralError::key("invalid starting rail"));
         }
 
         // Count how many letters must be on each rail

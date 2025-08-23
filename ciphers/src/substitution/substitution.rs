@@ -1,6 +1,5 @@
-use utils::{preset_alphabet::Alphabet, vecstring::VecString};
-
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet, vecstring::VecString};
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
@@ -27,28 +26,28 @@ impl GeneralSubstitution {
         *self.pt_alphabet.get_char(pos).unwrap()
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), GeneralError> {
         if self.pt_alphabet.chars().count() != self.ct_alphabet.chars().count() {
-            return Err(CipherError::key(
+            return Err(GeneralError::key(
                 "the input and output alphabets must have the same length",
             ));
         }
         Ok(())
     }
 
-    fn validate_text_encrypt(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_text_encrypt(&self, text: &str) -> Result<(), GeneralError> {
         for c in text.chars() {
             if !self.pt_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(GeneralError::invalid_input_char(c));
             }
         }
         Ok(())
     }
 
-    fn validate_text_decrypt(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_text_decrypt(&self, text: &str) -> Result<(), GeneralError> {
         for c in text.chars() {
             if !self.ct_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(GeneralError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -67,14 +66,14 @@ impl Default for GeneralSubstitution {
 }
 
 impl Cipher for GeneralSubstitution {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         self.validate_text_encrypt(text)?;
         let out = text.chars().map(|c| self.encrypt_char(c)).collect();
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_settings()?;
         self.validate_text_decrypt(text)?;
         let out = text.chars().map(|c| self.decrypt_char(c)).collect();

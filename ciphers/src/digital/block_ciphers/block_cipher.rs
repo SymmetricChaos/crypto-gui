@@ -1,6 +1,6 @@
-use crate::CipherError;
 use std::fmt::Display;
 use strum::EnumIter;
+use utils::errors::GeneralError;
 use utils::{
     byte_formatting::{overwrite_bytes, xor_into_bytes},
     math_functions::incr_array_ctr_be,
@@ -348,24 +348,24 @@ impl Default for BCPadding {
 }
 
 impl BCPadding {
-    pub fn add_padding(&self, bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
+    pub fn add_padding(&self, bytes: &mut Vec<u8>, block_size: u32) -> Result<(), GeneralError> {
         match self {
             BCPadding::None => none_padding(bytes, block_size),
             BCPadding::Bit => bit_padding(bytes, block_size),
             BCPadding::Pkcs => pkcs5_padding(bytes, block_size),
             BCPadding::Ansi923 => ansi923_padding(bytes, block_size),
         }
-        .map_err(|e| CipherError::General(e.to_string()))
+        .map_err(|e| GeneralError::general(e.to_string()))
     }
 
-    pub fn strip_padding(&self, bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
+    pub fn strip_padding(&self, bytes: &mut Vec<u8>, block_size: u32) -> Result<(), GeneralError> {
         match self {
             BCPadding::None => strip_none_padding(bytes, block_size),
             BCPadding::Bit => strip_bit_padding(bytes),
             BCPadding::Pkcs => strip_pkcs5_padding(bytes),
             BCPadding::Ansi923 => strip_ansi923_padding(bytes),
         }
-        .map_err(|e| CipherError::General(e.to_string()))
+        .map_err(|e| GeneralError::general(e.to_string()))
     }
 
     pub fn info(&self) -> &'static str {

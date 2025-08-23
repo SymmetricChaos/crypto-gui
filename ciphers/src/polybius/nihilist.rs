@@ -1,7 +1,7 @@
 use super::PolybiusSquare;
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use num::integer::Roots;
-use utils::vecstring::VecString;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 pub struct Nihilist {
     pub polybius: PolybiusSquare,
@@ -25,13 +25,13 @@ impl Nihilist {
         polybius_keyword: &str,
         additive_keyword: &str,
         alphabet: &str,
-    ) -> Result<(), CipherError> {
+    ) -> Result<(), GeneralError> {
         self.polybius.square = VecString::keyed_alphabet(polybius_keyword, alphabet);
         self.polybius.side_len = alphabet.chars().count().sqrt();
         self.keyword = self
             .polybius
             .encrypt(additive_keyword)
-            .or(Err(CipherError::input("invalid additive key")))?
+            .or(Err(GeneralError::input("invalid additive key")))?
             .split(' ')
             .filter(|s| !s.is_empty())
             .map(|s| usize::from_str_radix(&s, 10).unwrap())
@@ -45,7 +45,7 @@ impl Nihilist {
 }
 
 impl Cipher for Nihilist {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::with_capacity(text.chars().count() * 2);
 
         let polybius_encrypt = self.polybius.encrypt(text)?;
@@ -62,7 +62,7 @@ impl Cipher for Nihilist {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut temp = String::with_capacity(text.len() / 3);
         for (group, key_n) in text
             .split(' ')
@@ -70,10 +70,10 @@ impl Cipher for Nihilist {
             .zip(self.keyword.iter().cycle())
         {
             let n = usize::from_str_radix(group, 10)
-                .map_err(|_| CipherError::invalid_input_group(group))?;
+                .map_err(|_| GeneralError::invalid_input_group(group))?;
             let t = n
                 .checked_sub(*key_n)
-                .ok_or(CipherError::input("invalid subtraction occured"))?;
+                .ok_or(GeneralError::input("invalid subtraction occured"))?;
             temp.push_str(&format!("{} ", t));
         }
         self.polybius.decrypt(&temp)

@@ -1,6 +1,6 @@
 use super::{padded_bytes_to_u64_be, AsconState};
-use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError};
-use utils::byte_formatting::ByteFormat;
+use crate::digital::block_ciphers::block_cipher::BCMode;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 pub struct Ascon80pq {
     pub mode: BCMode,
@@ -141,9 +141,9 @@ impl Ascon80pq {
         ctext
     }
 
-    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, GeneralError> {
         if bytes.len() < 16 {
-            return Err(CipherError::general(
+            return Err(GeneralError::general(
                 "authentication failed, message too short",
             ));
         }
@@ -190,7 +190,7 @@ impl Ascon80pq {
             Ok(ptext)
         } else {
             // println!("{:02x?}", ptext);
-            Err(CipherError::general("authentication failed"))
+            Err(GeneralError::general("authentication failed"))
         }
     }
 }

@@ -1,10 +1,10 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use std::{
     fmt::{self, Formatter},
     sync::LazyLock,
 };
-use utils::vecstring::VecString;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Cage {
@@ -58,10 +58,10 @@ impl Rotor {
         self.alphabet.rotate_left(1)
     }
 
-    pub fn set_pins(&mut self, pins: &str) -> Result<(), CipherError> {
+    pub fn set_pins(&mut self, pins: &str) -> Result<(), GeneralError> {
         for p in pins.chars() {
             if !self.alphabet.contains(p) {
-                return Err(CipherError::key(
+                return Err(GeneralError::key(
                     "effective pins must be in the Rotor's alphabet",
                 ));
             }
@@ -170,7 +170,7 @@ impl Default for M209 {
 }
 
 impl M209 {
-    pub fn set_pins(&mut self, pins: [&str; 6]) -> Result<(), CipherError> {
+    pub fn set_pins(&mut self, pins: [&str; 6]) -> Result<(), GeneralError> {
         for (r, p) in self.get_wheels().zip(pins) {
             r.set_pins(p)?
         }
@@ -220,7 +220,7 @@ impl M209 {
 }
 
 impl Cipher for M209 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let nums = text.chars().map(|x| char_to_usize(x)).collect_vec();
         let mut out = String::with_capacity(text.len());
 
@@ -263,7 +263,7 @@ impl Cipher for M209 {
     }
 
     // The M209 is reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.encrypt(text)
     }
 }

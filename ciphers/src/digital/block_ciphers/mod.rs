@@ -35,31 +35,31 @@ pub mod twofish;
 macro_rules! impl_cipher_for_block_cipher {
     ($cipher: ty, $blocksize: literal) => {
         impl crate::traits::Cipher for $cipher {
-            fn encrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+            fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 use crate::digital::block_ciphers::block_cipher::BlockCipher;
                 // Interpret the input
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
+                    .map_err(|e| utils::errors::GeneralError::input(&e.to_string()))?;
 
                 self.encrypt_bytes(&mut bytes);
 
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
 
-            fn decrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+            fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 use crate::digital::block_ciphers::block_cipher::BlockCipher;
                 // Interpret the input
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
+                    .map_err(|e| utils::errors::GeneralError::input(&e.to_string()))?;
 
                 // If padding is needed return an error if the input for decryption is the wrong size
                 if self.mode.padded() {
                     if bytes.len() % $blocksize != 0 {
-                        return Err(crate::errors::CipherError::General(format!(
+                        return Err(utils::errors::GeneralError::general(&format!(
                             "decryption requires blocks of exactly {} bytes",
                             $blocksize
                         )));

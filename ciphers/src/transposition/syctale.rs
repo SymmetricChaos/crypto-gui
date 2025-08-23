@@ -1,4 +1,5 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
+use utils::errors::GeneralError;
 
 pub struct Scytale {
     pub num_rails: usize,
@@ -15,9 +16,9 @@ impl Default for Scytale {
 }
 
 impl Cipher for Scytale {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.num_rails <= 1 {
-            return Err(CipherError::key("Scytale key must have at least 2 rails"));
+            return Err(GeneralError::key("Scytale key must have at least 2 rails"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.chars().count(), &self.num_rails);
@@ -43,9 +44,9 @@ impl Cipher for Scytale {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.num_rails <= 1 {
-            return Err(CipherError::key("Scytale key must be 2 or greater"));
+            return Err(GeneralError::key("Scytale key must be 2 or greater"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.chars().count(), &self.num_rails);

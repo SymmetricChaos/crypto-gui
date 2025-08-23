@@ -43,11 +43,11 @@ impl Wake {
 }
 
 impl Cipher for Wake {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         todo!()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         todo!()
     }
 }

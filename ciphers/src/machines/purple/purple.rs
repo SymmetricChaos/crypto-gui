@@ -1,7 +1,7 @@
 use super::switch::Switches;
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 use std::{cell::LazyCell, collections::HashMap};
-use utils::vecstring::VecString;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 pub const PURPLE_ALPHABET: LazyCell<VecString> =
     LazyCell::new(|| VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ"));
@@ -84,9 +84,9 @@ impl Default for Purple {
 }
 
 impl Purple {
-    pub fn set_plugboard(&mut self, string: &str) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self, string: &str) -> Result<(), GeneralError> {
         if string.chars().count() != 26 {
-            return Err(CipherError::key(
+            return Err(GeneralError::key(
                 "plugboard must have exactly 26 characters",
             ));
         }
@@ -101,12 +101,12 @@ impl Purple {
 }
 
 impl Cipher for Purple {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         // convert kana to romaji if needed
         // let text = if self.use_kana {
         //     let text = to_romaji(text, &NIHON_SHIKI);
         //     if let Err(e) = text {
-        //         return Err(CipherError::General(e.to_string()));
+        //         return Err(GeneralError::General(e.to_string()));
         //     }
         //     text.unwrap()
         // } else {
@@ -120,13 +120,13 @@ impl Cipher for Purple {
             let n = self
                 .plugboard
                 .get(&c)
-                .ok_or(CipherError::input("invalid character"))?;
+                .ok_or(GeneralError::input("invalid character"))?;
             let encrypted = switches.encrypt_num(*n);
             out.push(
                 *self
                     .plugboard_inv
                     .get(&encrypted)
-                    .ok_or(CipherError::input("invalid character"))?,
+                    .ok_or(GeneralError::input("invalid character"))?,
             );
             switches.step();
         }
@@ -134,12 +134,12 @@ impl Cipher for Purple {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         // convert kana to romaji if needed
         // let text = if self.use_kana {
         //     let text = to_romaji(text, &NIHON_SHIKI);
         //     if let Err(e) = text {
-        //         return Err(CipherError::General(e.to_string()));
+        //         return Err(GeneralError::General(e.to_string()));
         //     }
         //     text.unwrap()
         // } else {
@@ -153,13 +153,13 @@ impl Cipher for Purple {
             let n = self
                 .plugboard
                 .get(&c)
-                .ok_or(CipherError::input("invalid character"))?;
+                .ok_or(GeneralError::input("invalid character"))?;
             let encrypted = switches.decrypt_num(*n);
             out.push(
                 *self
                     .plugboard_inv
                     .get(&encrypted)
-                    .ok_or(CipherError::input("invalid character"))?,
+                    .ok_or(GeneralError::input("invalid character"))?,
             );
             switches.step();
         }

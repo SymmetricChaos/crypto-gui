@@ -1,11 +1,10 @@
+use crate::Cipher;
 use num::{bigint::ToBigUint, BigUint};
-use utils::byte_formatting::ByteFormat;
-
-use crate::{Cipher, CipherError};
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 pub struct ElGamal {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
+    pub output_format: ByteFormat,
 
     pub group_size: BigUint,
     pub generator: BigUint,
@@ -17,8 +16,8 @@ pub struct ElGamal {
 impl Default for ElGamal {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             group_size: BigUint::default(),
             generator: BigUint::default(),
@@ -36,10 +35,10 @@ impl ElGamal {
             .modpow(&self.private_key.to_biguint().unwrap(), &self.group_size);
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), CipherError> {
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), GeneralError> {
         let m = BigUint::from_bytes_be(bytes);
         if m > self.group_size {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "message length cannot be greater than group size",
             ));
         };
@@ -49,7 +48,7 @@ impl ElGamal {
         Ok((gamma.to_bytes_be(), delta.to_bytes_be()))
     }
 
-    pub fn decrypt_bytes(&self, gamma: &[u8], delta: &[u8]) -> Result<Vec<u8>, CipherError> {
+    pub fn decrypt_bytes(&self, gamma: &[u8], delta: &[u8]) -> Result<Vec<u8>, GeneralError> {
         let gamma = BigUint::from_bytes_be(gamma);
         let delta = BigUint::from_bytes_be(delta);
 
@@ -65,11 +64,11 @@ impl ElGamal {
 }
 
 impl Cipher for ElGamal {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let pair = self.encrypt_bytes(&mut bytes)?;
         let out = format!(
             "{}\n{}",
@@ -79,19 +78,19 @@ impl Cipher for ElGamal {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if !text.contains('\n') {
-            return Err(CipherError::input("no linebreak found"));
+            return Err(GeneralError::input("no linebreak found"));
         }
         let (t_gamma, t_delta) = text.split_once('\n').unwrap();
         let gamma = self
             .input_format
             .text_to_bytes(t_gamma)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let delta = self
             .input_format
             .text_to_bytes(t_delta)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
 
         let out = self.decrypt_bytes(&gamma, &delta)?;
         Ok(self.output_format.byte_slice_to_text(&out))
@@ -106,8 +105,8 @@ mod elgamal_tests {
     #[test]
     fn encrypt_decrypt() {
         let cipher = ElGamal {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             group_size: BigUint::from(2357_u32),
             generator: BigUint::from(2_u32),
@@ -123,8 +122,8 @@ mod elgamal_tests {
     #[test]
     fn encrypt() {
         let cipher = ElGamal {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             group_size: BigUint::from(2357_u32),
             generator: BigUint::from(2_u32),

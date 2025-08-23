@@ -211,11 +211,11 @@ impl CipherFrame for SolitaireFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.cipher.encrypt(text)
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.cipher.encrypt(text)
     }
 }

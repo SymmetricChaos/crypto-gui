@@ -77,16 +77,16 @@ impl CipherFrame for Snow3GFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|e| ciphers::CipherError::Input(e.to_string()))?;
+            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
         self.cipher.encrypt_bytes(&mut bytes);
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.encrypt_string(text)
     }
 }

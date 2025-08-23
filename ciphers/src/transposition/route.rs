@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use crate::{
-    errors::CipherError,
+    errors::GeneralError,
     grid::Grid,
     text_aux::PresetAlphabet,
     text_functions::{random_sample_replace, rank_str},
@@ -148,9 +148,9 @@ impl Route {
 }
 
 impl Cipher for Route {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.dimensions.0 * self.dimensions.1 != text.chars().count() {
-            return Err(CipherError::Input());
+            return Err(GeneralError::input());
         }
         match self.route_type {
             Snake => Ok(self.encrypt_snake(text)),
@@ -158,9 +158,9 @@ impl Cipher for Route {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.dimensions.0 * self.dimensions.1 != text.chars().count() {
-            return Err(CipherError::Input());
+            return Err(GeneralError::input());
         }
         match self.route_type {
             Snake => Ok(self.decrypt_snake(text)),

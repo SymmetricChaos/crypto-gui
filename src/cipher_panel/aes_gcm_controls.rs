@@ -253,7 +253,7 @@ impl CipherFrame for AesGcmFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             AesGcmSelect::AesGcm128 => self.cipher128.encrypt(text),
             AesGcmSelect::AesGcm192 => self.cipher192.encrypt(text),
@@ -261,7 +261,7 @@ impl CipherFrame for AesGcmFrame {
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             AesGcmSelect::AesGcm128 => self.cipher128.decrypt(text),
             AesGcmSelect::AesGcm192 => self.cipher192.decrypt(text),

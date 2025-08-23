@@ -1,6 +1,7 @@
 use super::chacha_ietf::ChaChaIetf;
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 use num::{BigUint, Zero};
+use utils::errors::GeneralError;
 
 // https://datatracker.ietf.org/doc/html/rfc8439
 pub struct ChaCha20Poly1305 {
@@ -111,13 +112,13 @@ impl ChaCha20Poly1305 {
 }
 
 impl Cipher for ChaCha20Poly1305 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         // Create encrypted bytes
         let bytes = self
             .cipher
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let mut encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
 
         // The r key is restricted within the hash invocation
@@ -131,22 +132,22 @@ impl Cipher for ChaCha20Poly1305 {
             .byte_slice_to_text(&encrypted_bytes))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let message = self
             .cipher
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
 
         if message.len() < 16 {
-            return Err(CipherError::input("authentication tag is missing"));
+            return Err(GeneralError::input("authentication tag is missing"));
         }
 
         // Split the tag and the encrypted message
         let (encrypted_bytes, message_tag) = message.split_at(message.len() - 16);
 
         if message_tag != self.create_tag(&encrypted_bytes) {
-            return Err(CipherError::input("message failed authentication"));
+            return Err(GeneralError::input("message failed authentication"));
         }
 
         // ChaCha is reciprocal

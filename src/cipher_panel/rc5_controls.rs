@@ -193,7 +193,7 @@ impl CipherFrame for Rc5Frame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             SizeSelector::R16 => self.cipher_16.encrypt(text),
             SizeSelector::R32 => self.cipher_32.encrypt(text),
@@ -201,7 +201,7 @@ impl CipherFrame for Rc5Frame {
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             SizeSelector::R16 => self.cipher_16.decrypt(text),
             SizeSelector::R32 => self.cipher_32.decrypt(text),

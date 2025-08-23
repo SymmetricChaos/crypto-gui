@@ -1,6 +1,6 @@
 use super::{
-    ghash::Ghash,
     aes_multiplication::{mul2, mul3},
+    ghash::Ghash,
     sbox::{sbox, sub_word},
 };
 use itertools::Itertools;
@@ -269,9 +269,11 @@ macro_rules! aes_gcm_methods {
                 &self,
                 tag: &[u8],
                 message_bytes: &[u8],
-            ) -> Result<(), crate::CipherError> {
+            ) -> Result<(), utils::errors::GeneralError> {
                 if tag != self.create_tag(&message_bytes) {
-                    return Err(crate::CipherError::input("message failed authentication"));
+                    return Err(utils::errors::GeneralError::input(
+                        "message failed authentication",
+                    ));
                 } else {
                     Ok(())
                 }
@@ -279,11 +281,11 @@ macro_rules! aes_gcm_methods {
         }
 
         impl crate::Cipher for $name {
-            fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+            fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|_| crate::CipherError::input("byte format error"))?;
+                    .map_err(|_| utils::errors::GeneralError::input("byte format error"))?;
 
                 self.encrypt_decrypt_ctr(&mut bytes, (self.iv + 1).to_be_bytes());
 
@@ -294,14 +296,16 @@ macro_rules! aes_gcm_methods {
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
 
-            fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+            fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|_| crate::CipherError::input("byte format error"))?;
+                    .map_err(|_| utils::errors::GeneralError::input("byte format error"))?;
 
                 if bytes.len() < 16 {
-                    return Err(crate::CipherError::input("authentication tag is missing"));
+                    return Err(utils::errors::GeneralError::input(
+                        "authentication tag is missing",
+                    ));
                 }
 
                 // Split the tag and the encrypted message

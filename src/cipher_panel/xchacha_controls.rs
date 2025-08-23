@@ -256,14 +256,14 @@ impl CipherFrame for XChaChaFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.ietf {
             true => ciphers::Cipher::encrypt(&self.cipher_ietf, text),
             false => ciphers::Cipher::encrypt(&self.cipher, text),
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.ietf {
             true => ciphers::Cipher::decrypt(&self.cipher_ietf, text),
             false => ciphers::Cipher::decrypt(&self.cipher, text),

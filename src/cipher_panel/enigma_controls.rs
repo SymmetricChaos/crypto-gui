@@ -147,7 +147,7 @@ impl CipherFrame for EnigmaM3Frame {
             match self.cipher.state.set_plugboard(&self.plugboard_string) {
                 Ok(_) => (),
                 Err(e) => {
-                    ui.error_text(&e.inner());
+                    ui.error_text(e);
                 }
             }
         };

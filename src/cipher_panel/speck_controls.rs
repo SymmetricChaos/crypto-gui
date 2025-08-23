@@ -289,11 +289,11 @@ impl CipherFrame for SpeckFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         ciphers::Cipher::encrypt(self.cipher(), text)
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         ciphers::Cipher::decrypt(self.cipher(), text)
     }
 }

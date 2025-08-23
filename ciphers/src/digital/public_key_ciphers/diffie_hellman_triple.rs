@@ -48,13 +48,13 @@ impl DiffieHellmanTriple {
 }
 
 impl Cipher for DiffieHellmanTriple {
-    fn encrypt(&self, _text: &str) -> Result<String, crate::CipherError> {
-        Err(crate::CipherError::general(
+    fn encrypt(&self, _text: &str) -> Result<String, utils::errors::GeneralError> {
+        Err(utils::errors::GeneralError::general(
             "Diffie-Hellman key exchange does not encrypt a message",
         ))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.encrypt(text)
     }
 }

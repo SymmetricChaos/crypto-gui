@@ -1,7 +1,7 @@
 use super::PolybiusSquare;
+use crate::traits::Cipher;
 use crate::transposition::Columnar;
-use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 pub enum AdfgvxMode {
     Short,
@@ -55,13 +55,13 @@ impl Default for Adfgvx {
 }
 
 impl Cipher for Adfgvx {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let poly_text = self.polybius.encrypt(text)?;
         let colm_text = self.columnar.encrypt(&poly_text)?;
         Ok(colm_text)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let colm_text = self.columnar.decrypt(text)?;
         let poly_text = self.polybius.decrypt(&colm_text)?;
         Ok(poly_text)

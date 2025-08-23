@@ -3,9 +3,12 @@ use crate::{
         block_cipher::{BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
-    impl_cipher_for_block_cipher, CipherError,
+    impl_cipher_for_block_cipher,
 };
-use utils::byte_formatting::{overwrite_bytes, ByteFormat};
+use utils::{
+    byte_formatting::{overwrite_bytes, ByteFormat},
+    errors::GeneralError,
+};
 
 pub struct Des {
     pub input_format: ByteFormat,
@@ -33,7 +36,7 @@ crate::block_cipher_builders! {Des, u64}
 
 impl Des {
     // Key Scheduling Algorithm (key generation)
-    pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {
+    pub fn ksa(&mut self, key: u64) -> Result<(), GeneralError> {
         self.subkeys = des_ksa(key)?;
         Ok(())
     }

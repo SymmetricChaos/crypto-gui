@@ -1,6 +1,7 @@
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 use itertools::Itertools;
 use std::fmt::Display;
+use utils::errors::GeneralError;
 use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 /// Two character names of cards in order A-K and ♣♦♥♠
@@ -93,7 +94,7 @@ impl Default for Solitaire {
 }
 
 impl Solitaire {
-    pub fn from_keyword(keyword: &str) -> Result<Self, CipherError> {
+    pub fn from_keyword(keyword: &str) -> Result<Self, GeneralError> {
         let mut deck = Vec::with_capacity(54);
         for i in 0..52 {
             deck.push(Card::C((i + 1) as u8));
@@ -106,13 +107,13 @@ impl Solitaire {
         };
 
         // Convert the keyword to numbers
-        let keyword_stream: Vec<Result<usize, CipherError>> = keyword
+        let keyword_stream: Vec<Result<usize, GeneralError>> = keyword
             .chars()
             .map(|c| {
                 cipher
                     .alphabet
                     .get_pos(c)
-                    .ok_or(CipherError::invalid_input_char(c))
+                    .ok_or(GeneralError::invalid_input_char(c))
             })
             .collect();
         for i in keyword_stream {
@@ -128,7 +129,7 @@ impl Solitaire {
         Ok(cipher)
     }
 
-    pub fn set_from_keyword(&mut self, keyword: &str) -> Result<(), CipherError> {
+    pub fn set_from_keyword(&mut self, keyword: &str) -> Result<(), GeneralError> {
         // Reset the deck
         let n = self.len() - 2;
         self.deck.clear();
@@ -140,12 +141,12 @@ impl Solitaire {
         self.deck.push(Card::JB);
 
         // Convert the keyword to numbers
-        let keyword_stream: Vec<Result<usize, CipherError>> = keyword
+        let keyword_stream: Vec<Result<usize, GeneralError>> = keyword
             .chars()
             .map(|c| {
                 self.alphabet
                     .get_pos(c)
-                    .ok_or(CipherError::invalid_input_char(c))
+                    .ok_or(GeneralError::invalid_input_char(c))
             })
             .collect();
         for i in keyword_stream {
@@ -284,25 +285,25 @@ impl Solitaire {
         out
     }
 
-    fn encrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+    fn encrypt_char(&self, c: char, k: usize) -> Result<char, GeneralError> {
         let p = self
             .alphabet
             .get_pos(c)
-            .ok_or(CipherError::invalid_input_char(c))?;
+            .ok_or(GeneralError::invalid_input_char(c))?;
         Ok(*self.alphabet.get_char_offset(p, k as i32).unwrap())
     }
 
-    fn decrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+    fn decrypt_char(&self, c: char, k: usize) -> Result<char, GeneralError> {
         let p = self
             .alphabet
             .get_pos(c)
-            .ok_or(CipherError::invalid_input_char(c))?;
+            .ok_or(GeneralError::invalid_input_char(c))?;
         Ok(*self.alphabet.get_char_offset(p, -(k as i32)).unwrap())
     }
 }
 
 impl Cipher for Solitaire {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let key_steam = self.key_stream(text.chars().count());
         let mut out = String::with_capacity(text.len());
         for (c, n) in text.chars().zip(key_steam) {
@@ -311,7 +312,7 @@ impl Cipher for Solitaire {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let key_steam = self.key_stream(text.chars().count());
         let mut out = String::with_capacity(text.len());
         for (c, n) in text.chars().zip(key_steam) {

@@ -1,6 +1,7 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::{traits::Cipher};
 use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
+use utils::errors::GeneralError;
 
 // Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
 pub const PORTA_TABLEAUX: [&'static str; 13] = [
@@ -34,12 +35,12 @@ impl Default for Porta {
 }
 
 impl Porta {
-    pub fn assign_key(&mut self, key: &str) -> Result<(), CipherError> {
+    pub fn assign_key(&mut self, key: &str) -> Result<(), GeneralError> {
         let mut values = Vec::new();
         for c in key.chars() {
             match self.alphabet.get_pos(c) {
                 Some(n) => values.push(n),
-                None => return Err(CipherError::invalid_key_char(c)),
+                None => return Err(GeneralError::invalid_key_char(c)),
             }
         }
         self.key_vals = values;
@@ -53,7 +54,7 @@ impl Porta {
 
 impl Cipher for Porta {
     // Need to incorporate graceful failure or guarantee of correctness
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::with_capacity(text.len());
         let ckey = self.key_vals.iter().cycle();
         for (c, k) in text.chars().zip(ckey) {
@@ -65,7 +66,7 @@ impl Cipher for Porta {
     }
 
     // The Porta cipher is reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.encrypt(text)
     }
 }

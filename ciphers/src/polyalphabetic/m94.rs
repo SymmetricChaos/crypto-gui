@@ -1,4 +1,5 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
+use utils::errors::GeneralError;
 
 const M94_WHEELS: [&'static str; 25] = [
     "ABCEIGDJFVUYMHTQKZOLRXSPWN",
@@ -59,9 +60,9 @@ impl M94 {
 }
 
 impl Cipher for M94 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if text.len() != self.wheels.len() {
-            return Err(CipherError::Input(
+            return Err(GeneralError::input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }
@@ -74,9 +75,9 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if text.len() != self.wheels.len() {
-            return Err(CipherError::Input(
+            return Err(GeneralError::input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }

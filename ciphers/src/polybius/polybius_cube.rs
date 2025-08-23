@@ -1,6 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
-use utils::vecstring::VecString;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 pub struct PolybiusCube {
     pub grid: VecString,
@@ -29,9 +29,9 @@ impl PolybiusCube {
         self.labels = VecString::unique_from(labels);
     }
 
-    fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, CipherError> {
+    fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, GeneralError> {
         if text.chars().count() % 3 != 0 {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "ciphertext length must be a multiple of three.",
             ));
         }
@@ -57,28 +57,28 @@ impl PolybiusCube {
         (x, y, z)
     }
 
-    fn position_to_char(&self, position: (char, char, char)) -> Result<char, CipherError> {
+    fn position_to_char(&self, position: (char, char, char)) -> Result<char, GeneralError> {
         let x = self
             .labels
             .get_pos(position.0)
-            .ok_or(CipherError::invalid_input_char(position.0))?;
+            .ok_or(GeneralError::invalid_input_char(position.0))?;
         let y = self
             .labels
             .get_pos(position.1)
-            .ok_or(CipherError::invalid_input_char(position.1))?;
+            .ok_or(GeneralError::invalid_input_char(position.1))?;
         let z = self
             .labels
             .get_pos(position.2)
-            .ok_or(CipherError::invalid_input_char(position.2))?;
+            .ok_or(GeneralError::invalid_input_char(position.2))?;
 
         let l = self.side_len;
         let num = x * (l * l) + y * l + z;
         Ok(*self.grid.get_char(num).unwrap())
     }
 
-    fn check_labels(&self) -> Result<(), CipherError> {
+    fn check_labels(&self) -> Result<(), GeneralError> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"));
+            return Err(GeneralError::key("not enough labels for grid size"));
         }
         Ok(())
     }
@@ -135,7 +135,7 @@ impl PolybiusCube {
 }
 
 impl Cipher for PolybiusCube {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_labels()?;
 
         let mut out = String::with_capacity(text.chars().count() * 3);
@@ -146,25 +146,25 @@ impl Cipher for PolybiusCube {
                 *self
                     .labels
                     .get_char(pos.0)
-                    .ok_or(CipherError::invalid_input_char(c))?,
+                    .ok_or(GeneralError::invalid_input_char(c))?,
             );
             out.push(
                 *self
                     .labels
                     .get_char(pos.1)
-                    .ok_or(CipherError::invalid_input_char(c))?,
+                    .ok_or(GeneralError::invalid_input_char(c))?,
             );
             out.push(
                 *self
                     .labels
                     .get_char(pos.2)
-                    .ok_or(CipherError::invalid_input_char(c))?,
+                    .ok_or(GeneralError::invalid_input_char(c))?,
             );
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_labels()?;
 
         if text.len() == 0 {
@@ -172,7 +172,7 @@ impl Cipher for PolybiusCube {
         }
 
         if text.chars().count() % 3 != 0 {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "Input text must have a length that is a multiple of three.",
             ));
         }

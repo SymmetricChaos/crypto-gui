@@ -1,11 +1,11 @@
 use num::{bigint::ToBigUint, BigUint, Integer};
-use utils::{byte_formatting::ByteFormat, math_functions::mul_inv};
+use utils::{byte_formatting::ByteFormat, errors::GeneralError, math_functions::mul_inv};
 
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 
 pub struct Rsa {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
+    pub output_format: ByteFormat,
 
     pub n: BigUint,
     pub d: BigUint,
@@ -16,8 +16,8 @@ pub struct Rsa {
 impl Default for Rsa {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             n: BigUint::default(),
             d: BigUint::default(),
@@ -53,20 +53,20 @@ impl Rsa {
         (&self.n, &self.d)
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, GeneralError> {
         let m = BigUint::from_bytes_be(bytes);
         if m > self.n {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "message length cannot be greater than group size",
             ));
         };
         Ok(m.modpow(&self.e, &self.n).to_bytes_be())
     }
 
-    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, GeneralError> {
         let c = BigUint::from_bytes_be(bytes);
         if c > self.n {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "message length cannot be greater than group size",
             ));
         };
@@ -75,20 +75,20 @@ impl Rsa {
 }
 
 impl Cipher for Rsa {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let out = self.encrypt_bytes(&mut bytes)?;
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| GeneralError::input("byte format error"))?;
         let out = self.decrypt_bytes(&mut bytes)?;
         Ok(self.output_format.byte_slice_to_text(&out))
     }

@@ -1,9 +1,10 @@
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 use itertools::Itertools;
 use num::Zero;
 use rand::{thread_rng, Rng};
 use std::num::ParseIntError;
 use utils::{
+    errors::GeneralError,
     math_functions::is_prime64,
     polynomial_interpolation::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
 };
@@ -86,32 +87,32 @@ impl ShamirSecretSharing {
         polynomial_string_unsigned(&self.polynomial, true)
     }
 
-    fn check_state(&self) -> Result<(), CipherError> {
+    fn check_state(&self) -> Result<(), GeneralError> {
         if self.modulus < 1 {
-            return Err(CipherError::state("modulus must be positive"));
+            return Err(GeneralError::state("modulus must be positive"));
         }
         if !is_prime64(self.modulus) {
-            return Err(CipherError::state("modulus must be prime"));
+            return Err(GeneralError::state("modulus must be prime"));
         }
         if self.threshold < 2 {
-            return Err(CipherError::state("threshold must be at least 3"));
+            return Err(GeneralError::state("threshold must be at least 3"));
         }
         if self.threshold > self.modulus {
-            return Err(CipherError::state(
+            return Err(GeneralError::state(
                 "threshold must be less than the order of the field",
             ));
         }
         if self.shares < 2 {
-            return Err(CipherError::state("there must be at least 3 shares"));
+            return Err(GeneralError::state("there must be at least 3 shares"));
         }
         if self.threshold > self.shares {
-            return Err(CipherError::state(
+            return Err(GeneralError::state(
                 "cannot require a greater threshold than shares",
             ));
         };
 
         if self.degree() != (self.threshold - 1) as usize {
-            return Err(CipherError::State(format!(
+            return Err(GeneralError::state(format!(
                 "polynomial of degree {} is required",
                 self.threshold - 1
             )));
@@ -121,11 +122,11 @@ impl ShamirSecretSharing {
 }
 
 impl Cipher for ShamirSecretSharing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_state()?;
 
         let secret =
-            u64::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
+            u64::from_str_radix(text, 10).map_err(|e| GeneralError::input(e.to_string()))?;
 
         let p = {
             let mut p = self.polynomial.clone();
@@ -164,20 +165,20 @@ impl Cipher for ShamirSecretSharing {
         Ok(out.iter().map(|p| format!("{p:?}")).join(", "))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.check_state()?;
 
         let mut pairs = Vec::new();
         for p in PAIRS.captures_iter(text) {
             let x =
-                u64::from_str_radix(&p[1], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u64::from_str_radix(&p[1], 10).map_err(|e| GeneralError::input(e.to_string()))?;
             let y =
-                u64::from_str_radix(&p[2], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u64::from_str_radix(&p[2], 10).map_err(|e| GeneralError::input(e.to_string()))?;
             pairs.push((x, y));
         }
 
         if pairs.len() < self.threshold as usize {
-            return Err(CipherError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "threshold requires at least {} pairs of positive integers",
                 self.threshold
             )));
@@ -185,7 +186,7 @@ impl Cipher for ShamirSecretSharing {
 
         match lagrange_interpolation(0, &pairs[0..self.threshold as usize], self.modulus) {
             Some(n) => Ok(n.to_str_radix(10)),
-            None => Err(CipherError::input("Lagrange interpolation failed")),
+            None => Err(GeneralError::input("Lagrange interpolation failed")),
         }
     }
 }

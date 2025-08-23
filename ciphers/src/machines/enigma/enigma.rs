@@ -1,8 +1,8 @@
 use super::{char_to_usize, usize_to_char, Reflector, Rotor, REFLECTOR_MAP, ROTOR_MAP};
-use crate::{errors::CipherError, substitution::Plugboard, traits::Cipher};
-use utils::preset_alphabet::Alphabet;
+use crate::{substitution::Plugboard, traits::Cipher};
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
-pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
+pub fn prep_enigma_text(text: &str) -> Result<String, GeneralError> {
     let mut out = String::with_capacity(text.len());
     for t in text.chars() {
         if Alphabet::BasicLatin.slice().contains(t) {
@@ -21,7 +21,7 @@ pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
                 'Ö' | 'ö' => out.push_str("OE"),
                 'Ü' | 'ü' => out.push_str("UE"),
                 'ẞ' | 'ß' => out.push_str("SS"),
-                _ => return Err(CipherError::invalid_input_char(t)),
+                _ => return Err(GeneralError::invalid_input_char(t)),
             }
         }
     }
@@ -77,10 +77,10 @@ impl EnigmaState {
         self.rotors[2].ring = rotor_ring_positions.2;
     }
 
-    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), GeneralError> {
         let digraphs = pairs.split(" ");
         if digraphs.clone().count() > 13 {
-            return Err(CipherError::key(
+            return Err(GeneralError::key(
                 "Engima Plugboard cannot include more than 13 pairs of letters",
             ));
         }
@@ -119,12 +119,12 @@ pub struct EnigmaM3 {
 }
 
 impl Cipher for EnigmaM3 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut inner_state = self.state.clone();
         Ok(text.chars().map(|c| inner_state.encrypt_char(c)).collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.encrypt(text)
     }
 }

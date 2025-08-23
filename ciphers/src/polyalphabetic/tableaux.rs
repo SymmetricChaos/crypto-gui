@@ -1,6 +1,6 @@
 use super::{Cipher, PolyMode};
 use crate::{
-    errors::CipherError,
+    errors::GeneralError,
     text_functions::{random_sample_replace, LATIN_UPPER},
 };
 use rand::prelude::ThreadRng;
@@ -23,25 +23,25 @@ impl CyclicKey {
         self.alphabet.chars().count()
     }
 
-    fn validate_key(&self) -> Result<(), CipherError> {
+    fn validate_key(&self) -> Result<(), GeneralError> {
         if self.keyword.len() == 0 {
-            return Err(CipherError::Key(String::from("No keyword provided")));
+            return Err(GeneralError::key(String::from("No keyword provided")));
         }
         for c in self.keyword.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_alphabet_char(c));
+                return Err(GeneralError::invalid_alphabet_char(c));
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_input(&self, text: &str) -> Result<(), GeneralError> {
         if text.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")));
+            return Err(GeneralError::input(String::from("No input text provided")));
         }
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(GeneralError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -62,7 +62,7 @@ impl CyclicKey {
         self.alphabet.chars().nth((l + t - k) % l).unwrap()
     }
 
-    fn encrypt_vigenere(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_vigenere(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -77,7 +77,7 @@ impl CyclicKey {
         Ok(out)
     }
 
-    fn decrypt_vigenere(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_vigenere(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -94,7 +94,7 @@ impl CyclicKey {
     }
 
     // There is no decrypt for Beaufort because it is reciprocal
-    fn encrypt_beaufort(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_beaufort(&self, text: &str) -> Result<String, GeneralError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -121,14 +121,14 @@ impl Default for CyclicKey {
 }
 
 impl Cipher for CyclicKey {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             PolyMode::Vigenere => self.encrypt_vigenere(text),
             PolyMode::Beaufort => self.encrypt_beaufort(text),
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             PolyMode::Vigenere => self.decrypt_vigenere(text),
             PolyMode::Beaufort => self.encrypt_beaufort(text),
@@ -147,7 +147,7 @@ impl Cipher for CyclicKey {
         &mut self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(), crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), crate::errors::GeneralErrors> {
         todo!()
     }
 }

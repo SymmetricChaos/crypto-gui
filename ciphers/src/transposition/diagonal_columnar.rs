@@ -1,5 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use utils::{
+    errors::GeneralError,
     grid::{Grid, Symbol, BLOCK, EMPTY},
     text_functions::{rank_str, rank_vec, StringRankError},
 };
@@ -86,7 +87,7 @@ impl Default for DiagonalColumnar {
 }
 
 impl Cipher for DiagonalColumnar {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let text_length = text.chars().count();
 
         let g = self.fill_grid(self.build_grid(text_length), text);
@@ -102,7 +103,7 @@ impl Cipher for DiagonalColumnar {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let text_length = text.chars().count();
         let n_cols = self.key.len();
         let n_rows = num::Integer::div_ceil(&text_length, &self.key.len());

@@ -1,5 +1,5 @@
-use crate::{errors::CipherError, traits::Cipher};
-use utils::vecstring::VecString;
+use crate::traits::Cipher;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 pub struct DecoderRing {
     pub index: usize,
@@ -15,16 +15,16 @@ impl DecoderRing {
         self.alphabet.len()
     }
 
-    fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
+    fn valid_code_group(&self, s: &str) -> Result<usize, GeneralError> {
         match s.parse::<usize>() {
             Ok(n) => {
                 if n < self.length() {
                     Ok(n)
                 } else {
-                    Err(CipherError::invalid_input_group(s))
+                    Err(GeneralError::invalid_input_group(s))
                 }
             }
-            Err(_) => return Err(CipherError::invalid_input_group(s)),
+            Err(_) => return Err(GeneralError::invalid_input_group(s)),
         }
     }
 }
@@ -39,21 +39,21 @@ impl Default for DecoderRing {
 }
 
 impl Cipher for DecoderRing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
             let pos = self.alphabet.get_pos(s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
-                None => return Err(CipherError::invalid_input_char(s)),
+                None => return Err(GeneralError::invalid_input_char(s)),
             };
             out.push(format!("{}", n))
         }
         Ok(out.join(" "))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let code_groups = text.split(' ');
         let nums = {
             let mut v = Vec::with_capacity(code_groups.clone().count());

@@ -1,12 +1,11 @@
+use crate::Cipher;
 use itertools::Itertools;
-
 use utils::{
+    errors::GeneralError,
     grid::Grid,
     math_functions::Parity,
     text_functions::{rank_str, rank_vec, StringRankError},
 };
-
-use crate::{Cipher, CipherError};
 
 pub struct Amsco {
     pub key: Vec<usize>,
@@ -71,11 +70,11 @@ impl Amsco {
 }
 
 impl Cipher for Amsco {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let groups = if let Some(groups) = self.groups(text) {
             groups
         } else {
-            return Err(CipherError::key("key must have at least one letter"));
+            return Err(GeneralError::key("key must have at least one letter"));
         };
 
         let n_cols = self.key.len();
@@ -103,11 +102,11 @@ impl Cipher for Amsco {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let groups_len = if let Some(groups) = self.groups(text) {
             groups.len()
         } else {
-            return Err(CipherError::key("key must have at least one letter"));
+            return Err(GeneralError::key("key must have at least one letter"));
         };
 
         // Build a grid of 1s and 2s, filled by columns in the order given by the key

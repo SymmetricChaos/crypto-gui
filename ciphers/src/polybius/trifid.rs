@@ -1,5 +1,7 @@
+use utils::errors::GeneralError;
+
 use super::PolybiusCube;
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 
 fn is_power_of_three(a: usize) -> bool {
     let mut p = 1;
@@ -29,9 +31,9 @@ impl Default for Trifid {
 }
 
 impl Cipher for Trifid {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if !is_power_of_three(self.polybius.alphabet_len()) {
-            return Err(CipherError::alphabet(
+            return Err(GeneralError::alphabet(
                 "alphabet length must be exactly a power of three to fill the grid",
             ));
         }
@@ -39,7 +41,7 @@ impl Cipher for Trifid {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if !(len % self.block_size == 0) {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "input length must be a multiple of the block size",
             ));
         };
@@ -68,9 +70,9 @@ impl Cipher for Trifid {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if !is_power_of_three(self.polybius.alphabet_len()) {
-            return Err(CipherError::alphabet(
+            return Err(GeneralError::alphabet(
                 "alphabet length must be exactly a power of three to fill the grid",
             ));
         }
@@ -78,7 +80,7 @@ impl Cipher for Trifid {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if !(vector.len() % self.block_size == 0) {
-            return Err(CipherError::input(
+            return Err(GeneralError::input(
                 "Input length must be a multiple of the block size",
             ));
         };

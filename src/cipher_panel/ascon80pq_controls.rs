@@ -1,4 +1,4 @@
-use ciphers::{digital::block_ciphers::ascon::ascon80pq::Ascon80pq, CipherError};
+use ciphers::digital::block_ciphers::ascon::ascon80pq::Ascon80pq;
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
@@ -115,22 +115,22 @@ impl CipherFrame for Ascon80pqFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| utils::errors::GeneralError::input("byte format error"))?;
 
         Ok(self
             .output_format
             .byte_slice_to_text(&self.cipher.encrypt_bytes(&bytes)))
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+            .map_err(|_| utils::errors::GeneralError::input("byte format error"))?;
 
         Ok(self
             .output_format

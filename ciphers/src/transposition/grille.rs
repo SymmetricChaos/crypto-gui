@@ -1,7 +1,8 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
 use utils::{
+    errors::GeneralError,
     grid::{str_to_char_grid, Grid, Symbol},
     preset_alphabet::Alphabet,
     vecstring::VecString,
@@ -48,16 +49,16 @@ impl Default for Grille {
 }
 
 impl Cipher for Grille {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.grid.num_empty() < text.chars().count() {
-            return Err(CipherError::Input(
-                "the text is too long to fit into the open spaces of the grille".to_string(),
+            return Err(GeneralError::input(
+                "the text is too long to fit into the open spaces of the grille",
             ));
         }
 
         if !self.use_nulls && self.grid.num_empty() != text.chars().count() {
-            return Err(CipherError::Input(
-                "the text must exactly fill the empty spaces in the grille".to_string(),
+            return Err(GeneralError::input(
+                "the text must exactly fill the empty spaces in the grille",
             ));
         }
 
@@ -104,11 +105,11 @@ impl Cipher for Grille {
             .collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         if self.use_nulls {
             if self.grid.grid_size() != text.chars().count() {
-                return Err(CipherError::Input(
-                    "text is not the same size as the grille".to_string(),
+                return Err(GeneralError::input(
+                    "text is not the same size as the grille",
                 ));
             }
 
@@ -125,8 +126,8 @@ impl Cipher for Grille {
             Ok(out)
         } else {
             if self.grid.num_empty() != text.chars().count() {
-                return Err(CipherError::Input(
-                    "The text must exactly fill the empty spaces in the Grille".to_string(),
+                return Err(GeneralError::input(
+                    "The text must exactly fill the empty spaces in the Grille",
                 ));
             }
 

@@ -189,7 +189,7 @@ impl CipherFrame for ThreefishFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             ThreefishSelect::Threefish256 => self.cipher256.encrypt(text),
             ThreefishSelect::Threefish512 => self.cipher512.encrypt(text),
@@ -197,7 +197,7 @@ impl CipherFrame for ThreefishFrame {
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             ThreefishSelect::Threefish256 => self.cipher256.decrypt(text),
             ThreefishSelect::Threefish512 => self.cipher512.decrypt(text),

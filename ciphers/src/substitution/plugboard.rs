@@ -1,5 +1,6 @@
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use std::collections::HashMap;
+use utils::errors::GeneralError;
 
 #[derive(Clone, Debug)]
 pub struct Plugboard {
@@ -15,7 +16,7 @@ impl Default for Plugboard {
 }
 
 impl Plugboard {
-    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), GeneralError> {
         let digraphs = pairs.split(" ");
 
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
@@ -25,7 +26,7 @@ impl Plugboard {
                 continue;
             }
             if d.len() != 2 {
-                return Err(CipherError::Key(
+                return Err(GeneralError::key(
                     format!("plugboard settings must be given as pairs of letters seperated by spaces, found `{}` instead", d),
                 ));
             }
@@ -33,7 +34,7 @@ impl Plugboard {
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
             if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
-                return Err(CipherError::key(
+                return Err(GeneralError::key(
                     "plugboards cannot include cycles or chains",
                 ));
             }
@@ -61,13 +62,13 @@ impl Plugboard {
 }
 
 impl Cipher for Plugboard {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let out = text.chars().map(|c| self.swap(c)).collect(); // This is infalliable
         Ok(out)
     }
 
     // Plugboards are naturally reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         self.encrypt(text)
     }
 }

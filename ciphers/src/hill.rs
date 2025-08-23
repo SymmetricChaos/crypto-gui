@@ -1,6 +1,6 @@
 use utils::vecstring::VecString;
 
-use crate::{Cipher, CipherError};
+use crate::{Cipher, GeneralError};
 
 // https://patents.google.com/patent/US1845947
 
@@ -14,14 +14,14 @@ pub struct Hill {
 impl Hill {}
 
 impl Cipher for Hill {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         // Vigenere step?
         // Matrix step
         // Vigenere step?
         todo!()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         todo!()
     }
 }

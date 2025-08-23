@@ -1,9 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
 use itertools::Itertools;
-use utils::vecstring::VecString;
-
-use crate::errors::CipherError;
+use utils::{errors::GeneralError, vecstring::VecString};
 
 #[derive(Clone, Debug)]
 pub struct HebernRotor {
@@ -17,7 +15,7 @@ pub struct HebernRotor {
 }
 
 impl HebernRotor {
-    pub fn new(wiring_str: &str, alphabet: &VecString) -> Result<HebernRotor, CipherError> {
+    pub fn new(wiring_str: &str, alphabet: &VecString) -> Result<HebernRotor, GeneralError> {
         let size = wiring_str.chars().count();
         let mut wiring_rtl = vec![0; size];
         let mut wiring_ltr = vec![0; size];
@@ -25,7 +23,7 @@ impl HebernRotor {
         for (pos, c) in wiring_str.chars().enumerate() {
             let n = alphabet
                 .get_pos(c)
-                .ok_or(CipherError::invalid_input_char(c))?;
+                .ok_or(GeneralError::invalid_input_char(c))?;
             wiring_rtl[pos] = n;
             wiring_ltr[n] = pos;
         }
@@ -57,17 +55,17 @@ impl HebernRotor {
         (inner + self.size - self.position) % self.size
     }
 
-    pub fn set(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
+    pub fn set(&mut self, alphabet: &VecString) -> Result<(), GeneralError> {
         let total_size = self.wiring_str.chars().count();
         if total_size != self.size {
-            return Err(CipherError::General(format!(
+            return Err(GeneralError::general(format!(
                 "must provide exactly {} characters",
                 self.size
             )));
         }
         let unique_size = self.wiring_str.chars().unique().count();
         if unique_size != total_size {
-            return Err(CipherError::General(String::from(
+            return Err(GeneralError::general(String::from(
                 "duplicate characters are not allowed",
             )));
         }
@@ -77,7 +75,7 @@ impl HebernRotor {
         for (pos, c) in self.wiring_str.chars().enumerate() {
             let n = alphabet
                 .get_pos(c)
-                .ok_or(CipherError::invalid_input_char(c))?;
+                .ok_or(GeneralError::invalid_input_char(c))?;
 
             new_wiring_rtl[pos] = n;
             new_wiring_ltr[n] = pos;
@@ -87,7 +85,7 @@ impl HebernRotor {
         Ok(())
     }
 
-    pub fn fill(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
+    pub fn fill(&mut self, alphabet: &VecString) -> Result<(), GeneralError> {
         for a in alphabet.chars() {
             if self.wiring_str.contains(a) {
                 continue;
@@ -98,7 +96,7 @@ impl HebernRotor {
         self.set(alphabet)
     }
 
-    // pub fn randomize(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
+    // pub fn randomize(&mut self, alphabet: &VecString) -> Result<(), GeneralError> {
     //     self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string();
     //     self.set(alphabet)
     // }

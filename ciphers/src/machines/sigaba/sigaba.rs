@@ -1,9 +1,10 @@
 use super::{
     char_to_usize, usize_to_char, CipherRotor, IndexRotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
-use crate::{errors::CipherError, traits::Cipher};
+use crate::traits::Cipher;
 use itertools::Itertools;
 use std::collections::HashSet;
+use utils::errors::GeneralError;
 
 #[derive(Clone, Debug)]
 pub struct ControlRotors {
@@ -238,7 +239,7 @@ impl Default for Sigaba {
 }
 
 impl Cipher for Sigaba {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 
@@ -255,7 +256,7 @@ impl Cipher for Sigaba {
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 

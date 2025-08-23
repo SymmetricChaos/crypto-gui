@@ -130,7 +130,7 @@ impl CipherFrame for TwofishFrame {
         *self = Self::default()
     }
 
-    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn encrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             TwofishSelect::Twofish128 => self.cipher128.encrypt(text),
             TwofishSelect::Twofish192 => self.cipher192.encrypt(text),
@@ -138,7 +138,7 @@ impl CipherFrame for TwofishFrame {
         }
     }
 
-    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+    fn decrypt_string(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         match self.selector {
             TwofishSelect::Twofish128 => self.cipher128.decrypt(text),
             TwofishSelect::Twofish192 => self.cipher192.decrypt(text),

@@ -1,7 +1,7 @@
-use crate::{Cipher, CipherError};
+use crate::Cipher;
 use bimap::BiMap;
 use std::ops::Not;
-use utils::text_functions::string_chunks;
+use utils::{errors::GeneralError, text_functions::string_chunks};
 
 const WIDTH: usize = 5;
 
@@ -83,7 +83,7 @@ fn map_inv_cyber_chef(k: &str) -> Option<char> {
 }
 
 /// Uses doubled codes for figure and letter shift, following Cyber Chef
-pub fn encode_ita2(text: &str) -> Result<String, CipherError> {
+pub fn encode_ita2(text: &str) -> Result<String, GeneralError> {
     let mut mode = Mode::Letters;
     let mut out = String::with_capacity(text.len() * WIDTH);
     for s in text.chars().map(|c| c.to_ascii_uppercase()) {
@@ -115,14 +115,14 @@ pub fn encode_ita2(text: &str) -> Result<String, CipherError> {
                     out.push_str(code_group);
                     mode = !mode;
                 }
-                None => return Err(CipherError::invalid_input_char(s)),
+                None => return Err(GeneralError::invalid_input_char(s)),
             },
         }
     }
     Ok(out)
 }
 
-pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
+pub fn decode_ita2(text: &str) -> Result<String, GeneralError> {
     let mut mode = Mode::Letters;
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(&text.replace(' ', ""), WIDTH) {
@@ -138,7 +138,7 @@ pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
         match map_inv(&group, mode) {
             Some(code_group) => out.push(code_group),
             None => {
-                return Err(CipherError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "The code group `{}` is not valid in ITA2",
                     group
                 )))
@@ -149,13 +149,13 @@ pub fn decode_ita2(text: &str) -> Result<String, CipherError> {
     Ok(out)
 }
 
-pub fn decode_ita2_cyber_chef(text: &str) -> Result<String, CipherError> {
+pub fn decode_ita2_cyber_chef(text: &str) -> Result<String, GeneralError> {
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(&text.replace(' ', ""), WIDTH) {
         match map_inv_cyber_chef(&group) {
             Some(code_group) => out.push(code_group),
             None => {
-                return Err(CipherError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "The code group `{}` is not valid",
                     group
                 )))
@@ -173,7 +173,7 @@ pub struct Wheel {
 }
 
 impl Wheel {
-    pub fn new(string: &str) -> Result<Self, CipherError> {
+    pub fn new(string: &str) -> Result<Self, GeneralError> {
         let mut pins = Vec::with_capacity(string.len());
         for c in string.chars() {
             if c == '.' {
@@ -181,7 +181,7 @@ impl Wheel {
             } else if c == 'x' {
                 pins.push(true);
             } else {
-                return Err(CipherError::input(
+                return Err(GeneralError::input(
                     "only the characters '.' and 'x' are used for setting the pins",
                 ));
             }
@@ -410,7 +410,7 @@ impl Lorenz {
         }
     }
 
-    fn encrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_mut(&mut self, text: &str) -> Result<String, GeneralError> {
         let bits = encode_ita2(text)?;
         let mut out = Vec::new();
         for group in string_chunks(&bits, WIDTH) {
@@ -424,14 +424,14 @@ impl Lorenz {
             .collect())
     }
 
-    fn decrypt_mut(&mut self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_mut(&mut self, text: &str) -> Result<String, GeneralError> {
         let text: String = text.chars().filter(|c| !c.is_whitespace()).collect();
         let mut out = Vec::new();
         if text.chars().count() % 5 != 0 {
-            return Err(CipherError::input("input must be groups of five bits"));
+            return Err(GeneralError::input("input must be groups of five bits"));
         }
         if text.chars().any(|c| c != '0' && c != '1') {
-            return Err(CipherError::input("invalid bit found"));
+            return Err(GeneralError::input("invalid bit found"));
         }
         for group in string_chunks(&text, WIDTH) {
             self.encrypt_group(&group, &mut out);
@@ -446,12 +446,12 @@ impl Lorenz {
 }
 
 impl Cipher for Lorenz {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut cipher = self.clone();
         cipher.encrypt_mut(text)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
         let mut cipher = self.clone();
         cipher.decrypt_mut(text)
     }
