@@ -22,9 +22,10 @@ impl CodeFrame for AckermannFrame {
         );
         ui.add_space(8.0);
 
-        ui.label("Convert between non-negative integers and the pure sets they are paired with.");
-        let pairs = (0..=16).map(|n| (n.to_string(), number_to_set(n)));
-        ui.fill_code_columns(16, 5, Box::new(pairs));
+        ui.label("The first few sets and their associated integers.");
+        ui.add_space(4.0);
+        let pairs = (0..16).map(|n| (n.to_string(), number_to_set(n)));
+        ui.fill_code_columns(16, 2, Box::new(pairs));
 
         ui.add_space(16.0);
     }
