@@ -26,12 +26,14 @@ impl GeneralError {
 
     pub fn invalid_key_char(c: char) -> Self {
         GeneralError(format!(
-            "invalid character `{c}`, alphabets are case sensitive"
+            "invalid key character `{c}`, alphabets are case sensitive"
         ))
     }
 
     pub fn invalid_key_group(c: char) -> Self {
-        GeneralError(format!("invalid group `{c}`, alphabets are case sensitive"))
+        GeneralError(format!(
+            "invalid key group `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn invalid_input_char(c: char) -> Self {
@@ -42,14 +44,14 @@ impl GeneralError {
 
     pub fn invalid_input_group<T: ToString>(s: T) -> Self {
         GeneralError(format!(
-            "invalid group `{}`, alphabets are case sensitive",
+            "invalid input group `{}`, alphabets are case sensitive",
             s.to_string()
         ))
     }
 
     pub fn invalid_alphabet_char(c: char) -> Self {
         GeneralError(format!(
-            "invalid character `{c}`, alphabets are case sensitive"
+            "invalid input character `{c}`, alphabets are case sensitive"
         ))
     }
 }

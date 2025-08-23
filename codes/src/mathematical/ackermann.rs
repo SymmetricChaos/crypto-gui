@@ -16,7 +16,8 @@ use crate::{ traits::Code};
 // f({{{}{{}}})}) = 2^3 = 8
 // f({{{{{}}}}}) = 2^f({{{{}}}}) = 2^4 = 16
 
-const SMALL_SETS: [&str; 32] = [
+// For 32-bit numbers only these 32 sets are used, each effectively represents a particular bit
+const BASE_SETS: [&str; 32] = [
     "{}",
     "{{}}",
     "{{{}}}",
@@ -56,7 +57,7 @@ pub fn number_to_set(mut n: u32) -> String {
     for i in 0..=32 {
         if n & 1 == 1 {
             // out.push_str(&number_to_set(i));
-            out.push_str(SMALL_SETS[i]); // faster than recursion
+            out.push_str(BASE_SETS[i]); // faster than recursion
         }
         n >>= 1;
     }
@@ -93,7 +94,7 @@ impl Code for Ackermann {
             let mut n = 0;
             for range in paren_ranges_nonoverlapping_subsets(set,'{', '}')? {
                 n += 1_u32
-                    << SMALL_SETS
+                    << BASE_SETS
                         .iter()
                         .position(|x| *x == &set[range.clone()])
                         .unwrap();
