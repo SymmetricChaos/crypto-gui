@@ -1,7 +1,10 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use itertools::izip;
-use utils::text_functions::{chunk_and_join, string_chunks};
+use utils::{
+    errors::GeneralError,
+    text_functions::{chunk_and_join, string_chunks},
+};
 
 pub const MTK_LETTERS: &'static str = "␑␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␒␓";
 pub const MTK_FIGURES: &'static str = "␑␍␊ 1234567890-'ЧЭШЩЮ()+/:=?,.␒␓";
@@ -73,7 +76,7 @@ impl Default for Mtk2 {
 }
 
 impl Code for Mtk2 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         // Always start in letter mode
         let mut mode = Mtk2Mode::Letters;
 
@@ -81,7 +84,7 @@ impl Code for Mtk2 {
         for s in text.chars() {
             match Self::map(s, &mode) {
                 Some(code_group) => out.push_str(code_group),
-                None => return Err(CodeError::invalid_input_char(s)),
+                None => return Err(GeneralError::invalid_input_char(s)),
             }
             match s {
                 '␑' => mode = Mtk2Mode::Cyrillic,
@@ -98,7 +101,7 @@ impl Code for Mtk2 {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         // Always start in letter mode
         let mut mode = Mtk2Mode::Letters;
 
@@ -107,7 +110,7 @@ impl Code for Mtk2 {
             match Self::map_inv(&group, &mode) {
                 Some(code_group) => out.push(*code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(GeneralError::input(format!(
                         "The code group `{}` is not valid",
                         group
                     )))

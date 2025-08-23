@@ -9,7 +9,6 @@ pub mod text_standards;
 
 pub mod bijection;
 pub mod compression;
-pub mod errors;
 pub mod ids;
 pub mod traits;
 

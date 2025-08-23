@@ -1,6 +1,7 @@
 use super::string_to_u32s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use num::Integer;
+use utils::errors::GeneralError;
 
 pub fn to_binary(mut n: u32, k: u32) -> String {
     let mut s = Vec::with_capacity(k as usize);
@@ -85,7 +86,7 @@ impl TruncatedBinary {
 }
 
 impl Code for TruncatedBinary {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         for x in string_to_u32s(text, ",")? {
@@ -103,7 +104,7 @@ impl Code for TruncatedBinary {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         if self.spaced {
             for word in text.split(",").map(|s| s.trim()) {

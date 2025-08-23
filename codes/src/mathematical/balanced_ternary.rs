@@ -1,8 +1,9 @@
 use super::string_to_i32s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
-pub fn decode_to_i32(s: &str) -> Result<i32, CodeError> {
+pub fn decode_to_i32(s: &str) -> Result<i32, GeneralError> {
     let mut value = 0;
     let mut base = 1;
     for c in s.chars().rev() {
@@ -10,7 +11,7 @@ pub fn decode_to_i32(s: &str) -> Result<i32, CodeError> {
             '+' => base,
             '-' => -base,
             '0' => 0,
-            _ => return Err(CodeError::invalid_input_group(s)),
+            _ => return Err(GeneralError::invalid_input_group(s)),
         };
         base *= 3;
     }
@@ -27,7 +28,7 @@ pub fn recognize_code(text: &str, sep: &str) -> Vec<Option<i32>> {
     output
 }
 
-pub fn encode_i32(n: i32) -> Result<String, CodeError> {
+pub fn encode_i32(n: i32) -> Result<String, GeneralError> {
     if n == 0 {
         return Ok(String::from("0"));
     }
@@ -76,7 +77,7 @@ impl Default for BalancedTernary {
 impl BalancedTernary {}
 
 impl Code for BalancedTernary {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut output = Vec::new();
 
         for n in string_to_i32s(text, ",")? {
@@ -86,7 +87,7 @@ impl Code for BalancedTernary {
         Ok(output.into_iter().join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut output = Vec::new();
 
         for section in recognize_code(&text, ",") {

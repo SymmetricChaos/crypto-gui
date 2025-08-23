@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use itertools::Itertools;
-use utils::{preset_alphabet::Alphabet, text_functions::string_chunks};
+use utils::{errors::GeneralError, preset_alphabet::Alphabet, text_functions::string_chunks};
 
 const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
     "␀  null",
@@ -265,7 +265,7 @@ impl Ascii {
         }
     }
 
-    pub fn map(&self, c: char) -> Result<String, CodeError> {
+    pub fn map(&self, c: char) -> Result<String, GeneralError> {
         if c.is_ascii() {
             if self.mode == DisplayMode::SevenBit {
                 return Ok(self.transform(c as u8));
@@ -280,29 +280,29 @@ impl Ascii {
             let n = self.change_upper_bit(*control_val);
             return Ok(self.transform(n));
         } else {
-            Err(CodeError::invalid_input_char(c))
+            Err(GeneralError::invalid_input_char(c))
         }
     }
 
-    pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
+    pub fn map_inv(&self, s: &str) -> Result<char, GeneralError> {
         if let Ok(n) = usize::from_str_radix(s, self.mode.radix()) {
             if self.mode == DisplayMode::SevenBit {
                 return Alphabet::Ascii128
                     .chars()
                     .nth(n)
-                    .ok_or(CodeError::invalid_input_group(s));
+                    .ok_or(GeneralError::invalid_input_group(s));
             }
             match self.upper_bit {
                 UpperBit::Set | UpperBit::Unset => Alphabet::Ascii128
                     .chars()
                     .nth(n % 128)
-                    .ok_or(CodeError::invalid_input_group(s)),
+                    .ok_or(GeneralError::invalid_input_group(s)),
                 UpperBit::Even => {
                     if n.count_ones() % 2 == 0 {
                         Alphabet::Ascii128
                             .chars()
                             .nth(n % 128)
-                            .ok_or(CodeError::invalid_input_group(s))
+                            .ok_or(GeneralError::invalid_input_group(s))
                     } else {
                         Ok('�')
                     }
@@ -312,14 +312,14 @@ impl Ascii {
                         Alphabet::Ascii128
                             .chars()
                             .nth(n % 128)
-                            .ok_or(CodeError::invalid_input_group(s))
+                            .ok_or(GeneralError::invalid_input_group(s))
                     } else {
                         Ok('�')
                     }
                 }
             }
         } else {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "error decoding ASCII ({} representation), unable to parse string: {}",
                 self.mode.name(),
                 s
@@ -348,7 +348,7 @@ impl Ascii {
 }
 
 impl Code for Ascii {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         for c in text.chars() {
             out.push(self.map(c)?)
@@ -360,7 +360,7 @@ impl Code for Ascii {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let chunks = string_chunks(&text.replace(' ', ""), self.mode.width());
         let mut out = String::with_capacity(chunks.len());
 

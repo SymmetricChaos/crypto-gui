@@ -1,9 +1,10 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::Zero;
 use utils::{
     bit_polynomial::BitPolynomial,
     bits::{bits_from_str, u32_to_bits, Bit},
+    errors::GeneralError,
 };
 
 pub struct PolynomialCode {
@@ -33,12 +34,12 @@ impl PolynomialCode {
 }
 
 impl Code for PolynomialCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
         if bits.len() % self.data_size() != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "when encoding the input must have a length that is a multiple of {}",
                 self.data_size()
             )));
@@ -56,12 +57,12 @@ impl Code for PolynomialCode {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
         if bits.len() % self.block_size != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "when decoding the input must have a length that is a multiple of {}",
                 self.block_size
             )));

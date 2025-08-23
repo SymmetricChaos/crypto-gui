@@ -1,5 +1,5 @@
-use crate::{errors::CodeError, traits::Code};
-use utils::byte_formatting::ByteFormat;
+use crate::traits::Code;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 const MASK: u8 = 0b01111111;
 const HIGH_BIT: u8 = 0b10000000;
@@ -106,7 +106,7 @@ impl Leb128 {
 }
 
 impl Code for Leb128 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let strs = text.split(',').map(|s| s.trim());
 
         let out = if self.spaced {
@@ -114,13 +114,13 @@ impl Code for Leb128 {
             if self.signed {
                 for s in strs {
                     let n = i128::from_str_radix(s, 10)
-                        .map_err(|_| CodeError::input("invalid i128 encountered"))?;
+                        .map_err(|_| GeneralError::input("invalid i128 encountered"))?;
                     v.push(self.byte_format.byte_slice_to_text(i128_leb128(n)));
                 }
             } else {
                 for s in strs {
                     let n = u128::from_str_radix(s, 10)
-                        .map_err(|_| CodeError::input("invalid u128 encountered"))?;
+                        .map_err(|_| GeneralError::input("invalid u128 encountered"))?;
                     v.push(self.byte_format.byte_slice_to_text(u128_leb128(n)));
                 }
             }
@@ -130,13 +130,13 @@ impl Code for Leb128 {
             if self.signed {
                 for s in strs {
                     let n = i128::from_str_radix(s, 10)
-                        .map_err(|_| CodeError::input("invalid i128 encountered"))?;
+                        .map_err(|_| GeneralError::input("invalid i128 encountered"))?;
                     v.push(i128_leb128(n));
                 }
             } else {
                 for s in strs {
                     let n = u128::from_str_radix(s, 10)
-                        .map_err(|_| CodeError::input("invalid u128 encountered"))?;
+                        .map_err(|_| GeneralError::input("invalid u128 encountered"))?;
                     v.push(u128_leb128(n));
                 }
             }
@@ -146,7 +146,7 @@ impl Code for Leb128 {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         if self.spaced {
@@ -156,7 +156,7 @@ impl Code for Leb128 {
                     let bytes = self
                         .byte_format
                         .text_to_bytes(s)
-                        .map_err(|_| CodeError::input("invalid bytes"))?;
+                        .map_err(|_| GeneralError::input("invalid bytes"))?;
                     v.push(leb128_to_i128(&bytes).to_string());
                 }
             } else {
@@ -164,7 +164,7 @@ impl Code for Leb128 {
                     let bytes = self
                         .byte_format
                         .text_to_bytes(s)
-                        .map_err(|_| CodeError::input("invalid bytes"))?;
+                        .map_err(|_| GeneralError::input("invalid bytes"))?;
                     v.push(leb128_to_u128(&bytes).to_string());
                 }
             }
@@ -172,7 +172,7 @@ impl Code for Leb128 {
             let bytes = self
                 .byte_format
                 .text_to_bytes(text)
-                .map_err(|_| CodeError::input("invalid bytes"))?;
+                .map_err(|_| GeneralError::input("invalid bytes"))?;
 
             let groups = bytes.split_inclusive(|b| b >> 7 == 0);
 

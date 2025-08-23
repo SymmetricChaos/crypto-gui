@@ -1,6 +1,7 @@
 use super::string_to_u32s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 const ROMAN_PV: [[&'static str; 10]; 3] = [
     ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
@@ -24,7 +25,7 @@ impl Default for RomanNumeral {
 }
 
 impl RomanNumeral {
-    fn char_to_num(c: char) -> Result<i32, CodeError> {
+    fn char_to_num(c: char) -> Result<i32, GeneralError> {
         Ok(match c {
             'I' => 1,
             'V' => 5,
@@ -33,19 +34,19 @@ impl RomanNumeral {
             'C' => 100,
             'D' => 500,
             'M' => 1000,
-            _ => return Err(CodeError::invalid_input_char(c)),
+            _ => return Err(GeneralError::invalid_input_char(c)),
         })
     }
 
-    pub fn encode_int(n: u32) -> Result<String, CodeError> {
+    pub fn encode_int(n: u32) -> Result<String, GeneralError> {
         let n = n as usize;
         if n > 3999 {
-            return Err(CodeError::input(
+            return Err(GeneralError::input(
                 "standard Roman Numerals cannot be greater than 3999",
             ));
         }
         if n == 0 {
-            return Err(CodeError::input(
+            return Err(GeneralError::input(
                 "there is no standard Roman Numeral representation for 0",
             ));
         }
@@ -56,9 +57,9 @@ impl RomanNumeral {
         Ok(out)
     }
 
-    fn decode_to_int(numeral: &str) -> Result<u32, CodeError> {
+    fn decode_to_int(numeral: &str) -> Result<u32, GeneralError> {
         if !RELAXED_ROMAN.is_match(numeral) {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the Roman Numeral `{}` contains invalid characters and cannot be decoded",
                 numeral
             )));
@@ -76,7 +77,7 @@ impl RomanNumeral {
         }
         n += Self::char_to_num(numeral.chars().last().unwrap())?;
         if n <= 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the Roman Numeral `{}` evaluates to 0 or less which is not valid",
                 numeral
             )));
@@ -86,7 +87,7 @@ impl RomanNumeral {
 }
 
 impl Code for RomanNumeral {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut output = Vec::new();
 
         for n in string_to_u32s(text, ",")? {
@@ -96,7 +97,7 @@ impl Code for RomanNumeral {
         Ok(output.into_iter().join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut output = Vec::new();
 
         for s in text.split(",").map(|s| s.trim()) {

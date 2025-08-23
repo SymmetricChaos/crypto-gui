@@ -1,7 +1,8 @@
 use super::morse_encodings::*;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use pest::{iterators::Pairs, Parser};
+use utils::errors::GeneralError;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MorseStandard {
@@ -52,7 +53,7 @@ impl MorseRep {
         }
     }
 
-    pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<&str, &str>, CodeError> {
+    pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<&str, &str>, GeneralError> {
         Ok(match standard {
             MorseStandard::Itu => match self {
                 Self::HalfBlock => &ITU_HALFBLOCK_MAP,
@@ -62,18 +63,14 @@ impl MorseRep {
             MorseStandard::American => match self {
                 Self::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
                 _ => {
-                    return Err(CodeError::State(
-                        "Only line codes work for American Morse".into(),
+                    return Err(GeneralError::state(
+                        "Only line codes work for American Morse",
                     ))
                 }
             },
             MorseStandard::Gerke => match self {
                 Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
-                _ => {
-                    return Err(CodeError::State(
-                        "Only line codes work for Gerke's code".into(),
-                    ))
-                }
+                _ => return Err(GeneralError::state("Only line codes work for Gerke's code")),
             },
             MorseStandard::Greek => match self {
                 Self::HalfBlock => &GREEK_HALFBLOCK_MAP,
@@ -142,7 +139,7 @@ impl Default for Morse {
 }
 
 impl Code for Morse {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         // Specific rules for ITU transmissions
         let filtered = if self.standard == MorseStandard::Itu {
             let mut filtered = text.replace("×", "x");
@@ -158,14 +155,14 @@ impl Code for Morse {
         let mut out = Vec::new();
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
-                Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
+                Rule::unknown => return Err(GeneralError::invalid_input_group(pair.as_str())),
                 Rule::itu_sign
                 | Rule::gerke_sign
                 | Rule::american_sign
                 | Rule::greek_sign
                 | Rule::russian_sign => match map.get_by_left(pair.as_str()) {
                     Some(s) => out.push(*s),
-                    None => return Err(CodeError::invalid_input_group(pair.as_str())),
+                    None => return Err(GeneralError::invalid_input_group(pair.as_str())),
                 },
                 Rule::space => out.push(" "),
                 _ => (),
@@ -175,7 +172,7 @@ impl Code for Morse {
         Ok(out.join(self.representation.letter_sep()))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         let mut word_buffer = String::new();
         let map = self.representation.map(self.standard)?;
@@ -183,7 +180,7 @@ impl Code for Morse {
             for ch in word.split(self.representation.letter_sep()) {
                 match map.get_by_right(&ch) {
                     Some(s) => word_buffer.push_str(s),
-                    None => return Err(CodeError::invalid_input_group(ch)),
+                    None => return Err(GeneralError::invalid_input_group(ch)),
                 }
             }
             out.push(word_buffer.to_string());

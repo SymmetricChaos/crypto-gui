@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 crate::lazy_bimap!(
     // Yes, ALFA and JULIETT are meant to be spelled that way
@@ -135,23 +135,25 @@ impl Default for SpellingAlphabet {
 }
 
 impl Code for SpellingAlphabet {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if self.variant == SpellingAlphabetMode::FirstLetter {
-            Err(CodeError::state("Cannot encode while in First Letter mode"))
+            Err(GeneralError::state(
+                "Cannot encode while in First Letter mode",
+            ))
         } else {
             let mut out = String::new();
             for c in text.chars() {
                 out.push_str(
                     self.variant
                         .encode(c)
-                        .ok_or(CodeError::invalid_input_char(c))?,
+                        .ok_or(GeneralError::invalid_input_char(c))?,
                 )
             }
             Ok(out)
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if self.variant == SpellingAlphabetMode::FirstLetter {
             Ok(text
                 .split_whitespace()
@@ -165,7 +167,7 @@ impl Code for SpellingAlphabet {
                     *self
                         .variant
                         .decode(s)
-                        .ok_or(CodeError::invalid_input_group(s))?,
+                        .ok_or(GeneralError::invalid_input_group(s))?,
                 )
             }
             Ok(out)

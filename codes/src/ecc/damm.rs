@@ -1,4 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use utils::errors::GeneralError;
+
+use crate::traits::Code;
 use std::cell::LazyCell;
 
 pub const DAMM_TABLE: LazyCell<[[usize; 10]; 10]> = LazyCell::new(|| {
@@ -33,7 +35,7 @@ impl Damm {
             } else {
                 out.push_str(line.trim());
                 out.push_str(" [");
-                out.push_str(&result.unwrap_err().inner());
+                out.push_str(&result.unwrap_err().to_string());
                 out.push(']');
                 out.push_str(",\n");
             }
@@ -49,14 +51,14 @@ impl Default for Damm {
 }
 
 impl Code for Damm {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         let mut interim = 0;
 
         for c in text.chars() {
-            let digit = c.to_digit(10).ok_or(CodeError::invalid_input_char(c))?;
+            let digit = c.to_digit(10).ok_or(GeneralError::invalid_input_char(c))?;
             interim = check(digit as usize, interim);
         }
 
@@ -65,19 +67,19 @@ impl Code for Damm {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         let mut interim = 0;
 
         for c in text.chars() {
-            let digit = c.to_digit(10).ok_or(CodeError::invalid_input_char(c))?;
+            let digit = c.to_digit(10).ok_or(GeneralError::invalid_input_char(c))?;
             interim = check(digit as usize, interim);
         }
 
         if interim != 0 {
-            return Err(CodeError::input("invalid check digit"));
+            return Err(GeneralError::input("invalid check digit"));
         } else {
             Ok(text[..text.len() - 1].to_string())
         }
@@ -105,7 +107,7 @@ mod damm_tests {
         let code = Damm::default();
         assert_eq!(
             code.decode("5723").unwrap_err(),
-            CodeError::input("invalid check digit")
+            GeneralError::input("invalid check digit")
         );
     }
 }

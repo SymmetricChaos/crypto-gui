@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use utils::{
     bit_polynomial::BitPolynomial,
-    bits::{bits_from_str, Bit},
+    bits::{bits_from_str, Bit}, errors::GeneralError,
 };
 
 pub struct ConvolutionalCode {
@@ -22,17 +22,17 @@ impl Default for ConvolutionalCode {
 }
 
 impl ConvolutionalCode {
-    fn validate(&self) -> Result<(), CodeError> {
+    fn validate(&self) -> Result<(), GeneralError> {
         Ok(())
     }
 }
 
 impl Code for ConvolutionalCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
 
         let mut bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         for _ in 0..self.constraint_length - 1 {
@@ -53,10 +53,10 @@ impl Code for ConvolutionalCode {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let _bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
         todo!()
     }

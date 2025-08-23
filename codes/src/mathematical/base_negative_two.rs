@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 // fn encode_bn2_be(n: i32) -> u32 {
 //     for byte in n.to_be_bytes() {
@@ -35,7 +35,7 @@ impl Default for BaseNegativeTwo {
 }
 
 impl Code for BaseNegativeTwo {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         // let mut v = Vec::new();
 
         // for group in text.split(",") {
@@ -68,7 +68,7 @@ impl Code for BaseNegativeTwo {
         todo!()
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         if self.spaced {
@@ -79,7 +79,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i8(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -87,7 +87,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i16_be(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -95,7 +95,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i32_be(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -103,7 +103,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i64_be(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -114,7 +114,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i8(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -122,7 +122,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i16_le(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -130,7 +130,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i32_le(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -138,7 +138,7 @@ impl Code for BaseNegativeTwo {
                             v.push(
                                 self.byte_format
                                     .text_to_i64_le(group.trim())
-                                    .map_err(|e| CodeError::Input(e.to_string()))?[0]
+                                    .map_err(|e| GeneralError::input(e.to_string()))?[0]
                                     .to_string(),
                             );
                         }
@@ -152,7 +152,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i8(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -161,7 +161,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i16_be(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -170,7 +170,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i32_be(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -179,7 +179,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i64_be(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -191,7 +191,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i8(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -200,7 +200,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i16_le(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -209,7 +209,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i32_le(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();
@@ -218,7 +218,7 @@ impl Code for BaseNegativeTwo {
                         v = self
                             .byte_format
                             .text_to_i64_le(text)
-                            .map_err(|e| CodeError::Input(e.to_string()))?
+                            .map_err(|e| GeneralError::input(e.to_string()))?
                             .into_iter()
                             .map(|n| n.to_string())
                             .collect_vec();

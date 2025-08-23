@@ -32,7 +32,7 @@ impl CodeFrame for ItfFrame {
         ui.text_edit_singleline(&mut self.example);
         match self.code.encode(&self.example) {
             Ok(bits) => ui.mono(bits),
-            Err(e) => ui.error_text(e.inner()),
+            Err(e) => ui.error_text(e),
         };
         ui.add_space(16.0);
     }

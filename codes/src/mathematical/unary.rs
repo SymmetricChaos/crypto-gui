@@ -1,5 +1,7 @@
+use utils::errors::GeneralError;
+
 use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s};
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 
 pub struct UnaryCode {
     pub invert: bool,
@@ -119,7 +121,7 @@ impl UnaryCode {
 }
 
 impl Code for UnaryCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         if self.signed {
@@ -139,7 +141,7 @@ impl Code for UnaryCode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         if self.spaced {

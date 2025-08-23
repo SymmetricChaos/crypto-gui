@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
+use utils::errors::GeneralError;
 
 const SEMAPHORE_MEANING: [&'static str; 30] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
@@ -64,7 +65,7 @@ impl Default for Semaphore {
 }
 
 impl Code for Semaphore {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut numeric_mode = false;
         let mut out = Vec::with_capacity(text.len());
         for symbol in SEMAPHORE_REGEX
@@ -106,13 +107,13 @@ impl Code for Semaphore {
 
             match SEMAPHORE_MAP.get_by_left(symbol) {
                 Some(code) => out.push(*code),
-                None => return Err(CodeError::invalid_input_group(symbol)),
+                None => return Err(GeneralError::invalid_input_group(symbol)),
             }
         }
         Ok(out.join(" "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut numeric_mode = false;
         let mut output = String::new();
         for code in text.split(" ") {
@@ -129,7 +130,7 @@ impl Code for Semaphore {
             let symbol = if numeric_mode {
                 let letter = *SEMAPHORE_MAP
                     .get_by_right(code)
-                    .ok_or_else(|| CodeError::invalid_input_group(code))?;
+                    .ok_or_else(|| GeneralError::invalid_input_group(code))?;
                 match letter {
                     "A" => "1",
                     "B" => "2",
@@ -146,7 +147,7 @@ impl Code for Semaphore {
             } else {
                 *SEMAPHORE_MAP
                     .get_by_right(code)
-                    .ok_or_else(|| CodeError::invalid_input_group(code))?
+                    .ok_or_else(|| GeneralError::invalid_input_group(code))?
             };
 
             output.push_str(symbol)

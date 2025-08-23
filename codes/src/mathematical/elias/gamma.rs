@@ -1,8 +1,11 @@
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
 
-use crate::{errors::CodeError, next_bit_or_reset};
+use crate::next_bit_or_reset;
 use num::Zero;
-use utils::bits::{bits_to_u32_lower, Bit};
+use utils::{
+    bits::{bits_to_u32_lower, Bit},
+    errors::GeneralError,
+};
 
 pub struct GammaGen {
     pub n: u32,
@@ -35,7 +38,7 @@ impl Iterator for GammaGen {
     }
 }
 
-pub fn gamma_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
+pub fn gamma_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, GeneralError> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut zero_ctr = 0;
@@ -54,7 +57,7 @@ pub fn gamma_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
                     if let Some(b) = bits.next() {
                         buffer.push(b)
                     } else {
-                        return Err(CodeError::input("partial or malformed input"));
+                        return Err(GeneralError::input("partial or malformed input"));
                     }
                 }
                 // Convert the bits into an integer

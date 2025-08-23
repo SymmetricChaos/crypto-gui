@@ -1,8 +1,8 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use num::Integer;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
@@ -64,7 +64,7 @@ impl Ascii85 {
 }
 
 impl BinaryToText for Ascii85 {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity((bytes.len() / 5) * 8);
         let map = self.map();
         let mut buffer = 0_u32;
@@ -116,10 +116,34 @@ impl BinaryToText for Ascii85 {
 
         Ok(String::from_utf8(out).unwrap())
     }
+
+    fn encode_hex(&self, hex: &str) -> Result<String, GeneralError> {
+        let bytes = utils::byte_formatting::hex_to_bytes(hex)
+            .map_err(|_| GeneralError::input("not valid hexcode"))?;
+        self.encode_bytes(&bytes)
+    }
+
+    fn encode_base64(&self, text: &str) -> Result<String, GeneralError> {
+        let bytes = ByteFormat::Base64
+            .text_to_bytes(text)
+            .map_err(|_| GeneralError::input("not valid Base64"))?;
+        self.encode_bytes(&bytes)
+    }
+
+    fn encode_utf8(&self, text: &str) -> Result<String, GeneralError> {
+        self.encode_bytes(text.as_bytes())
+    }
+
+    fn encode_bits(&self, text: &str) -> Result<String, GeneralError> {
+        let bytes = ByteFormat::Binary
+            .text_to_bytes(text)
+            .map_err(|_| GeneralError::input("not valid binary"))?;
+        self.encode_bytes(&bytes)
+    }
 }
 
 impl Code for Ascii85 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -128,7 +152,7 @@ impl Code for Ascii85 {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out: Vec<u8> = Vec::new();
         let mut chars = text.chars().filter(|c| !c.is_whitespace()).peekable();
         let map = self.map();
@@ -166,7 +190,7 @@ impl Code for Ascii85 {
                     Some(byte) => {
                         buffer += *map
                             .get_by_right(&(byte as u8))
-                            .ok_or_else(|| CodeError::invalid_input_char(byte as char))?
+                            .ok_or_else(|| GeneralError::invalid_input_char(byte as char))?
                             as u32
                             * 85_u32.pow(i)
                     }
@@ -223,17 +247,18 @@ mod ascii85_tests {
         // Fail on character that is always invalid
         assert_eq!(
             code.decode("abdc}").unwrap_err(),
-            CodeError::Input("invalid character `}`, alphabets are case sensitive".into())
+            GeneralError::input("invalid character `}`, alphabets are case sensitive")
         );
+
         // Fail on z if not found at the start of a chunk
         assert_eq!(
             code.decode("azg}").unwrap_err(),
-            CodeError::Input("invalid character `z`, alphabets are case sensitive".into())
+            GeneralError::input("invalid character `z`, alphabets are case sensitive")
         );
         // Fail on y if not found at the start of a chunk
         assert_eq!(
             code.decode("agy{").unwrap_err(),
-            CodeError::Input("invalid character `y`, alphabets are case sensitive".into())
+            GeneralError::input("invalid character `y`, alphabets are case sensitive")
         );
     }
 }

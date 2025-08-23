@@ -106,7 +106,7 @@ impl Cipher for Purple {
         // let text = if self.use_kana {
         //     let text = to_romaji(text, &NIHON_SHIKI);
         //     if let Err(e) = text {
-        //         return Err(GeneralError::General(e.to_string()));
+        //         return Err(GeneralError::general(e.to_string()));
         //     }
         //     text.unwrap()
         // } else {
@@ -139,7 +139,7 @@ impl Cipher for Purple {
         // let text = if self.use_kana {
         //     let text = to_romaji(text, &NIHON_SHIKI);
         //     if let Err(e) = text {
-        //         return Err(GeneralError::General(e.to_string()));
+        //         return Err(GeneralError::general(e.to_string()));
         //     }
         //     text.unwrap()
         // } else {

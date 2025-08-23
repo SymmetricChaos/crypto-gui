@@ -167,7 +167,7 @@ macro_rules! simple_block_cipher {
             // If padding is needed return an error if the input for decryption is the wrong size
             if self.mode.padded() {
                 if bytes.len() % $blocksize != 0 {
-                    return Err(crate::errors::GeneralError::General(format!(
+                    return Err(crate::errors::GeneralError::general(format!(
                         "decryption requires blocks of exactly {} bytes",
                         $blocksize
                     )));

@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
-use utils::text_functions::bimap_from_iter;
+use utils::{errors::GeneralError, text_functions::bimap_from_iter};
 
 const FIVE_NEEDLE_CODES: [&'static str; 20] = [
     r"/|||\", r"/||\|", r"|/||\", r"/|\||", r"|/|\|", r"||/|\", r"/\|||", r"|/\||", r"||/\|",
@@ -32,26 +32,26 @@ impl Default for Needle {
 }
 
 impl Code for Needle {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut vec = Vec::with_capacity(text.len());
         for c in text.chars() {
             let code = self
                 .map
                 .get_by_left(&c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                .ok_or_else(|| GeneralError::invalid_input_char(c))?;
             vec.push(*code)
         }
         Ok(vec.join(" "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let codes = text.split(" ");
         let mut output = String::with_capacity(codes.clone().count());
         for code in codes {
             let c = self
                 .map
                 .get_by_right(code)
-                .ok_or_else(|| CodeError::invalid_input_group(code))?;
+                .ok_or_else(|| GeneralError::invalid_input_group(code))?;
             output.push(*c)
         }
         Ok(output)

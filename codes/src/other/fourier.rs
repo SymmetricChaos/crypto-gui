@@ -1,8 +1,9 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use core::f64;
 use itertools::Itertools;
 use nalgebra::ComplexField;
 use num::{complex::Complex64, Complex, FromPrimitive, Num, Zero};
+use utils::errors::GeneralError;
 
 fn dft(v: &Vec<Complex<f64>>) -> Vec<Complex<f64>> {
     let tau = Complex64::from_f64(f64::consts::TAU).unwrap();
@@ -50,12 +51,12 @@ impl Default for Fourier {
 }
 
 impl Code for Fourier {
-    fn encode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
         for s in text.split(",") {
             v.push(
                 Complex64::from_str_radix(s.trim(), 10)
-                    .or_else(|e| Err(CodeError::Input(e.to_string())))?,
+                    .or_else(|e| Err(GeneralError::input(e.to_string())))?,
             );
         }
         if self.rounded {
@@ -68,12 +69,12 @@ impl Code for Fourier {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
         for s in text.split(",") {
             v.push(
                 Complex64::from_str_radix(s.trim(), 10)
-                    .or_else(|e| Err(CodeError::Input(e.to_string())))?,
+                    .or_else(|e| Err(GeneralError::input(e.to_string())))?,
             );
         }
         if self.rounded {

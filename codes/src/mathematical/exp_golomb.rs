@@ -1,7 +1,8 @@
 use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s, swap_01};
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use std::u32;
+use utils::errors::GeneralError;
 
 pub fn u32_to_exp_golomb(n: u32) -> String {
     if n == u32::MAX {
@@ -96,7 +97,7 @@ impl ExpGolomb {
 }
 
 impl Code for ExpGolomb {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         if self.signed {
             for n in string_to_i32s(text, ",")? {
@@ -117,7 +118,7 @@ impl Code for ExpGolomb {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         if self.spaced {

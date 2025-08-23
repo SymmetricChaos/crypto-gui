@@ -1,7 +1,7 @@
 use super::block::BlockCode;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 pub struct Bacon {
     pub block: BlockCode,
@@ -26,7 +26,7 @@ impl Bacon {
         self.block.chars_codes()
     }
 
-    fn enough_false_text(&self, text: &str) -> Result<(), CodeError> {
+    fn enough_false_text(&self, text: &str) -> Result<(), GeneralError> {
         let usable_chars = self
             .false_text
             .chars()
@@ -34,7 +34,7 @@ impl Bacon {
             .count();
         let chars_needed = text.chars().count() * self.block.width;
         if usable_chars < chars_needed {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "At least {chars_needed} ASCII alphabetic characters are needed in the false text."
             )));
         }
@@ -59,7 +59,7 @@ fn bits_to_capitalization(c: char) -> bool {
 }
 
 impl Code for Bacon {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.enough_false_text(text)?;
 
         let binding = self.block.encode(text)?;
@@ -87,7 +87,7 @@ impl Code for Bacon {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let usable_letters = text.chars().filter(|c| c.is_ascii_alphabetic()).count();
         let extra_letters = usable_letters % self.block.width;
         let message_length = usable_letters - extra_letters;

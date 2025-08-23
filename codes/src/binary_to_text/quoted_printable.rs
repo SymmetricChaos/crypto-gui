@@ -1,6 +1,6 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
-use utils::byte_formatting::ByteFormat;
+use crate::traits::Code;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 fn push_quote_byte(byte: u8, string: &mut String) {
     string.push_str(&format!("={:02X}", byte))
@@ -19,7 +19,7 @@ impl Default for QuotedPrintable {
 }
 
 impl BinaryToText for QuotedPrintable {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         let mut out = String::new();
         let mut row = String::with_capacity(76);
         for byte in bytes {
@@ -46,7 +46,7 @@ impl BinaryToText for QuotedPrintable {
 }
 
 impl Code for QuotedPrintable {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -55,7 +55,7 @@ impl Code for QuotedPrintable {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         for line in text.split("=\r\n") {}
 
         todo!()

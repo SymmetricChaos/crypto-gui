@@ -1,8 +1,9 @@
-use crate::{binary_to_text::BinaryToText, errors::CodeError, traits::Code};
+use crate::{binary_to_text::BinaryToText, traits::Code};
 use itertools::Itertools;
 use std::{str::Chars, sync::LazyLock};
 use utils::{
     byte_formatting::{bytes_to_hex, ByteFormat},
+    errors::GeneralError,
     text_functions::string_chunks,
 };
 
@@ -81,24 +82,48 @@ impl Default for Ccsid {
 }
 
 impl BinaryToText for Ccsid {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         Ok(bytes
             .into_iter()
             .map(|b| self.page.chars().nth(*b as usize).unwrap())
             .collect())
     }
+
+    fn encode_hex(&self, hex: &str) -> Result<String, utils::errors::GeneralError> {
+        let bytes = utils::byte_formatting::hex_to_bytes(hex)
+            .map_err(|_| utils::errors::GeneralError::input("not valid hexcode"))?;
+        self.encode_bytes(&bytes)
+    }
+
+    fn encode_base64(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
+        let bytes = ByteFormat::Base64
+            .text_to_bytes(text)
+            .map_err(|_| utils::errors::GeneralError::input("not valid Base64"))?;
+        self.encode_bytes(&bytes)
+    }
+
+    fn encode_utf8(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
+        self.encode_bytes(text.as_bytes())
+    }
+
+    fn encode_bits(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
+        let bytes = ByteFormat::Binary
+            .text_to_bytes(text)
+            .map_err(|_| utils::errors::GeneralError::input("not valid binary"))?;
+        self.encode_bytes(&bytes)
+    }
 }
 
 impl Ccsid {
-    pub fn map(&self, c: char) -> Result<String, CodeError> {
+    pub fn map(&self, c: char) -> Result<String, GeneralError> {
         if c == '�' {
-            return Err(CodeError::invalid_input_char(c));
+            return Err(GeneralError::invalid_input_char(c));
         };
         let n = self
             .page
             .chars()
             .position(|x| x == c)
-            .ok_or(CodeError::invalid_input_char(c))?;
+            .ok_or(GeneralError::invalid_input_char(c))?;
         match self.mode {
             DisplayMode::Binary => Ok(BINARY.get(n).unwrap().to_string()),
             DisplayMode::Octal => Ok(OCTAL.get(n).unwrap().to_string()),
@@ -107,14 +132,14 @@ impl Ccsid {
         }
     }
 
-    pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
+    pub fn map_inv(&self, s: &str) -> Result<char, GeneralError> {
         let n = match self.mode {
             DisplayMode::Binary => BINARY.iter().position(|x| x == s),
             DisplayMode::Octal => OCTAL.iter().position(|x| x == s),
             DisplayMode::Decimal => DECIMAL.iter().position(|x| x == s),
             DisplayMode::Hex => HEX.iter().position(|x| x == s),
         }
-        .ok_or(CodeError::invalid_input_group(s))?;
+        .ok_or(GeneralError::invalid_input_group(s))?;
 
         Ok(self.page.chars().nth(n).unwrap())
     }
@@ -129,7 +154,7 @@ impl Ccsid {
         }
     }
 
-    pub fn decode_to_bytes(&self, text: &str) -> Result<String, CodeError> {
+    pub fn decode_to_bytes(&self, text: &str) -> Result<String, GeneralError> {
         let out = text
             .chars()
             .map(|c| self.page.chars().position(|x| x == c).unwrap() as u8)
@@ -137,17 +162,17 @@ impl Ccsid {
         match self.b2t_mode {
             Some(ByteFormat::Hex) => Ok(bytes_to_hex(out)),
             Some(ByteFormat::Utf8) => {
-                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
+                String::from_utf8(out).map_err(|e| GeneralError::input(e.to_string()))
             }
             Some(ByteFormat::Base64) => todo!(),
             Some(ByteFormat::Binary) => todo!(),
-            None => Err(CodeError::state("Binary to Text Mode is not set")),
+            None => Err(GeneralError::state("Binary to Text Mode is not set")),
         }
     }
 }
 
 impl Code for Ccsid {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if let Some(m) = self.b2t_mode {
             match m {
                 ByteFormat::Hex => self.encode_hex(text),
@@ -167,7 +192,7 @@ impl Code for Ccsid {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if self.b2t_mode.is_some() {
             self.decode_to_bytes(text)
         } else {

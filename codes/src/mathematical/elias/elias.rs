@@ -5,7 +5,6 @@ use super::{
     EliasVariant,
 };
 use crate::{
-    errors::CodeError,
     mathematical::{string_to_u32s, swap_01},
     traits::Code,
 };
@@ -14,6 +13,7 @@ use std::{
     cell::{Ref, RefCell, RefMut},
     collections::BTreeMap,
 };
+use utils::errors::GeneralError;
 
 pub struct EliasCode {
     pub variant: EliasVariant,
@@ -100,7 +100,7 @@ impl EliasCode {
 }
 
 impl Code for EliasCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         for n in string_to_u32s(text, ",")? {
@@ -120,7 +120,7 @@ impl Code for EliasCode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let t = match self.invert {
             true => swap_01(text.to_string()),
             false => text.to_string(),

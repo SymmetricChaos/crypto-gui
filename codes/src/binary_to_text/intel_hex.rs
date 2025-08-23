@@ -1,6 +1,6 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
-use utils::byte_formatting::ByteFormat;
+use crate::traits::Code;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 const EOF: &str = ":00000001FF";
 
@@ -23,7 +23,7 @@ impl Default for IntelHex {
 impl IntelHex {}
 
 impl BinaryToText for IntelHex {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         let mut address = self.address;
         let mut out = String::new();
         for chunk in bytes.chunks(self.line_length as usize) {
@@ -51,7 +51,7 @@ impl BinaryToText for IntelHex {
 }
 
 impl Code for IntelHex {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -60,28 +60,28 @@ impl Code for IntelHex {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for record in text.split(":").skip(1).map(|s| s.trim()) {
             if record.is_empty() {
-                return Err(CodeError::input("records cannot be empty"));
+                return Err(GeneralError::input("records cannot be empty"));
             }
             let rec = match ByteFormat::Hex.text_to_bytes(record) {
                 Ok(s) => s,
-                Err(e) => return Err(CodeError::Input(e.to_string())),
+                Err(e) => return Err(GeneralError::input(e.to_string())),
             };
             let mut check: u8 = 0;
             for byte in &rec {
                 check = check.wrapping_add(*byte);
             }
             if check != 0 {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "checksum dected an error in record: {}",
                     record
                 )));
             }
             if rec[0] != (rec.len() - 5) as u8 {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "length is incorrect in record: {}",
                     record
                 )));

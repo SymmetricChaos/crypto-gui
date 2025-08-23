@@ -1,25 +1,23 @@
-use crate::{errors::CodeError, traits::Code};
+use utils::errors::GeneralError;
 
-pub struct ArithmeticCode {
+use crate::traits::Code;
 
-}
+pub struct ArithmeticCode {}
 
 impl Default for ArithmeticCode {
     fn default() -> Self {
-        Self {  }
+        Self {}
     }
 }
 
-impl ArithmeticCode {
-
-}
+impl ArithmeticCode {}
 
 impl Code for ArithmeticCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         todo!()
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         todo!()
     }
 }

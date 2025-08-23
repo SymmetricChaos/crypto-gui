@@ -1,8 +1,8 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use itertools::Itertools;
 use std::cell::Cell;
-use utils::text_functions::chunk_and_join;
+use utils::{errors::GeneralError, text_functions::chunk_and_join};
 
 //http://www.linotype.org/OnLineDocs/LinotypeMachinePrinciples-1940/LMP-chapter20.pdf
 const LINOTYPE_90_MAG: &'static str =
@@ -30,7 +30,7 @@ pub fn space_to_name(c: char) -> &'static str {
 impl Linotype {
     const WIDTH: usize = 7;
 
-    pub fn map_inv(&self, s: &str) -> Result<&char, CodeError> {
+    pub fn map_inv(&self, s: &str) -> Result<&char, GeneralError> {
         if s == "0000010" {
             Ok(&'e')
         } else if s == "0000011" {
@@ -38,7 +38,7 @@ impl Linotype {
         } else {
             LINO_90_MAP
                 .get_by_right(s)
-                .ok_or(CodeError::invalid_input_group(s))
+                .ok_or(GeneralError::invalid_input_group(s))
         }
     }
 
@@ -64,7 +64,7 @@ impl Default for Linotype {
 }
 
 impl Code for Linotype {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for c in text.chars() {
             if c == 'e' {
@@ -82,7 +82,7 @@ impl Code for Linotype {
                 out.push_str(
                     LINO_90_MAP
                         .get_by_left(&c)
-                        .ok_or(CodeError::invalid_input_char(c))?,
+                        .ok_or(GeneralError::invalid_input_char(c))?,
                 )
             }
         }
@@ -93,7 +93,7 @@ impl Code for Linotype {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         let binding = text.chars().filter(|c| !c.is_whitespace()).chunks(7);
         let chunks = binding.into_iter().map(|chunk| chunk.collect::<String>());

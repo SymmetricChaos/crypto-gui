@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
+use utils::errors::GeneralError;
 
 const GUARD: &'static str = "101"; // Start and End guard pattern
 const MIDDLE: &'static str = "01010";
@@ -45,14 +46,14 @@ pub fn is_valid_upc_a(digits: &str) -> bool {
     check % 10 == 0
 }
 
-pub fn upc_a_check_digit(digits: &str) -> Result<char, CodeError> {
+pub fn upc_a_check_digit(digits: &str) -> Result<char, GeneralError> {
     if digits.is_ascii() && digits.len() == 11 {
         let coefs = [3, 1].into_iter().cycle();
         let mut check = 0;
         for (d, co) in digits.chars().zip(coefs) {
             match d.to_digit(10) {
                 Some(d) => check += d * co,
-                None => return Err(CodeError::invalid_input_char(d)),
+                None => return Err(GeneralError::invalid_input_char(d)),
             }
         }
         match check % 10 {
@@ -69,16 +70,18 @@ pub fn upc_a_check_digit(digits: &str) -> Result<char, CodeError> {
             _ => unreachable!("an integer modulo 10 is between 0 and 9"),
         }
     } else {
-        return Err(CodeError::input(
+        return Err(GeneralError::input(
             "a UPC-A check digit can only be calculated for 11 digits",
         ));
     }
 }
 
 impl Code for Upc {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if !UPCA_DIGITS.is_match(text) {
-            return Err(CodeError::input("a UPC-A code must have exactly 12 digits"));
+            return Err(GeneralError::input(
+                "a UPC-A code must have exactly 12 digits",
+            ));
         }
 
         let mut out = String::with_capacity(95);
@@ -89,7 +92,7 @@ impl Code for Upc {
             out.push_str(
                 UPCA_LEFT
                     .get_by_left(&c)
-                    .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                    .ok_or_else(|| GeneralError::invalid_input_char(c))?,
             )
         }
 
@@ -99,7 +102,7 @@ impl Code for Upc {
             out.push_str(
                 UPCA_RIGHT
                     .get_by_left(&c)
-                    .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                    .ok_or_else(|| GeneralError::invalid_input_char(c))?,
             )
         }
 
@@ -107,12 +110,12 @@ impl Code for Upc {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         // Ignore quiet area on the ends
         let trimmed = text.trim_matches('0');
 
         if !UPCA_PATTERN.is_match(trimmed) {
-            return Err(CodeError::input("not structured as a UPC-A code"));
+            return Err(GeneralError::input("not structured as a UPC-A code"));
         }
 
         let mut out = String::new();
@@ -123,7 +126,7 @@ impl Code for Upc {
             let group = &trimmed[start..end];
             let digit = UPCA_LEFT
                 .get_by_right(group)
-                .ok_or_else(|| CodeError::invalid_input_group(group))?;
+                .ok_or_else(|| GeneralError::invalid_input_group(group))?;
             out.push(*digit);
         }
 
@@ -134,14 +137,14 @@ impl Code for Upc {
             let group = &trimmed[start..end];
             let digit = UPCA_RIGHT
                 .get_by_right(group)
-                .ok_or_else(|| CodeError::invalid_input_group(group))?;
+                .ok_or_else(|| GeneralError::invalid_input_group(group))?;
             out.push(*digit);
         }
 
         if is_valid_upc_a(&out) {
             Ok(out)
         } else {
-            Err(CodeError::input("check digit is incorrect"))
+            Err(GeneralError::input("check digit is incorrect"))
         }
     }
 }

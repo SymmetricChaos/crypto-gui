@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
-use utils::text_functions::string_chunks;
+use utils::{errors::GeneralError, text_functions::string_chunks};
 
 crate::lazy_bimap!(
     BIQUINARY_MAP: BiMap<char, &str> =
@@ -65,7 +65,7 @@ impl BiquinaryDecimal {
 }
 
 impl Code for BiquinaryDecimal {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for c in text.split(",").map(|s| s.trim()) {
             match self.mode.encode(c.chars().next().unwrap()) {
@@ -78,7 +78,7 @@ impl Code for BiquinaryDecimal {
         Ok(string_chunks(&out, 8).join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for s in text.split(",").map(|s| s.trim()) {
             match self.mode.decode(s) {

@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use num::Integer;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 // To be used in a more complex encoding scheme.
 // u64 allows recording a single repetition that takes up 18 exabytes and thus should
@@ -148,26 +148,28 @@ impl RunLengthEncodingBytes {
 }
 
 impl Code for RunLengthEncodingBytes {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CodeError::input("invalid input bytes"))?;
+            .map_err(|_| GeneralError::input("invalid input bytes"))?;
 
         Ok(self
             .output_format
             .byte_slice_to_text(&self.compress(&bytes)))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let bytes = self
             .input_format
             .text_to_bytes(text)
-            .map_err(|_| CodeError::input("invalid input bytes"))?;
+            .map_err(|_| GeneralError::input("invalid input bytes"))?;
 
         if self.method == RleMethod::OneByte {
             if !bytes.len().is_even() {
-                return Err(CodeError::input("the rle must be an even number of bytes"));
+                return Err(GeneralError::input(
+                    "the rle must be an even number of bytes",
+                ));
             }
         }
 

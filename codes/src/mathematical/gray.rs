@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::{bits::IS_BITS, text_functions::string_chunks};
+use utils::{bits::IS_BITS, errors::GeneralError, text_functions::string_chunks};
 
 pub struct GrayCode {
     pub width: usize,
@@ -40,15 +40,15 @@ impl GrayCode {
 }
 
 impl Code for GrayCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let m = 2_u32.pow(self.width as u32);
         let mut out = Vec::new();
 
         for w in text.split(",") {
-            let n =
-                u32::from_str_radix(w.trim(), 10).map_err(|e| CodeError::Input(e.to_string()))?;
+            let n = u32::from_str_radix(w.trim(), 10)
+                .map_err(|e| GeneralError::input(e.to_string()))?;
             if n >= m && self.fixed_width {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "for a width of {} inputs must be less than {}",
                     self.width, m
                 )));
@@ -63,7 +63,7 @@ impl Code for GrayCode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         let chunks = match self.fixed_width {
             true => string_chunks(
@@ -80,9 +80,10 @@ impl Code for GrayCode {
         };
         for s in chunks {
             if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
-                return Err(CodeError::invalid_input_group(&s));
+                return Err(GeneralError::invalid_input_group(&s));
             }
-            let n = u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
+            let n =
+                u32::from_str_radix(&s, 2).map_err(|_| GeneralError::invalid_input_group(&s))?;
             let code = self.decode_to_u32(n);
 
             out.push(code.to_string());

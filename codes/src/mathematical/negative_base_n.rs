@@ -1,8 +1,8 @@
 use super::string_to_i32s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::{Integer, Zero};
-use utils::text_functions::num_to_digit;
+use utils::{errors::GeneralError, text_functions::num_to_digit};
 
 pub struct NegativeBaseN {
     pub radix: i32,
@@ -19,16 +19,16 @@ impl Default for NegativeBaseN {
 }
 
 impl NegativeBaseN {
-    pub fn validate(&self) -> Result<(), CodeError> {
+    pub fn validate(&self) -> Result<(), GeneralError> {
         if self.radix > -2 || self.radix < -36 {
-            return Err(CodeError::state(
+            return Err(GeneralError::state(
                 "radix must be between -2 and -36, inclusive",
             ));
         }
         Ok(())
     }
 
-    pub fn encode_i32(&self, n: i32) -> Result<String, CodeError> {
+    pub fn encode_i32(&self, n: i32) -> Result<String, GeneralError> {
         if n.is_zero() {
             return Ok(String::from("0"));
         }
@@ -54,7 +54,7 @@ impl NegativeBaseN {
         }
     }
 
-    pub fn decode_to_i32(&self, s: &str) -> Result<i32, CodeError> {
+    pub fn decode_to_i32(&self, s: &str) -> Result<i32, GeneralError> {
         let mut out = 0;
         let mut base = 1;
         if self.little_endian {
@@ -62,7 +62,7 @@ impl NegativeBaseN {
                 if let Some(n) = c.to_digit(-self.radix as u32) {
                     out += (n as i32) * base;
                 } else {
-                    return Err(CodeError::invalid_input_char(c));
+                    return Err(GeneralError::invalid_input_char(c));
                 }
                 base *= self.radix;
             }
@@ -71,7 +71,7 @@ impl NegativeBaseN {
                 if let Some(n) = c.to_digit(-self.radix as u32) {
                     out += (n as i32) * base;
                 } else {
-                    return Err(CodeError::invalid_input_char(c));
+                    return Err(GeneralError::invalid_input_char(c));
                 }
                 base *= self.radix;
             }
@@ -82,7 +82,7 @@ impl NegativeBaseN {
 }
 
 impl Code for NegativeBaseN {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let mut output = Vec::new();
 
@@ -93,7 +93,7 @@ impl Code for NegativeBaseN {
         Ok(output.into_iter().join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let mut output = Vec::new();
 

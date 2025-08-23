@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::{integer::binomial, Integer};
-use utils::bits::{bits_from_str, Bit};
+use utils::{bits::{bits_from_str, Bit}, errors::GeneralError};
 
 pub fn u32_to_m_of_n(n: u32, w: usize, l: usize) -> Option<String> {
     let mut n = n;
@@ -46,14 +46,14 @@ impl MofNCode {
         self.length - self.weight
     }
 
-    pub fn validate(&self) -> Result<(), CodeError> {
+    pub fn validate(&self) -> Result<(), GeneralError> {
         if self.length > 10 {
-            return Err(CodeError::state(
+            return Err(GeneralError::state(
                 "lengths greater than 10 not currently supported",
             ));
         }
         if self.weight >= self.length {
-            return Err(CodeError::state("weight must be less than length"));
+            return Err(GeneralError::state("weight must be less than length"));
         }
         Ok(())
     }
@@ -74,23 +74,23 @@ impl Default for MofNCode {
 }
 
 impl Code for MofNCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
 
         let n_data_bits = self.n_data_bits();
         if bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .count()
             % n_data_bits
             != 0
         {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "when encoding an {}-of-{} code the input must have a length that is a multiple of {}",
                 self.weight, self.length, n_data_bits
             )));
         };
 
-        let bits = bits_from_str(text).map_err(|e| CodeError::Input(e.to_string()))?;
+        let bits = bits_from_str(text).map_err(|e| GeneralError::input(e.to_string()))?;
 
         let mut out = Vec::new();
         let mut counted_weight = 0;
@@ -102,7 +102,7 @@ impl Code for MofNCode {
             }
 
             if counted_weight > self.weight {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "encoutered more than {} set bits",
                     self.weight
                 )));
@@ -121,17 +121,17 @@ impl Code for MofNCode {
         Ok(out.join(if self.spaced { ", " } else { "" }))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
 
         let n_data_bits = self.n_data_bits();
 
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % self.length != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "when decoding an {}-of-{} code the input must have a length that is a multiple of {}",
                 self.weight, self.length, self.length
             )));

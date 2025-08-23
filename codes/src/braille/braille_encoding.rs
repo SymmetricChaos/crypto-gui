@@ -1,6 +1,7 @@
 use super::braille_data::{ASCII_ORDER, UNICODE_ORDER};
-use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
+use crate::{braille::braille_data::UEB_ORDER, traits::Code};
 use bimap::BiMap;
+use utils::errors::GeneralError;
 
 // All of these are in UEB order
 const BRAILLE_DOTS: [&'static str; 64] = [
@@ -114,7 +115,7 @@ impl BrailleEncoding {
 }
 
 impl Code for BrailleEncoding {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
 
         for c in text.chars() {
@@ -124,7 +125,7 @@ impl Code for BrailleEncoding {
                 out.push_str(
                     self.mode
                         .encode(c)
-                        .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                        .ok_or_else(|| GeneralError::invalid_input_char(c))?,
                 );
             }
             if self.mode != BrailleEncodingType::Ascii {
@@ -138,7 +139,7 @@ impl Code for BrailleEncoding {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
 
         if self.mode == BrailleEncodingType::Ascii {
@@ -150,7 +151,7 @@ impl Code for BrailleEncoding {
                     out.push(
                         self.mode
                             .decode(&c.to_string())
-                            .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                            .ok_or_else(|| GeneralError::invalid_input_char(c))?,
                     );
                 }
             }
@@ -159,7 +160,7 @@ impl Code for BrailleEncoding {
                 out.push(
                     self.mode
                         .decode(s)
-                        .ok_or_else(|| CodeError::invalid_input_group(s))?,
+                        .ok_or_else(|| GeneralError::invalid_input_group(s))?,
                 );
             }
         }

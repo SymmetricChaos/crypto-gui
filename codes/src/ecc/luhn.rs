@@ -1,19 +1,19 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use num::Integer;
-use utils::text_functions::num_to_digit;
+use utils::{errors::GeneralError, text_functions::num_to_digit};
 
 pub struct LuhnAlgorithm {
     pub modulus: u32,
 }
 
 impl LuhnAlgorithm {
-    fn validate(&self) -> Result<(), CodeError> {
+    fn validate(&self) -> Result<(), GeneralError> {
         if self.modulus % 2 != 0 {
-            return Err(CodeError::state("modulus must be even"));
+            return Err(GeneralError::state("modulus must be even"));
         }
 
         if self.modulus < 2 || self.modulus > 36 {
-            return Err(CodeError::state(
+            return Err(GeneralError::state(
                 "modulus must be between 2 and 36, inclusive",
             ));
         }
@@ -39,9 +39,9 @@ fn digital_sum(n: u32, m: u32) -> u32 {
 }
 
 impl Code for LuhnAlgorithm {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         self.validate()?;
 
@@ -49,7 +49,7 @@ impl Code for LuhnAlgorithm {
         for (p, c) in text.chars().rev().enumerate() {
             let n = c
                 .to_digit(self.modulus)
-                .ok_or(CodeError::invalid_input_char(c))?;
+                .ok_or(GeneralError::invalid_input_char(c))?;
             if p % 2 == 0 {
                 check += digital_sum(n * 2, self.modulus);
             } else {
@@ -64,9 +64,9 @@ impl Code for LuhnAlgorithm {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
 
         self.validate()?;
@@ -76,13 +76,13 @@ impl Code for LuhnAlgorithm {
             .last()
             .unwrap()
             .to_digit(self.modulus)
-            .ok_or(CodeError::input("check digit is not a valid digit"))?;
+            .ok_or(GeneralError::input("check digit is not a valid digit"))?;
 
         let mut check = 0;
         for (p, c) in text.chars().rev().skip(1).enumerate() {
             let n = c
                 .to_digit(self.modulus)
-                .ok_or(CodeError::invalid_input_char(c))?;
+                .ok_or(GeneralError::invalid_input_char(c))?;
             if p % 2 == 0 {
                 check += digital_sum(n * 2, self.modulus);
             } else {
@@ -93,7 +93,7 @@ impl Code for LuhnAlgorithm {
         if stored_check_num == (self.modulus - (check % self.modulus)) {
             Ok(text[0..text.len() - 1].to_string())
         } else {
-            Err(CodeError::input("check digit does not match"))
+            Err(GeneralError::input("check digit does not match"))
         }
     }
 }
@@ -119,7 +119,7 @@ mod luhn_tests {
         let code = LuhnAlgorithm::default();
         assert_eq!(
             code.decode("79297398713").unwrap_err(),
-            CodeError::input("check digit does not match")
+            GeneralError::input("check digit does not match")
         );
     }
 }

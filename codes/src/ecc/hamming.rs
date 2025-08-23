@@ -1,8 +1,8 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 use std::sync::LazyLock;
-use utils::bits::{bits_from_str, to_bit_array, Bit};
+use utils::{bits::{bits_from_str, to_bit_array, Bit}, errors::GeneralError};
 
 // Generator matrix with systemtic order
 pub static GEN_4_7_SYS: LazyLock<SMatrix<Bit, 4, 7>> = LazyLock::new(|| {
@@ -121,13 +121,13 @@ impl HammingCode {
         .position(|c| c == vec)
     }
 
-    fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
+    fn decode_4_7(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 7 != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the input must have a length that is a multiple of 7",
             )));
         }
@@ -164,13 +164,13 @@ impl HammingCode {
         Ok(out)
     }
 
-    fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
+    fn decode_4_8(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 8 != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the input must have a length that is a multiple of 8",
             )));
         }
@@ -195,7 +195,7 @@ impl HammingCode {
                 // If an error location is found there must be a two bit error
                 {
                     if location.is_some() {
-                        return Err(CodeError::input("a two bit error was detected"));
+                        return Err(GeneralError::input("a two bit error was detected"));
                     } else {
                         // Otherwise the extra check bit was a single bit error
                     }
@@ -227,13 +227,13 @@ impl HammingCode {
 }
 
 impl Code for HammingCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 4 != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the input must have a length that is a multiple of 4",
             )));
         }
@@ -268,7 +268,7 @@ impl Code for HammingCode {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         match self.extra_bit {
             true => self.decode_4_8(text),
             false => self.decode_4_7(text),
@@ -371,7 +371,7 @@ mod hamming_tests {
         code.extra_bit = true;
         assert_eq!(
             code.decode("10110001").unwrap_err(),
-            CodeError::input("a two bit error was detected")
+            GeneralError::input("a two bit error was detected")
         );
     }
 
@@ -381,7 +381,7 @@ mod hamming_tests {
         code.extra_bit = true;
         assert_eq!(
             code.decode("10000100").unwrap_err(),
-            CodeError::input("a two bit error was detected")
+            GeneralError::input("a two bit error was detected")
         );
     }
 }

@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::One;
-use utils::bits::{bits_from_str, Bit};
+use utils::{bits::{bits_from_str, Bit}, errors::GeneralError};
 
 pub struct ParityBit {
     pub block_size: usize,
@@ -22,13 +22,13 @@ impl Default for ParityBit {
 impl ParityBit {}
 
 impl Code for ParityBit {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % self.block_size != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the input must have a length that is a multiple of {}",
                 self.block_size
             )));
@@ -60,13 +60,13 @@ impl Code for ParityBit {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % (self.block_size + 1) != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "the input must have a length that is a multiple of {}",
                 self.block_size + 1
             )));

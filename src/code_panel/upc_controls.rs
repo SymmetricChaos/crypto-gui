@@ -1,8 +1,6 @@
-use codes::{
-    commercial::upc::{is_valid_upc_a, upc_a_check_digit, Upc},
-    errors::CodeError,
-};
+use codes::commercial::upc::{is_valid_upc_a, upc_a_check_digit, Upc};
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 use crate::ui_elements::UiElements;
 
@@ -22,9 +20,9 @@ impl Default for UpcFrame {
     }
 }
 
-fn upca_example(text: &str) -> Result<String, CodeError> {
+fn upca_example(text: &str) -> Result<String, GeneralError> {
     if !text.is_ascii() {
-        return Err(CodeError::Input(format!(
+        return Err(GeneralError::input(format!(
             "{} is not a valid UPC-A code",
             text
         )));
@@ -36,13 +34,13 @@ fn upca_example(text: &str) -> Result<String, CodeError> {
         out.push(upc_a_check_digit(text)?);
     } else if text.len() == 12 {
         if !is_valid_upc_a(text) {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "{} is not a valid UPC-A code",
                 text
             )));
         }
     } else {
-        return Err(CodeError::Input(format!(
+        return Err(GeneralError::input(format!(
             "{} is not a valid UPC-A code",
             text
         )));
@@ -99,7 +97,7 @@ impl CodeFrame for UpcFrame {
                 ui.label("The weighted sum is always a multiple of ten due to the check digit.");
             }
             Err(e) => {
-                ui.error_text(e.inner());
+                ui.error_text(e);
             }
         }
         ui.add_space(16.0);

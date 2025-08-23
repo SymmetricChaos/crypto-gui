@@ -1,6 +1,7 @@
 use super::{decode_prefix_to_strings, string_to_u32s};
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use num::CheckedAdd;
+use utils::errors::GeneralError;
 
 // First 46 Fibonacci numbers (skipping the initial 0 and 1), all the ones that fit in u32
 pub const FIBS: [u32; 46] = [
@@ -106,7 +107,7 @@ impl FibonacciCode {
 }
 
 impl Code for FibonacciCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         for n in string_to_u32s(text, ",")? {
@@ -123,7 +124,7 @@ impl Code for FibonacciCode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         if self.spaced {

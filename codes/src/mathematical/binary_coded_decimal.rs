@@ -1,4 +1,4 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use paste::paste;
 use utils::byte_formatting::ByteFormat;
@@ -26,11 +26,11 @@ pub enum WordWidth {
 macro_rules! encode_decode_signed {
     ($t: ty, $u: ty, $bytes: literal, $min: ident, $max: ident) => {
         paste! {
-            pub fn [<encode_ $t>](&self, values: &[$t]) -> Result<Vec<$u>, CodeError> {
+            pub fn [<encode_ $t>](&self, values: &[$t]) -> Result<Vec<$u>, utils::errors::GeneralError> {
                 let mut out = Vec::with_capacity(values.len());
                 for &value in values {
                     if value < $min || value > $max {
-                        return Err(CodeError::Input(
+                        return Err(utils::errors::GeneralError::input(
                             format!("the allowed range is {}..={}", $min, $max)
                         ));
                     }
@@ -51,7 +51,7 @@ macro_rules! encode_decode_signed {
                 Ok(out)
             }
 
-            pub fn [<decode_ $u>](&self, values: &[$u]) -> Result<Vec<$t>, CodeError> {
+            pub fn [<decode_ $u>](&self, values: &[$u]) -> Result<Vec<$t>, utils::errors::GeneralError> {
                 let mut out = Vec::with_capacity(values.len());
                 for value in values {
                     let negative = if value & 0xF == NEG as $u {
@@ -59,7 +59,7 @@ macro_rules! encode_decode_signed {
                     } else if value & 0xF == POS as $u {
                         false
                     } else {
-                        return Err(CodeError::Input(format!(
+                        return Err(utils::errors::GeneralError::input(format!(
                             "invalid sign nibble in value {:08x?}, only 0xC and 0xD are allowed",
                             value
                         )));
@@ -71,7 +71,7 @@ macro_rules! encode_decode_signed {
                             n *= 10;
                             n += nibble as $t;
                         } else {
-                            return Err(CodeError::Input(format!(
+                            return Err(utils::errors::GeneralError::input(format!(
                                 "invalid digit nibble `0x{:01x?}` in value {:08x?}",
                                 nibble, value
                             )));
@@ -92,11 +92,11 @@ macro_rules! encode_decode_signed {
 macro_rules! encode_decode_unsigned {
     ($t: ty, $bytes: literal, $max: ident) => {
         paste! {
-            pub fn [<encode_ $t _usigned>](&self, values: &[$t]) -> Result<Vec<$t>, CodeError> {
+            pub fn [<encode_ $t _usigned>](&self, values: &[$t]) -> Result<Vec<$t>, utils::errors::GeneralError> {
                 let mut out = Vec::with_capacity(values.len());
                 for &value in values {
                     if value > $max {
-                        return Err(CodeError::Input(
+                        return Err(utils::errors::GeneralError::input(
                             format!("the allowed range is 0..={}",  $max)
                         ));
                     }
@@ -113,7 +113,7 @@ macro_rules! encode_decode_unsigned {
                 Ok(out)
             }
 
-            pub fn [<decode_ $t _usigned>](&self, values: &[$t]) -> Result<Vec<$t>, CodeError> {
+            pub fn [<decode_ $t _usigned>](&self, values: &[$t]) -> Result<Vec<$t>, utils::errors::GeneralError> {
                 let mut out = Vec::with_capacity(values.len());
                 for value in values {
                     let mut n = 0;
@@ -123,7 +123,7 @@ macro_rules! encode_decode_unsigned {
                             n *= 10;
                             n += nibble as $t;
                         } else {
-                            return Err(CodeError::Input(format!(
+                            return Err(utils::errors::GeneralError::input(format!(
                                 "invalid digit nibble `0x{:01x?}` in value {:08x?}",
                                 nibble, value
                             )));
@@ -181,14 +181,14 @@ impl BinaryCodedDecimal {
 }
 
 impl Code for BinaryCodedDecimal {
-    fn encode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn encode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         if self.signed {
             match self.width {
                 WordWidth::W32 => {
                     let mut values = Vec::new();
                     for s in text.split(",").map(|s| s.trim()) {
                         let n = i32::from_str_radix(s, 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -199,7 +199,7 @@ impl Code for BinaryCodedDecimal {
                     let mut values = Vec::new();
                     for value in text.split(",").map(|s| s.trim()) {
                         let n = i64::from_str_radix(value, 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -210,7 +210,7 @@ impl Code for BinaryCodedDecimal {
                     let mut values = Vec::new();
                     for value in text.split(",").map(|s| s.trim()) {
                         let n = i128::from_str_radix(value.trim(), 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -224,7 +224,7 @@ impl Code for BinaryCodedDecimal {
                     let mut values = Vec::new();
                     for value in text.split(",").map(|s| s.trim()) {
                         let n = u32::from_str_radix(value.trim(), 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -235,7 +235,7 @@ impl Code for BinaryCodedDecimal {
                     let mut values = Vec::new();
                     for value in text.split(",").map(|s| s.trim()) {
                         let n = u64::from_str_radix(value.trim(), 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -246,7 +246,7 @@ impl Code for BinaryCodedDecimal {
                     let mut values = Vec::new();
                     for value in text.split(",").map(|s| s.trim()) {
                         let n = u128::from_str_radix(value.trim(), 10)
-                            .map_err(|e| CodeError::Input(e.to_string()))?;
+                            .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                         values.push(n);
                     }
                     Ok(self
@@ -257,14 +257,14 @@ impl Code for BinaryCodedDecimal {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn decode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         if self.signed {
             match self.width {
                 WordWidth::W32 => {
                     let values = self
                         .formatting
                         .text_to_u32_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u32(&values)?
                         .into_iter()
@@ -275,7 +275,7 @@ impl Code for BinaryCodedDecimal {
                     let values = self
                         .formatting
                         .text_to_u64_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u64(&values)?
                         .into_iter()
@@ -286,7 +286,7 @@ impl Code for BinaryCodedDecimal {
                     let values = self
                         .formatting
                         .text_to_u128_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u128(&values)?
                         .into_iter()
@@ -300,7 +300,7 @@ impl Code for BinaryCodedDecimal {
                     let values = self
                         .formatting
                         .text_to_u32_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u32_usigned(&values)?
                         .into_iter()
@@ -311,7 +311,7 @@ impl Code for BinaryCodedDecimal {
                     let values = self
                         .formatting
                         .text_to_u64_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u64_usigned(&values)?
                         .into_iter()
@@ -322,7 +322,7 @@ impl Code for BinaryCodedDecimal {
                     let values = self
                         .formatting
                         .text_to_u128_be(text)
-                        .map_err(|e| CodeError::Input(e.to_string()))?;
+                        .map_err(|e| utils::errors::GeneralError::input(e.to_string()))?;
                     Ok(self
                         .decode_u128_usigned(&values)?
                         .into_iter()

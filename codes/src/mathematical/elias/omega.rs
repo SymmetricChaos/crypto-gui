@@ -1,8 +1,9 @@
 // https://en.wikipedia.org/wiki/Elias_omega_coding
-
-use crate::errors::CodeError;
 use num::Zero;
-use utils::bits::{bits_to_u32_lower, Bit};
+use utils::{
+    bits::{bits_to_u32_lower, Bit},
+    errors::GeneralError,
+};
 
 pub struct OmegaGen {
     pub n: u32,
@@ -29,7 +30,7 @@ impl Iterator for OmegaGen {
     }
 }
 
-pub fn omega_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
+pub fn omega_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, GeneralError> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut n = 1;
@@ -47,7 +48,7 @@ pub fn omega_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
                     if let Some(b) = bits.next() {
                         buffer.push(b)
                     } else {
-                        return Err(CodeError::input("partial or malformed input"));
+                        return Err(GeneralError::input("partial or malformed input"));
                     }
                 }
                 n = bits_to_u32_lower(&buffer);

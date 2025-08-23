@@ -1,4 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use utils::errors::GeneralError;
+
+use crate::{ traits::Code};
 
 // f({}) = 0
 // f(A) = sum 2^f(elem_i) for all elem_i in A
@@ -62,7 +64,7 @@ pub fn number_to_set(mut n: u32) -> String {
     out
 }
 
-pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)>, CodeError> {
+pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)>, GeneralError> {
     let mut starts = Vec::new();
     let mut pairs: Vec<(usize, usize)> = Vec::new();
 
@@ -71,7 +73,7 @@ pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)
             starts.push(i);
         } else if c == '}' {
             if starts.is_empty() {
-                return Err(CodeError::input("brackets in the set do not match"));
+                return Err(GeneralError::input("brackets in the set do not match"));
             } else {
                 let pair = (starts.pop().unwrap(), i + 1);
                 if pair.0 == 0 {
@@ -81,7 +83,7 @@ pub fn paren_ranges_nonoverlapping_subsets(s: &str) -> Result<Vec<(usize, usize)
                 pairs.push(pair);
             }
         } else {
-            return Err(CodeError::input("invalid character"));
+            return Err(GeneralError::input("invalid character"));
         }
     }
 
@@ -97,7 +99,7 @@ impl Default for Ackermann {
 }
 
 impl Code for Ackermann {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         for num in text.split(",") {
             match u32::from_str_radix(num.trim(), 10) {
@@ -110,7 +112,7 @@ impl Code for Ackermann {
         Ok(out.join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         for set in text.split(",").map(|s| s.trim()) {
             let mut n = 0;

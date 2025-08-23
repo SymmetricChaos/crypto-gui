@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 pub struct TapCode {
     pub grid: Vec<char>,
@@ -30,12 +30,12 @@ impl TapCode {
         self.grid.len()
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CodeError> {
+    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), GeneralError> {
         let num = self
             .grid
             .iter()
             .position(|x| x == &symbol)
-            .ok_or_else(|| CodeError::invalid_input_char(symbol))?;
+            .ok_or_else(|| GeneralError::invalid_input_char(symbol))?;
         Ok((num / self.side_len, num % self.side_len))
     }
 
@@ -55,7 +55,7 @@ impl TapCode {
 }
 
 impl Code for TapCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         for c in text.chars() {
@@ -66,7 +66,7 @@ impl Code for TapCode {
         Ok(out.join("  "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         let pairs = text.split("  ");
         for pair in pairs {
@@ -75,14 +75,14 @@ impl Code for TapCode {
                 let c = col.chars().count() - 1;
                 let nth = r * self.side_len + c;
                 if r >= self.side_len {
-                    return Err(CodeError::Input(format!("Invalid code group {}", row)));
+                    return Err(GeneralError::input(format!("Invalid code group {}", row)));
                 }
                 if c >= self.side_len {
-                    return Err(CodeError::Input(format!("Invalid code group {}", col)));
+                    return Err(GeneralError::input(format!("Invalid code group {}", col)));
                 }
                 out.push(*self.grid.iter().nth(nth).unwrap())
             } else {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "Unable to correctly segment code groups. Found pair {}",
                     pair
                 )));

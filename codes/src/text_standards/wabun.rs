@@ -1,8 +1,10 @@
+use utils::errors::GeneralError;
+
 use super::wabun_encoding::{
     ASCII_TO_HIRA, HALFBLOCK_TO_HIRA, HIRAGANA, KANA_TO_ASCII, KANA_TO_HALFBLOCK, KANA_TO_WORD,
     WABUN_ASCII, WABUN_HALFBLOCK, WABUN_WORD, WORD_TO_HIRA,
 };
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use std::collections::HashMap;
 
 crate::lazy_regex!(
@@ -78,7 +80,7 @@ impl Default for Wabun {
 }
 
 impl Code for Wabun {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let map = self.representation.kana_to_code();
         let mut out: Vec<&str> = Vec::new();
         for symbol in WABUN_KANA_REGEX
@@ -98,7 +100,7 @@ impl Code for Wabun {
         Ok(out.join(self.representation.letter_sep()))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         let map = self.representation.code_to_kana();
         let regex = match self.representation {
@@ -114,7 +116,7 @@ impl Code for Wabun {
             {
                 match map.get(cap) {
                     Some(kana) => word_buffer.push_str(kana),
-                    None => return Err(CodeError::invalid_input_group(cap)),
+                    None => return Err(GeneralError::invalid_input_group(cap)),
                 }
             }
             out.push(word_buffer.to_string());

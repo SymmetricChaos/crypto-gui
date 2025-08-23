@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
+use utils::errors::GeneralError;
 
 const AMERICAN_LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:?\"";
 const AMERICAN_BRAILLE: &'static str = "⠁⠣⠚⠙⠂⠋⠛⠓⠊⠽⠗⠇⠍⠬⠑⠩⠟⠉⠅⠃⠥⠧⠺⠷⠜⠻⠾⠈⠒⠄⠆⠴⠲⠦";
@@ -103,7 +104,7 @@ impl Default for SimpleBraille {
 }
 
 impl Code for SimpleBraille {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
 
         for c in text.chars() {
@@ -125,7 +126,7 @@ impl Code for SimpleBraille {
                         *self
                             .language
                             .encode(code_point)
-                            .ok_or_else(|| CodeError::invalid_input_char(code_point))?,
+                            .ok_or_else(|| GeneralError::invalid_input_char(code_point))?,
                     )
                 }
                 continue;
@@ -134,7 +135,7 @@ impl Code for SimpleBraille {
             // Handle numbers by prepending the numeric sign and converting to a character
             if c.is_ascii_digit() {
                 out.push(self.language.number_sign().ok_or_else(|| {
-                    CodeError::state("numeric characters are not handled in this encoding")
+                    GeneralError::state("numeric characters are not handled in this encoding")
                 })?);
                 out.push(
                     self.language
@@ -148,14 +149,14 @@ impl Code for SimpleBraille {
                 *self
                     .language
                     .encode(c)
-                    .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                    .ok_or_else(|| GeneralError::invalid_input_char(c))?,
             )
         }
 
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
 
         let mut mode = BrailleMode::Letter;
@@ -177,7 +178,7 @@ impl Code for SimpleBraille {
             let x = self
                 .language
                 .decode(c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                .ok_or_else(|| GeneralError::invalid_input_char(c))?;
 
             match mode {
                 BrailleMode::Letter => out.push(*x),
@@ -185,7 +186,7 @@ impl Code for SimpleBraille {
                     if c.is_ascii_digit() {
                         out.push(((c as u32) - 49) as u8 as char)
                     } else {
-                        return Err(CodeError::Input(format!(
+                        return Err(GeneralError::input(format!(
                             "character `{}` encountered in numeric mode, where it has no meaning",
                             c
                         )));

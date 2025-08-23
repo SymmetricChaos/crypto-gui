@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::{Integer, Zero};
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
 fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &Vec<char>) -> String {
     if n.is_zero() {
@@ -63,10 +63,10 @@ impl BlockCode {
             .ceil() as usize
     }
 
-    pub fn check_code_width(&self) -> Result<(), CodeError> {
+    pub fn check_code_width(&self) -> Result<(), GeneralError> {
         let min_width = self.min_code_width();
         if min_width < self.symbols.len() {
-            Err(CodeError::State(format!(
+            Err(GeneralError::state(format!(
                 "a width of {} is needed to represent the entire alphabet",
                 min_width
             )))
@@ -77,16 +77,16 @@ impl BlockCode {
 }
 
 impl Code for BlockCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity(text.len());
         for c in text.chars() {
             let n = self
                 .alphabet
                 .iter()
                 .position(|x| x == &c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                .ok_or_else(|| GeneralError::invalid_input_char(c))?;
             if n > self.total_codes() {
-                return Err(CodeError::invalid_input_char(c));
+                return Err(GeneralError::invalid_input_char(c));
             }
             out.push(self.num_to_string(n));
         }
@@ -97,7 +97,7 @@ impl Code for BlockCode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         let pows = (0..self.width).rev().cycle();
         let mut val = 0;
@@ -110,19 +110,19 @@ impl Code for BlockCode {
                 .symbols
                 .iter()
                 .position(|x| x == &c)
-                .ok_or(CodeError::invalid_input_char(c))?;
+                .ok_or(GeneralError::invalid_input_char(c))?;
             val += n * self.symbols.len().pow(p as u32);
 
             if p == 0 {
                 if val > self.total_codes() {
-                    return Err(CodeError::input("unable to decode"));
+                    return Err(GeneralError::input("unable to decode"));
                 }
                 out.push(
                     *self
                         .alphabet
                         .iter()
                         .nth(val)
-                        .ok_or(CodeError::input("unable to decode"))?,
+                        .ok_or(GeneralError::input("unable to decode"))?,
                 );
                 val = 0;
             }

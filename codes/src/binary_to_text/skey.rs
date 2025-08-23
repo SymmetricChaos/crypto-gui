@@ -1,7 +1,7 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 // rfc2289
 
@@ -174,11 +174,11 @@ const SKEY_WORDS: [&'static str; 2048] = [
     "YANG", "YANK", "YARD", "YARN", "YAWL", "YAWN", "YEAH", "YEAR", "YELL", "YOGA", "YOKE",
 ];
 
-fn skeyword(word: &str) -> Result<usize, CodeError> {
+fn skeyword(word: &str) -> Result<usize, GeneralError> {
     SKEY_WORDS
         .iter()
         .position(|p| p == &word)
-        .ok_or_else(|| CodeError::Input(format!("invalid word `{}` found", word)))
+        .ok_or_else(|| GeneralError::input(format!("invalid word `{}` found", word)))
 }
 
 fn skey_parity(n: u64) -> u64 {
@@ -201,9 +201,9 @@ fn u64_to_words(n: u64) -> [&'static str; 6] {
     words
 }
 
-fn words_to_u64(words: &[&str]) -> Result<u64, CodeError> {
+fn words_to_u64(words: &[&str]) -> Result<u64, GeneralError> {
     if words.len() != 6 {
-        return Err(CodeError::Input(format!(
+        return Err(GeneralError::input(format!(
             "cannot decode {words:?} because it does not have 6 words"
         )));
     }
@@ -215,7 +215,7 @@ fn words_to_u64(words: &[&str]) -> Result<u64, CodeError> {
     let parity = (big_n & 0b11) as u64;
     let expected_parity = skey_parity((big_n >> 2) as u64);
     if parity != expected_parity {
-        return Err(CodeError::Input(format!(
+        return Err(GeneralError::input(format!(
             "invalid words {:?}, parity check failed",
             words
         )));
@@ -243,10 +243,10 @@ impl SKeyWords {
 }
 
 impl BinaryToText for SKeyWords {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         if bytes.len() % 8 != 0 {
-            return Err(CodeError::Input(
-                "S/KEY operates on chunks of 8 bytes at a time".into(),
+            return Err(GeneralError::input(
+                "S/KEY operates on chunks of 8 bytes at a time",
             ));
         } else {
             let mut out = Vec::new();
@@ -262,7 +262,7 @@ impl BinaryToText for SKeyWords {
 }
 
 impl Code for SKeyWords {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -271,11 +271,11 @@ impl Code for SKeyWords {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let words = text.split(' ');
         if words.clone().count() % 6 != 0 {
-            return Err(CodeError::Input(
-                "S/KEY operates on chunks of 6 words at a time".into(),
+            return Err(GeneralError::input(
+                "S/KEY operates on chunks of 6 words at a time",
             ));
         } else {
             let mut out = Vec::new();
@@ -320,11 +320,11 @@ mod skey_tests {
         );
         assert_eq!(
             words_to_u64(&["FOWL", "KID", "MASH", "DEAD", "DUAL", "O"]).unwrap_err(),
-            CodeError::Input("invalid words, parity check failed".into())
+            GeneralError::input("invalid words, parity check failed")
         );
         assert_eq!(
             words_to_u64(&["FOWL", "KIP", "MASH", "DEAD", "DUAL", "OAF"]).unwrap_err(),
-            CodeError::Input("invalid word `KIP` found".into())
+            GeneralError::input("invalid word `KIP` found")
         );
     }
 
@@ -344,7 +344,7 @@ mod skey_tests {
         let text = "abcdefghijklmno";
         assert_eq!(
             code.encode(text).unwrap_err(),
-            CodeError::Input("S/KEY operates on chunks of 8 bytes at a time".into())
+            GeneralError::input("S/KEY operates on chunks of 8 bytes at a time")
         );
     }
 
@@ -361,17 +361,17 @@ mod skey_tests {
         assert_eq!(
             code.decode("COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE MALL POW")
                 .unwrap_err(),
-            CodeError::Input("S/KEY operates on chunks of 6 words at a time".into())
+            GeneralError::input("S/KEY operates on chunks of 6 words at a time")
         );
         assert_eq!(
             code.decode("COAST SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW")
                 .unwrap_err(),
-            CodeError::Input("invalid word `COAST` found".into())
+            GeneralError::input("invalid word `COAST` found")
         );
         assert_eq!(
             code.decode("COAT SEC HOFF ONLY RAM OVA DAWN EMIL HOVE SEEN MALL POW")
                 .unwrap_err(),
-            CodeError::Input("invalid words [\"COAT\", \"SEC\", \"HOFF\", \"ONLY\", \"RAM\", \"OVA\"], parity check failed".into())
+            GeneralError::input("invalid words [\"COAT\", \"SEC\", \"HOFF\", \"ONLY\", \"RAM\", \"OVA\"], parity check failed")
         );
     }
 }

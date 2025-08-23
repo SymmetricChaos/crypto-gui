@@ -26,7 +26,7 @@ impl Default for VonNeumann {
 }
 
 impl Code for VonNeumann {
-    fn encode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn encode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut out = Vec::new();
         let sep = if self.comma { "," } else { "" };
         for value in text.split(",").map(|s| s.trim()) {
@@ -43,7 +43,7 @@ impl Code for VonNeumann {
         Ok(out.join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn decode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut out = Vec::new();
         for value in text.split(",").map(|s| s.trim()) {
             if value == "INPUT TOO LARGE" || value == "INVALID INPUT" {

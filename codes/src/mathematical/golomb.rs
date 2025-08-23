@@ -1,6 +1,7 @@
 use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s, swap_01};
-use crate::{errors::CodeError, mathematical::truncated_binary::TruncatedBinary, traits::Code};
+use crate::{mathematical::truncated_binary::TruncatedBinary, traits::Code};
 use num::Integer;
+use utils::errors::GeneralError;
 
 pub struct Golomb {
     pub spaced: bool,
@@ -108,7 +109,7 @@ impl Golomb {
 }
 
 impl Code for Golomb {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         if self.signed {
@@ -128,7 +129,7 @@ impl Code for Golomb {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out: Vec<String> = Vec::new();
 
         if self.spaced {

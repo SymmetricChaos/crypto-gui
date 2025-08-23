@@ -1,4 +1,4 @@
-use crate::errors::CodeError;
+use utils::errors::GeneralError;
 
 pub mod ackermann;
 pub mod arithmetic;
@@ -63,66 +63,66 @@ pub fn i32_to_u32_zigzag(n: i32) -> Option<u32> {
     }
 }
 
-pub(super) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, CodeError> {
+pub(super) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, GeneralError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
             continue;
         }
         let n =
-            u32::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+            u32::from_str_radix(group, 10).map_err(|_| GeneralError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
 }
 
-pub(super) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, CodeError> {
+pub(super) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, GeneralError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
             continue;
         }
         let n =
-            i32::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+            i32::from_str_radix(group, 10).map_err(|_| GeneralError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
 }
 
-pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> {
+pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, GeneralError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
             continue;
         }
         let n =
-            u64::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+            u64::from_str_radix(group, 10).map_err(|_| GeneralError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
 }
 
-// pub(super) fn string_to_i64s(s: &str, sep: &str) -> Result<Vec<i64>, CodeError> {
+// pub(super) fn string_to_i64s(s: &str, sep: &str) -> Result<Vec<i64>, GeneralError> {
 //     let mut out = Vec::new();
 //     for group in s.split(sep).map(|x| x.trim()) {
 //         if group.is_empty() {
 //             continue;
 //         }
 //         let n =
-//             i64::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+//             i64::from_str_radix(group, 10).map_err(|_| GeneralError::invalid_input_group(group))?;
 //         out.push(n);
 //     }
 //     Ok(out)
 // }
 
-// pub(super) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeError> {
+// pub(super) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, GeneralError> {
 //     let mut out = Vec::new();
 //     for group in s.split(sep).map(|x| x.trim()) {
 //         if group.is_empty() {
 //             continue;
 //         }
 //         let n =
-//             usize::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+//             usize::from_str_radix(group, 10).map_err(|_| GeneralError::invalid_input_group(group))?;
 //         out.push(n);
 //     }
 //     Ok(out)

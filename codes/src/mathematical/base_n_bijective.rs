@@ -1,7 +1,7 @@
 use super::string_to_u32s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::text_functions::num_to_digit;
+use utils::{errors::GeneralError, text_functions::num_to_digit};
 
 pub struct BaseNBijective {
     pub radix: u32,
@@ -18,9 +18,9 @@ impl Default for BaseNBijective {
 }
 
 impl BaseNBijective {
-    pub fn validate(&self) -> Result<(), CodeError> {
+    pub fn validate(&self) -> Result<(), GeneralError> {
         if self.radix < 1 || self.radix > 35 {
-            return Err(CodeError::state(
+            return Err(GeneralError::state(
                 "bijective radix must be between 1 and 35, inclusive",
             ));
         }
@@ -28,9 +28,9 @@ impl BaseNBijective {
         Ok(())
     }
 
-    pub fn encode_u32(&self, n: u32) -> Result<String, CodeError> {
+    pub fn encode_u32(&self, n: u32) -> Result<String, GeneralError> {
         if n == 0 {
-            return Err(CodeError::input(
+            return Err(GeneralError::input(
                 "in bijective representation 0 is the empty string and cannot be represented",
             ));
         };
@@ -57,7 +57,7 @@ impl BaseNBijective {
         }
     }
 
-    pub fn decode_to_u32(&self, s: &str) -> Result<u32, CodeError> {
+    pub fn decode_to_u32(&self, s: &str) -> Result<u32, GeneralError> {
         let word: String = if self.little_endian {
             s.chars().collect()
         } else {
@@ -69,7 +69,7 @@ impl BaseNBijective {
         for c in word.chars().rev() {
             let n = c
                 .to_digit(36)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                .ok_or_else(|| GeneralError::invalid_input_char(c))?;
             out += base * n;
             base *= self.radix;
         }
@@ -78,7 +78,7 @@ impl BaseNBijective {
 }
 
 impl Code for BaseNBijective {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let mut output = Vec::new();
 
@@ -89,7 +89,7 @@ impl Code for BaseNBijective {
         Ok(output.into_iter().join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let mut output = Vec::new();
 

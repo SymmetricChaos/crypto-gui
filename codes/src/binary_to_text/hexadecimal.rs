@@ -1,7 +1,7 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 crate::lazy_regex!(IS_BASE16, r"^([0-9A-F][0-9A-F])*$");
 
@@ -20,7 +20,7 @@ impl Default for Hexadecimal {
 }
 
 impl BinaryToText for Hexadecimal {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         if self.upper {
             Ok(bytes.iter().map(|b| format!("{b:02X}")).collect())
         } else {
@@ -30,7 +30,7 @@ impl BinaryToText for Hexadecimal {
 }
 
 impl Code for Hexadecimal {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -39,9 +39,11 @@ impl Code for Hexadecimal {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if !IS_BASE16.is_match(&text.to_uppercase()) {
-            return Err(CodeError::input("provided text is not valid Hexadecimal"));
+            return Err(GeneralError::input(
+                "provided text is not valid Hexadecimal",
+            ));
         }
 
         let out = text

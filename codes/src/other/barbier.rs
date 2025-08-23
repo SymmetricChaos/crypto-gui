@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 pub struct BarbierCode {
     pub symbol: char,
@@ -20,17 +21,17 @@ impl BarbierCode {
         "ien", "ion", "ieu",
     ];
 
-    fn str_to_position(&self, symbol: &str) -> Result<(usize, usize), CodeError> {
+    fn str_to_position(&self, symbol: &str) -> Result<(usize, usize), GeneralError> {
         let num = Self::GRID
             .iter()
             .position(|x| x == &symbol)
-            .ok_or_else(|| CodeError::invalid_input_group(symbol))?;
+            .ok_or_else(|| GeneralError::invalid_input_group(symbol))?;
         Ok((num / Self::SIDE_LEN, num % Self::SIDE_LEN))
     }
 }
 
 impl Code for BarbierCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
 
         for s in text.split(" ") {
@@ -41,7 +42,7 @@ impl Code for BarbierCode {
         Ok(out.join("  "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for pair in text.split("  ") {
             if let Some((row, col)) = pair.split(" ").collect_tuple() {
@@ -49,15 +50,15 @@ impl Code for BarbierCode {
                 let c = col.chars().count() - 1;
                 let nth = r * Self::SIDE_LEN + c;
                 if r >= Self::SIDE_LEN {
-                    return Err(CodeError::Input(format!("Invalid code group {}", row)));
+                    return Err(GeneralError::input(format!("Invalid code group {}", row)));
                 }
                 if c >= Self::SIDE_LEN {
-                    return Err(CodeError::Input(format!("Invalid code group {}", col)));
+                    return Err(GeneralError::input(format!("Invalid code group {}", col)));
                 }
                 out.push_str(*Self::GRID.iter().nth(nth).unwrap());
                 out.push(' ');
             } else {
-                return Err(CodeError::Input(format!(
+                return Err(GeneralError::input(format!(
                     "Unable to correctly segment code groups. Found pair {}",
                     pair
                 )));

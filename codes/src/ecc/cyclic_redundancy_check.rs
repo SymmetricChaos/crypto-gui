@@ -1,7 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use utils::{
     bit_polynomial::BitPolynomial,
-    bits::{bits_from_str, Bit},
+    bits::{bits_from_str, Bit}, errors::GeneralError,
 };
 
 pub struct CyclicRedundancyCheck {
@@ -23,12 +23,12 @@ impl CyclicRedundancyCheck {
         self.generator.degree()
     }
 
-    fn validate(&self) -> Result<(), CodeError> {
+    fn validate(&self) -> Result<(), GeneralError> {
         if self.block_size < 2 {
-            return Err(CodeError::state("block size must be greater than 1"));
+            return Err(GeneralError::state("block size must be greater than 1"));
         }
         if self.generator.len() < 2 {
-            return Err(CodeError::state(
+            return Err(GeneralError::state(
                 "generator polynomial must be greater than degree 1",
             ));
         }
@@ -37,14 +37,14 @@ impl CyclicRedundancyCheck {
 }
 
 impl Code for CyclicRedundancyCheck {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % self.block_size != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "when encoding the input must have a length that is a multiple of {}, the block size",
                 self.block_size
             )));
@@ -64,14 +64,14 @@ impl Code for CyclicRedundancyCheck {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         self.validate()?;
         let bits: Vec<Bit> = bits_from_str(text)
-            .map_err(|e| CodeError::input(&e.to_string()))?
+            .map_err(|e| GeneralError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % (self.block_size + self.check_bits()) != 0 {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                     "when decoding the input must have a length that is a multiple of {}, the block size plus the number of check bits",
                     self.block_size + self.check_bits()
                 )));

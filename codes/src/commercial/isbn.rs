@@ -1,4 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use utils::errors::GeneralError;
+
+use crate::traits::Code;
 
 crate::lazy_regex!(
     ISBN_10, r"^([0-9]{9}[0-9X])$";
@@ -32,7 +34,7 @@ fn digit_to_char_isbn(digit: u32) -> char {
     }
 }
 
-fn isbn_10_check_digit(text: &str) -> Result<char, CodeError> {
+fn isbn_10_check_digit(text: &str) -> Result<char, GeneralError> {
     let mut check = 0;
     for (c, idx) in text
         .chars()
@@ -41,16 +43,16 @@ fn isbn_10_check_digit(text: &str) -> Result<char, CodeError> {
     {
         match c.to_digit(10) {
             Some(n) => check += idx * n,
-            None => return Err(CodeError::input("only ASCII digits are allowed")),
+            None => return Err(GeneralError::input("only ASCII digits are allowed")),
         }
     }
     check %= 11;
     Ok(digit_to_char_isbn(11 - check))
 }
 
-pub fn is_valid_isbn_10(text: &str) -> Result<(), CodeError> {
+pub fn is_valid_isbn_10(text: &str) -> Result<(), GeneralError> {
     if !ISBN_10.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
-        return Err(CodeError::input("not a well formed ISBN-10 code"));
+        return Err(GeneralError::input("not a well formed ISBN-10 code"));
     }
 
     let mut check = 0;
@@ -67,11 +69,11 @@ pub fn is_valid_isbn_10(text: &str) -> Result<(), CodeError> {
     if check % 11 == 0 {
         Ok(())
     } else {
-        Err(CodeError::input("invalid check digit"))
+        Err(GeneralError::input("invalid check digit"))
     }
 }
 
-fn isbn_13_check_digit(text: &str) -> Result<char, CodeError> {
+fn isbn_13_check_digit(text: &str) -> Result<char, GeneralError> {
     let mut check = 0;
     for (c, idx) in text
         .chars()
@@ -87,9 +89,9 @@ fn isbn_13_check_digit(text: &str) -> Result<char, CodeError> {
     Ok(digit_to_char_isbn(10 - check))
 }
 
-pub fn is_valid_isbn_13(text: &str) -> Result<(), CodeError> {
+pub fn is_valid_isbn_13(text: &str) -> Result<(), GeneralError> {
     if !ISBN_13.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
-        return Err(CodeError::input("not a well formed ISBN-13 code"));
+        return Err(GeneralError::input("not a well formed ISBN-13 code"));
     }
 
     let mut check = 0;
@@ -106,7 +108,7 @@ pub fn is_valid_isbn_13(text: &str) -> Result<(), CodeError> {
     if check % 10 == 0 {
         Ok(())
     } else {
-        Err(CodeError::input("invalid check digit"))
+        Err(GeneralError::input("invalid check digit"))
     }
 }
 
@@ -124,7 +126,7 @@ impl Isbn {
             } else {
                 out.push_str(line.trim());
                 out.push_str(" [");
-                out.push_str(&result.unwrap_err().inner());
+                out.push_str(&result.unwrap_err().to_string());
                 out.push(']');
                 out.push_str(",\n");
             }
@@ -132,13 +134,13 @@ impl Isbn {
         out
     }
 
-    pub fn check_digit(&self, text: &str) -> Result<char, CodeError> {
+    pub fn check_digit(&self, text: &str) -> Result<char, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
 
         if !text.is_ascii() {
-            return Err(CodeError::input("only ASCII digits are allowed"));
+            return Err(GeneralError::input("only ASCII digits are allowed"));
         }
 
         match self.variant {
@@ -157,7 +159,7 @@ impl Default for Isbn {
 }
 
 impl Code for Isbn {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let check = self.check_digit(text)?;
         let mut out = String::with_capacity(text.len() + 1);
         out.push_str(text);
@@ -165,9 +167,9 @@ impl Code for Isbn {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         match self.variant {
             IsbnVariant::Ten => {

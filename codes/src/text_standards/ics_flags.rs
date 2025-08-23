@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
+use utils::errors::GeneralError;
 
 const ICS_MEANING: [&'static str; 26] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
@@ -59,7 +60,7 @@ impl Default for IcsFlags {
 }
 
 impl Code for IcsFlags {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity(text.len());
         for symbol in ICS_REGEX
             .captures_iter(text)
@@ -72,13 +73,13 @@ impl Code for IcsFlags {
 
             match ICS_MAP.get_by_left(symbol) {
                 Some(code) => out.push(*code),
-                None => return Err(CodeError::invalid_input_group(symbol)),
+                None => return Err(GeneralError::invalid_input_group(symbol)),
             }
         }
         Ok(out.join(" "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = String::new();
         for code in ICS_BLAZON_REGEX
             .captures_iter(text)
@@ -86,7 +87,7 @@ impl Code for IcsFlags {
         {
             match ICS_MAP.get_by_right(code) {
                 Some(code) => out.push_str(code),
-                None => return Err(CodeError::invalid_input_group(code)),
+                None => return Err(GeneralError::invalid_input_group(code)),
             }
         }
         Ok(out)

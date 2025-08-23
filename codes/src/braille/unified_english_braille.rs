@@ -4,10 +4,10 @@ use super::{
 };
 use crate::{
     braille::unified_english_braille_maps::{LETTERS, LETTERS_BRAILLE, LETTERS_UPPER},
-    errors::CodeError,
     traits::Code,
 };
 use itertools::izip;
+use utils::errors::GeneralError;
 
 pub struct UnifiedEnglishBraille {}
 
@@ -28,11 +28,11 @@ impl UnifiedEnglishBraille {
 }
 
 impl Code for UnifiedEnglishBraille {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(encode_g1_braille(text))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(decode_g1_braille(text))
     }
 }

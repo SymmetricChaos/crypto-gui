@@ -1,7 +1,7 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["aardvark", "adroitness"],
@@ -263,18 +263,18 @@ const PGP_WORDS: [[&'static str; 2]; 256] = [
 ];
 
 // This can't be done with a binary search because the right side list is not sorted with "applicant" before "Apollo"
-pub fn left_word(word: &str) -> Result<usize, CodeError> {
+pub fn left_word(word: &str) -> Result<usize, GeneralError> {
     PGP_WORDS
         .iter()
         .position(|p| p[0] == word)
-        .ok_or_else(|| CodeError::Input(format!("invalid left word `{}` found", word)))
+        .ok_or_else(|| GeneralError::input(format!("invalid left word `{}` found", word)))
 }
 
-pub fn right_word(word: &str) -> Result<usize, CodeError> {
+pub fn right_word(word: &str) -> Result<usize, GeneralError> {
     PGP_WORDS
         .iter()
         .position(|p| p[1] == word)
-        .ok_or_else(|| CodeError::Input(format!("invalid right word `{}` found", word)))
+        .ok_or_else(|| GeneralError::input(format!("invalid right word `{}` found", word)))
 }
 
 pub struct PgpWords {
@@ -301,7 +301,7 @@ impl PgpWords {
 }
 
 impl BinaryToText for PgpWords {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         Ok(bytes
             .into_iter()
             .enumerate()
@@ -311,7 +311,7 @@ impl BinaryToText for PgpWords {
 }
 
 impl Code for PgpWords {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -320,7 +320,7 @@ impl Code for PgpWords {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let words = text.split(" ");
         let mut left = true;
         let mut out = Vec::with_capacity(words.clone().count());
@@ -357,7 +357,7 @@ mod pgp_tests {
             mode: ByteFormat::Hex,
         };
         assert_eq!(
-            CodeError::Input("not valid hex bytes".into()),
+            GeneralError::input("not valid hex bytes"),
             code.encode(nums).unwrap_err()
         )
     }
@@ -379,11 +379,11 @@ mod pgp_tests {
 
         let code = PgpWords::default();
         assert_eq!(
-            CodeError::Input("invalid left word `topmst` found".into()),
+            GeneralError::input("invalid left word `topmst` found"),
             code.decode(words1).unwrap_err()
         );
         assert_eq!(
-            CodeError::Input("invalid right word `Istannbul` found".into()),
+            GeneralError::input("invalid right word `Istannbul` found"),
             code.decode(words2).unwrap_err()
         );
     }

@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 // Any single codepoint (captured), followed by a space, followed by a sequence of digits (captured), followed by either a space of EOF
 crate::lazy_regex!(RLE_FORMAT, r"(.) ([0-9]+)(?: |$)");
@@ -34,14 +35,14 @@ fn rle_to_utf8(arr: &Vec<(char, u32)>) -> String {
 pub struct RunLengthEncoding {}
 
 impl Code for RunLengthEncoding {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(utf8_to_rle(text)
             .into_iter()
             .map(|(c, n)| format!("{c} {n}"))
             .join(" "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let v = RLE_FORMAT
             .captures_iter(text)
             .map(|caps| {

@@ -1,6 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 crate::lazy_regex!(ITF_PATTERN, r"^1010([01]{14})*1101$");
 
@@ -28,27 +29,27 @@ impl Default for Itf {
     }
 }
 
-fn encode_itf_pair(pair: (char, char)) -> Result<(&'static str, &'static str), CodeError> {
+fn encode_itf_pair(pair: (char, char)) -> Result<(&'static str, &'static str), GeneralError> {
     Ok((
         ITF_LEFT
             .get_by_left(&pair.0)
-            .ok_or_else(|| CodeError::invalid_input_char(pair.0))?,
+            .ok_or_else(|| GeneralError::invalid_input_char(pair.0))?,
         ITF_RIGHT
             .get_by_left(&pair.1)
-            .ok_or_else(|| CodeError::invalid_input_char(pair.1))?,
+            .ok_or_else(|| GeneralError::invalid_input_char(pair.1))?,
     ))
 }
 
 impl Itf {}
 
 impl Code for Itf {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if !text.is_ascii() {
-            return Err(CodeError::input("found non-ASCII characters"));
+            return Err(GeneralError::input("found non-ASCII characters"));
         }
 
         if text.is_empty() {
-            return Err(CodeError::input("empty input"));
+            return Err(GeneralError::input("empty input"));
         }
 
         let mut out = String::new();
@@ -70,7 +71,7 @@ impl Code for Itf {
                 out.push_str(codes.0);
                 out.push_str(codes.1);
             } else {
-                return Err(CodeError::input(
+                return Err(GeneralError::input(
                     "ITF codes encode an even number of digits",
                 ));
             }
@@ -88,10 +89,10 @@ impl Code for Itf {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let trimmed = text.trim_matches('0');
         if !ITF_PATTERN.is_match(trimmed) {
-            return Err(CodeError::input("not structured as a ITF code"));
+            return Err(GeneralError::input("not structured as a ITF code"));
         }
 
         let n_pairs = (trimmed.len() - 8) / 14;
@@ -102,14 +103,14 @@ impl Code for Itf {
             let left_group = dbg!(&trimmed[left_start..left_start + 7]);
             let left_digit = ITF_LEFT
                 .get_by_right(left_group)
-                .ok_or_else(|| CodeError::invalid_input_group(left_group))?;
+                .ok_or_else(|| GeneralError::invalid_input_group(left_group))?;
             out.push(*left_digit);
 
             let right_start = left_start + 7;
             let right_group = dbg!(&trimmed[right_start..right_start + 7]);
             let right_digit = ITF_RIGHT
                 .get_by_right(right_group)
-                .ok_or_else(|| CodeError::invalid_input_group(right_group))?;
+                .ok_or_else(|| GeneralError::invalid_input_group(right_group))?;
             out.push(*right_digit);
         }
 

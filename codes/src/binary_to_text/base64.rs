@@ -1,8 +1,7 @@
 use super::BinaryToText;
-use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;
@@ -64,7 +63,7 @@ impl Base64 {
 }
 
 impl BinaryToText for Base64 {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity((bytes.len() / 3) * 4 + 1);
         let map = self.map();
         let mut buffer = 0_u32;
@@ -127,7 +126,7 @@ impl BinaryToText for Base64 {
 }
 
 impl Code for Base64 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -136,7 +135,7 @@ impl Code for Base64 {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity((text.len() / 4) * 3 + 1);
         let mut buffer = 0_u32;
         let mut bits_in_use = 0;
@@ -148,7 +147,7 @@ impl Code for Base64 {
             .filter(|b| !b.is_ascii_whitespace())
             .map(|n| {
                 map.get_by_right(&n)
-                    .ok_or_else(|| CodeError::invalid_input_char(n as char))
+                    .ok_or_else(|| GeneralError::invalid_input_char(n as char))
             });
         loop {
             if bits_in_use < 8 {

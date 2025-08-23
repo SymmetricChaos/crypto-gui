@@ -1,5 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
+use utils::errors::GeneralError;
 
 // https://datatracker.ietf.org/doc/html/rfc3492
 
@@ -30,20 +31,20 @@ impl Punycode {
         k + (((self.base - self.tmin + 1) * delta) / (delta + self.skew))
     }
 
-    pub fn decode_digit(c: char) -> Result<u32, CodeError> {
+    pub fn decode_digit(c: char) -> Result<u32, GeneralError> {
         Ok(match c {
             'a'..='z' => u32::from(c) - 97,
             'A'..='Z' => u32::from(c) - 65,
             '0'..='9' => u32::from(c) - 22,
-            _ => return Err(CodeError::state("invalid punycode digit")),
+            _ => return Err(GeneralError::state("invalid punycode digit")),
         })
     }
 
-    pub fn encode_digit(n: u32) -> Result<char, CodeError> {
+    pub fn encode_digit(n: u32) -> Result<char, GeneralError> {
         Ok(match n {
             0..=25 => char::from_u32(n + 97).unwrap(),
             26..=35 => char::from_u32(n + 22).unwrap(),
-            _ => return Err(CodeError::state("invalid punycode digit")),
+            _ => return Err(GeneralError::state("invalid punycode digit")),
         })
     }
 
@@ -74,7 +75,7 @@ impl Default for Punycode {
 }
 
 impl Code for Punycode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut n = self.init_n;
         let mut delta = 0;
         let mut bias = self.init_bias;
@@ -98,9 +99,9 @@ impl Code for Punycode {
 
             delta += m
                 .checked_sub(n)
-                .ok_or(CodeError::state("overflow subtracting m from n"))?
+                .ok_or(GeneralError::state("overflow subtracting m from n"))?
                 .checked_mul(h + 1)
-                .ok_or(CodeError::state("overflow multiplying (m-n) by (h+1)"))?;
+                .ok_or(GeneralError::state("overflow multiplying (m-n) by (h+1)"))?;
             n = m;
             for c in text.chars() {
                 if u32::from(c) < n {
@@ -133,13 +134,13 @@ impl Code for Punycode {
         Ok(output.iter().collect())
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut n = self.init_n;
         let mut i = 0;
         let mut bias = self.init_bias;
 
         if !text.is_ascii() {
-            return Err(CodeError::input(
+            return Err(GeneralError::input(
                 "Punycode can only decode ASCII characters",
             ));
         }
@@ -169,9 +170,9 @@ impl Code for Punycode {
 
                 i = digit
                     .checked_mul(w)
-                    .ok_or(CodeError::state("overflow multipliying digit by w"))?
+                    .ok_or(GeneralError::state("overflow multipliying digit by w"))?
                     .checked_add(i)
-                    .ok_or(CodeError::state("overflow incrementing i"))?;
+                    .ok_or(GeneralError::state("overflow incrementing i"))?;
 
                 let t = self.threshold(k * self.base, bias);
 
@@ -182,9 +183,9 @@ impl Code for Punycode {
                 w = self
                     .base
                     .checked_sub(t)
-                    .ok_or(CodeError::state("overflow subtracting t from self.base"))?
+                    .ok_or(GeneralError::state("overflow subtracting t from self.base"))?
                     .checked_mul(w)
-                    .ok_or(CodeError::state(
+                    .ok_or(GeneralError::state(
                         "overflow multiplying (self.base - t) by w",
                     ))?;
             }
@@ -195,11 +196,11 @@ impl Code for Punycode {
 
             n = n
                 .checked_add(i / len_plus_one)
-                .ok_or(CodeError::state("overflow while incrementing n"))?;
+                .ok_or(GeneralError::state("overflow while incrementing n"))?;
 
             i = i % len_plus_one;
 
-            let c = char::from_u32(n).ok_or(CodeError::state("invalid unicode codepoint"))?;
+            let c = char::from_u32(n).ok_or(GeneralError::state("invalid unicode codepoint"))?;
 
             output.insert(i as usize, c);
 

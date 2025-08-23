@@ -1,7 +1,8 @@
 use super::string_to_u64s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::Integer;
+use utils::errors::GeneralError;
 
 // All the primorials that fit in a u64 (1 excluded)
 const PRIMORIALS: [u64; 16] = [
@@ -85,7 +86,7 @@ impl Default for Primorial {
 impl Primorial {}
 
 impl Code for Primorial {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         for n in string_to_u64s(text, ",")? {
@@ -95,7 +96,7 @@ impl Code for Primorial {
         Ok(v.join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         for group in extract_code_groups(text) {

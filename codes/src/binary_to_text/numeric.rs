@@ -1,8 +1,9 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use utils::{
     byte_formatting::ByteFormat,
+    errors::GeneralError,
     text_functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width},
 };
 
@@ -60,18 +61,18 @@ impl BytesAsNumbers {
         }
     }
 
-    pub fn number_to_byte(&self, number: &str) -> Result<u8, CodeError> {
+    pub fn number_to_byte(&self, number: &str) -> Result<u8, GeneralError> {
         if !self.little_endian {
             u8::from_str_radix(&number.chars().rev().collect::<String>(), self.radix)
-                .map_err(|e| CodeError::Input(e.to_string()))
+                .map_err(|e| GeneralError::input(e.to_string()))
         } else {
-            u8::from_str_radix(number, self.radix).map_err(|e| CodeError::Input(e.to_string()))
+            u8::from_str_radix(number, self.radix).map_err(|e| GeneralError::input(e.to_string()))
         }
     }
 
-    // pub fn encode_file(&self) -> Result<String, CodeError> {
+    // pub fn encode_file(&self) -> Result<String, GeneralError> {
     //     if self.file.is_none() {
-    //         return Err(CodeError::input("no file stored"));
+    //         return Err(GeneralError::input("no file stored"));
     //     }
     //     let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
     //     self.encode_bytes(bytes)
@@ -79,13 +80,13 @@ impl BytesAsNumbers {
 }
 
 impl BinaryToText for BytesAsNumbers {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         Ok(bytes.iter().map(|b| self.byte_to_number(b)).join(" "))
     }
 }
 
 impl Code for BytesAsNumbers {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -94,7 +95,7 @@ impl Code for BytesAsNumbers {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut bytes = Vec::new();
         for s in text.split(" ") {
             if s.is_empty() {

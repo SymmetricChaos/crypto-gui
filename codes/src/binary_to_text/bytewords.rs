@@ -1,9 +1,8 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use utils::{
-    byte_formatting::ByteFormat,
-    text_functions::{closest_match, string_pairs},
+    byte_formatting::ByteFormat, errors::GeneralError, text_functions::{closest_match, string_pairs}
 };
 
 const BYTEWORD_WORDS: [&'static str; 256] = [
@@ -63,16 +62,19 @@ fn byte_to_word(byte: &u8) -> &'static str {
 }
 
 // Find the closest matching word
-fn word_to_byte(word: &str) -> Result<u8, CodeError> {
+fn word_to_byte(word: &str) -> Result<u8, GeneralError> {
     let (idx, dist) = closest_match(word, &BYTEWORD_WORDS);
     if dist >= 2 {
-        Err(CodeError::Input(format!("invalid word `{}` found", word)))
+        Err(GeneralError::input(format!(
+            "invalid word `{}` found",
+            word
+        )))
     } else {
         Ok(idx as u8)
     }
 }
 
-fn words_to_bytes(words: &[&str]) -> Result<Vec<u8>, CodeError> {
+fn words_to_bytes(words: &[&str]) -> Result<Vec<u8>, GeneralError> {
     let mut out = Vec::with_capacity(words.len());
     for word in words {
         out.push(word_to_byte(word)?);
@@ -80,15 +82,15 @@ fn words_to_bytes(words: &[&str]) -> Result<Vec<u8>, CodeError> {
     Ok(out)
 }
 
-fn minword_to_byte(word: &str) -> Result<u8, CodeError> {
+fn minword_to_byte(word: &str) -> Result<u8, GeneralError> {
     BYTEWORD_MINWORDS
         .iter()
         .position(|p| p == &word)
-        .ok_or_else(|| CodeError::Input(format!("invalid word `{}` found", word)))
+        .ok_or_else(|| GeneralError::input(format!("invalid word `{}` found", word)))
         .map(|n| n as u8)
 }
 
-fn minwords_to_bytes(words: &[&str]) -> Result<Vec<u8>, CodeError> {
+fn minwords_to_bytes(words: &[&str]) -> Result<Vec<u8>, GeneralError> {
     let mut out = Vec::with_capacity(words.len());
     for word in words {
         out.push(minword_to_byte(word)?);
@@ -150,7 +152,7 @@ impl Bytewords {
 }
 
 impl BinaryToText for Bytewords {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         match self.minwords {
             true => Ok(bytes_to_minwords(bytes).join("")),
             false => Ok(bytes_to_words(bytes).join(self.sep.str())),
@@ -159,7 +161,7 @@ impl BinaryToText for Bytewords {
 }
 
 impl Code for Bytewords {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -168,7 +170,7 @@ impl Code for Bytewords {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if self.minwords {
             let words = string_pairs(text);
             let bytes = minwords_to_bytes(&words)?;
@@ -219,12 +221,12 @@ mod byteword_tests {
         let words = "tuna next jamq";
         assert_eq!(
             code.decode(words).unwrap_err(),
-            CodeError::input("invalid word `jamq` found")
+            GeneralError::input("invalid word `jamq` found")
         );
         let words = "ttunna next jazz";
         assert_eq!(
             code.decode(words).unwrap_err(),
-            CodeError::input("invalid word `ttunna` found")
+            GeneralError::input("invalid word `ttunna` found")
         );
         // Sometimes error correction fails due to similarity (jadz is the same distance from 'jade' and 'jazz')
         // Since 'jade' is earlier in the list it is the preferred decoding, this changes the decoding from the intended d99d6c to d99d6b
@@ -263,17 +265,17 @@ mod byteword_tests {
         let words = "tantj";
         assert_eq!(
             code.decode(words).unwrap_err(),
-            CodeError::input("invalid word")
+            GeneralError::input("invalid word")
         );
         let words = "t!nt";
         assert_eq!(
             code.decode(words).unwrap_err(),
-            CodeError::input("invalid word")
+            GeneralError::input("invalid word")
         );
         let words = "t私nt";
         assert_eq!(
             code.decode(words).unwrap_err(),
-            CodeError::input("invalid word")
+            GeneralError::input("invalid word")
         );
     }
 }

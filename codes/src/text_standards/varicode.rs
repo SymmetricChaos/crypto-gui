@@ -1,9 +1,9 @@
 use bimap::BiMap;
 use itertools::Itertools;
 use num::CheckedAdd;
-use utils::preset_alphabet::Alphabet;
+use utils::{errors::GeneralError, preset_alphabet::Alphabet};
 
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 
 pub const FIBS: [u32; 12] = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233];
 
@@ -153,20 +153,20 @@ impl Default for Varicode {
 }
 
 impl Varicode {
-    pub fn map(&self, c: char) -> Result<String, CodeError> {
+    pub fn map(&self, c: char) -> Result<String, GeneralError> {
         if c.is_ascii_control() {
             return Ok(VARICODE[c as usize].to_string());
         }
         match VARICODE_MAP.get_by_left(&c) {
             Some(s) => Ok(s.to_string()),
-            None => Err(CodeError::invalid_alphabet_char(c)),
+            None => Err(GeneralError::invalid_alphabet_char(c)),
         }
     }
 
-    pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
+    pub fn map_inv(&self, s: &str) -> Result<char, GeneralError> {
         match VARICODE_MAP.get_by_right(&s) {
             Some(c) => Ok(*c),
-            None => Err(CodeError::invalid_input_group(s)),
+            None => Err(GeneralError::invalid_input_group(s)),
         }
     }
 
@@ -231,7 +231,7 @@ impl Varicode {
 }
 
 impl Code for Varicode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         for c in text.chars() {
             out.push(self.map(c)?)
@@ -243,7 +243,7 @@ impl Code for Varicode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let text = text.replace(" ", "");
         let codes = self.parse_codes(&text);
         let mut out = String::new();
@@ -252,7 +252,7 @@ impl Code for Varicode {
                 // The control pictures have the last same eight bits as the actual control characters.
                 // Casting to u8 is guaranteed keep only the last eight bits so it automatically maps control pictures to control characters.
                 Some(code) => out.push((self.map_inv(&code)? as u8) as char),
-                None => return Err(CodeError::input("impossible input group")),
+                None => return Err(GeneralError::input("impossible input group")),
             }
         }
         Ok(out)

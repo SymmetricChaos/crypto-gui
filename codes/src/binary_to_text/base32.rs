@@ -1,7 +1,7 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;
@@ -64,7 +64,7 @@ impl Base32 {
 }
 
 impl BinaryToText for Base32 {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity((bytes.len() / 5) * 8);
         let map = self.map();
         let mut buffer = 0_u32;
@@ -127,7 +127,7 @@ impl BinaryToText for Base32 {
 }
 
 impl Code for Base32 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -136,7 +136,7 @@ impl Code for Base32 {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::with_capacity((text.len() / 8) * 5);
         let mut buffer = 0_u32;
         let mut bits_in_use = 0;
@@ -144,7 +144,7 @@ impl Code for Base32 {
         // Detect and remove padding then map each character to its bitstring
         let mut bytes = text.bytes().take_while(|n| n != &PAD).map(|n| {
             map.get_by_right(&n)
-                .ok_or_else(|| CodeError::invalid_input_char(n as char))
+                .ok_or_else(|| GeneralError::invalid_input_char(n as char))
         });
         loop {
             if bits_in_use < 8 {

@@ -1,4 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use utils::errors::GeneralError;
+
+use crate::traits::Code;
 use std::cell::LazyCell;
 
 pub const VERHOEFF_PERM_TABLE: LazyCell<[[u8; 10]; 8]> = LazyCell::new(|| {
@@ -32,25 +34,25 @@ pub const VERHOEFF_MUL_TABLE: LazyCell<[[u8; 10]; 10]> = LazyCell::new(|| {
 pub struct VerhoeffAlgorithm {}
 
 impl VerhoeffAlgorithm {
-    fn mul(a: char, b: char) -> Result<char, CodeError> {
+    fn mul(a: char, b: char) -> Result<char, GeneralError> {
         let j = a
             .to_digit(10)
-            .ok_or_else(|| CodeError::invalid_input_char(a))? as usize;
+            .ok_or_else(|| GeneralError::invalid_input_char(a))? as usize;
         let k = b
             .to_digit(10)
-            .ok_or_else(|| CodeError::invalid_input_char(b))? as usize;
+            .ok_or_else(|| GeneralError::invalid_input_char(b))? as usize;
         Ok((VERHOEFF_MUL_TABLE[j][k] + 48) as char)
     }
 
-    fn perm(pos: usize, num: char) -> Result<char, CodeError> {
+    fn perm(pos: usize, num: char) -> Result<char, GeneralError> {
         let n = num
             .to_digit(10)
-            .ok_or_else(|| CodeError::invalid_input_char(num))? as usize;
+            .ok_or_else(|| GeneralError::invalid_input_char(num))? as usize;
 
         Ok((VERHOEFF_PERM_TABLE[pos][n] + 48) as char)
     }
 
-    fn inv(a: char) -> Result<char, CodeError> {
+    fn inv(a: char) -> Result<char, GeneralError> {
         match a {
             '0' => Ok('0'),
             '1' => Ok('4'),
@@ -62,7 +64,7 @@ impl VerhoeffAlgorithm {
             '7' => Ok('7'),
             '8' => Ok('8'),
             '9' => Ok('9'),
-            _ => Err(CodeError::invalid_input_char(a)),
+            _ => Err(GeneralError::invalid_input_char(a)),
         }
     }
 
@@ -76,7 +78,7 @@ impl VerhoeffAlgorithm {
             } else {
                 out.push_str(line.trim());
                 out.push_str(" [");
-                out.push_str(&result.unwrap_err().inner());
+                out.push_str(&result.unwrap_err().to_string());
                 out.push(']');
                 out.push_str(",\n");
             }
@@ -92,9 +94,9 @@ impl Default for VerhoeffAlgorithm {
 }
 
 impl Code for VerhoeffAlgorithm {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         let mut check = '0';
         for (i, n) in text.chars().chain(std::iter::once('0')).rev().enumerate() {
@@ -105,16 +107,16 @@ impl Code for VerhoeffAlgorithm {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
+            return Err(GeneralError::input("input cannot be empty"));
         }
         let mut check = '0';
         for (i, c) in text.chars().rev().enumerate() {
             check = Self::mul(check, Self::perm(i % 8, c)?)?;
         }
         if check != '0' {
-            return Err(CodeError::input("invalid check digit"));
+            return Err(GeneralError::input("invalid check digit"));
         } else {
             Ok(text[0..text.len() - 1].to_string())
         }
@@ -142,7 +144,7 @@ mod verhoeff_tests {
         let code = VerhoeffAlgorithm::default();
         assert_eq!(
             code.decode("2365").unwrap_err(),
-            CodeError::input("invalid check digit")
+            GeneralError::input("invalid check digit")
         );
     }
 }

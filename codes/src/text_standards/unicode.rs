@@ -1,6 +1,6 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, errors::GeneralError};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnicodeEncoding {
@@ -15,45 +15,45 @@ pub struct Unicode {
 }
 
 impl Unicode {
-    fn utf8_encode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf8_encode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(self.mode.byte_iter_to_text(text.bytes()))
     }
 
-    fn utf16_encode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf16_encode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(self
             .mode
             .u16_slice_to_text_be(text.encode_utf16().collect_vec()))
     }
 
-    fn utf32_encode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf32_encode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(self
             .mode
             .u32_slice_to_text_be(text.chars().map(|c| u32::from(c)).collect_vec()))
     }
 
-    fn utf8_decode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf8_decode(&self, text: &str) -> Result<String, GeneralError> {
         let v = self
             .mode
             .text_to_bytes(text)
-            .map_err(|e| CodeError::Input(e.to_string()))?;
+            .map_err(|e| GeneralError::input(e.to_string()))?;
 
-        String::from_utf8(v).map_err(|e| CodeError::Input(e.to_string()))
+        String::from_utf8(v).map_err(|e| GeneralError::input(e.to_string()))
     }
 
-    fn utf16_decode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf16_decode(&self, text: &str) -> Result<String, GeneralError> {
         let v = self
             .mode
             .text_to_u16_be(text)
-            .map_err(|e| CodeError::Input(e.to_string()))?;
+            .map_err(|e| GeneralError::input(e.to_string()))?;
 
-        String::from_utf16(&v).map_err(|e| CodeError::Input(e.to_string()))
+        String::from_utf16(&v).map_err(|e| GeneralError::input(e.to_string()))
     }
 
-    fn utf32_decode(&self, text: &str) -> Result<String, CodeError> {
+    fn utf32_decode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(self
             .mode
             .text_to_u32_be(text)
-            .map_err(|e| CodeError::Input(e.to_string()))?
+            .map_err(|e| GeneralError::input(e.to_string()))?
             .into_iter()
             .map(|n| char::from_u32(n).unwrap_or('�'))
             .collect())
@@ -70,7 +70,7 @@ impl Default for Unicode {
 }
 
 impl Code for Unicode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.encoding {
             UnicodeEncoding::Utf8 => self.utf8_encode(text),
             UnicodeEncoding::Utf16 => self.utf16_encode(text),
@@ -78,7 +78,7 @@ impl Code for Unicode {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         match self.encoding {
             UnicodeEncoding::Utf8 => self.utf8_decode(text),
             UnicodeEncoding::Utf16 => self.utf16_decode(text),
@@ -108,10 +108,10 @@ mod unicode_tests {
                 code.mode = mode;
                 let encoded = code
                     .encode(PLAINTEXT)
-                    .expect(&format!("encoding {:?} {:?} CodeError", encoding, mode));
+                    .expect(&format!("encoding {:?} {:?} GeneralError", encoding, mode));
                 let decoded = code
                     .decode(&encoded)
-                    .expect(&format!("decoding{:?} {:?} CodeError", encoding, mode));
+                    .expect(&format!("decoding{:?} {:?} GeneralError", encoding, mode));
                 if decoded != PLAINTEXT {
                     panic!(
                         "decoded {:?} {:?} not equivalent to plaintext",

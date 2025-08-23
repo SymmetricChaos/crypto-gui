@@ -1,7 +1,8 @@
 use super::string_to_u64s;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::Integer;
+use utils::errors::GeneralError;
 
 crate::lazy_regex!(TUPLE, r"(([0-9]+:)*[0-9]+)");
 
@@ -65,7 +66,7 @@ impl Default for Factoradic {
 impl Factoradic {}
 
 impl Code for Factoradic {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         for n in string_to_u64s(text, ",")? {
@@ -75,7 +76,7 @@ impl Code for Factoradic {
         Ok(v.join(", "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut v = Vec::new();
 
         for group in extract_code_groups(text) {

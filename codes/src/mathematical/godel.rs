@@ -1,7 +1,8 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::{BigUint, Integer, Num, One};
 use primal::Primes;
+use utils::errors::GeneralError;
 
 const MESSAGE_LIMIT: usize = 100;
 
@@ -33,9 +34,9 @@ impl Godel {
 }
 
 impl Code for Godel {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         if text.split(" ").count() > MESSAGE_LIMIT {
-            return Err(CodeError::Input(format!(
+            return Err(GeneralError::input(format!(
                 "The Godel encoding is currently limited to {} code points",
                 MESSAGE_LIMIT
             )));
@@ -50,7 +51,7 @@ impl Code for Godel {
                 .words
                 .iter()
                 .position(|x| x == s)
-                .ok_or_else(|| CodeError::invalid_input_group(s))
+                .ok_or_else(|| GeneralError::invalid_input_group(s))
             {
                 Ok(v) => out *= BigUint::from(*prime).pow((v + 1) as u32),
                 Err(e) => return Err(e),
@@ -60,10 +61,10 @@ impl Code for Godel {
         return Ok(out.to_str_radix(10));
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut num = match BigUint::from_str_radix(text, 10) {
             Ok(n) => n,
-            Err(_) => return Err(CodeError::Input("unable to parse input as a number".into())),
+            Err(_) => return Err(GeneralError::input("unable to parse input as a number")),
         };
 
         let mut words = Vec::with_capacity(MESSAGE_LIMIT);

@@ -1,7 +1,10 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use std::ops::Not;
-use utils::text_functions::{chunk_and_join, string_chunks};
+use utils::{
+    errors::GeneralError,
+    text_functions::{chunk_and_join, string_chunks},
+};
 
 const WIDTH: usize = 5;
 
@@ -117,7 +120,7 @@ fn map_l_inv(k: &str, mode: TtyMode) -> Option<char> {
     map.get_by_right(k).cloned()
 }
 
-pub fn encode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
+pub fn encode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, GeneralError> {
     let mut text = text.to_string();
     text = text.replace("\\0", "␀");
     text = text.replace("\\r", "␍");
@@ -158,7 +161,7 @@ pub fn encode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeErro
                         out.push_str(code_group);
                         mode = !mode;
                     }
-                    None => return Err(CodeError::invalid_input_char(s)),
+                    None => return Err(GeneralError::invalid_input_char(s)),
                 },
             }
         } else {
@@ -170,7 +173,7 @@ pub fn encode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeErro
                         out.push_str(code_group);
                         mode = !mode;
                     }
-                    None => return Err(CodeError::invalid_input_char(s)),
+                    None => return Err(GeneralError::invalid_input_char(s)),
                 },
             }
         }
@@ -178,7 +181,7 @@ pub fn encode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeErro
     Ok(out)
 }
 
-pub fn decode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeError> {
+pub fn decode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, GeneralError> {
     let mut mode = TtyMode::Letters;
     let mut out = String::with_capacity(text.len() / WIDTH);
     for group in string_chunks(
@@ -201,7 +204,7 @@ pub fn decode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeErro
             BitOrder::LsbR => match map_r_inv(&group, mode) {
                 Some(code_group) => out.push(code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(GeneralError::input(format!(
                         "The code group `{}` is not valid in ITA2",
                         group
                     )))
@@ -210,7 +213,7 @@ pub fn decode_us_tty(text: &str, bit_order: BitOrder) -> Result<String, CodeErro
             BitOrder::LsbL => match map_l_inv(&group, mode) {
                 Some(code_group) => out.push(code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(GeneralError::input(format!(
                         "The code group `{}` is not valid in ITA2",
                         group
                     )))
@@ -264,7 +267,7 @@ impl UsTty {
 }
 
 impl Code for UsTty {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let out = encode_us_tty(text, self.bit_order)?;
 
         if self.spaced {
@@ -274,7 +277,7 @@ impl Code for UsTty {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         Ok(decode_us_tty(text, self.bit_order)?)
     }
 }

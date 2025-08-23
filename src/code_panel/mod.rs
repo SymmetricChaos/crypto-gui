@@ -1,5 +1,4 @@
 use codes::{
-    errors::CodeError,
     ids::{CodeCategory, CodeId},
     traits::Code,
 };
@@ -77,10 +76,10 @@ mod wabun_controls;
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui);
     fn code(&self) -> &dyn Code;
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.code().encode(text)
     }
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         self.code().decode(text)
     }
 }

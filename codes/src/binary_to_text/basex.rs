@@ -1,9 +1,9 @@
 use super::BinaryToText;
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use itertools::Itertools;
 use num::Zero;
-use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
+use utils::{byte_formatting::ByteFormat, errors::GeneralError, text_functions::bimap_from_iter};
 
 // Translated from
 // https://github.com/eknkc/basex/blob/6baac8ea8b19cc66d125286d213770fec0691867/basex.go#L46
@@ -51,7 +51,7 @@ impl BaseX {
 }
 
 impl BinaryToText for BaseX {
-    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, GeneralError> {
         if bytes.len() == 0 {
             return Ok(String::new());
         }
@@ -87,7 +87,7 @@ impl BinaryToText for BaseX {
 }
 
 impl Code for BaseX {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
@@ -96,13 +96,13 @@ impl Code for BaseX {
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut bytes: Vec<u8> = Vec::new();
         for c in text.chars() {
             let mut carry = *self
                 .map
                 .get_by_left(&c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                .ok_or_else(|| GeneralError::invalid_input_char(c))?;
             for j in 0..bytes.len() {
                 carry += bytes[j] as u32 * self.base;
                 bytes[j] = (carry & 0xFF) as u8;

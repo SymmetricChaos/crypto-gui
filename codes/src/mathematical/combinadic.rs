@@ -1,6 +1,7 @@
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 use itertools::Itertools;
 use num::integer::binomial;
+use utils::errors::GeneralError;
 
 crate::lazy_regex!(TUPLE, r"(([0-9]+:)*[0-9]+)");
 
@@ -74,11 +75,11 @@ impl Combinadic {
 }
 
 impl Code for Combinadic {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let mut output = String::new();
 
         for w in text.split(" ") {
-            let n = u64::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
+            let n = u64::from_str_radix(w, 10).map_err(|e| GeneralError::input(e.to_string()))?;
             output.push_str(&self.encode_u64(n));
             output.push(' ');
         }
@@ -87,7 +88,7 @@ impl Code for Combinadic {
         Ok(output)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         // let mut output = String::new();
 
         //     for section in Self::recognize_code(&text) {

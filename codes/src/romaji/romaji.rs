@@ -1,8 +1,10 @@
+use utils::errors::GeneralError;
+
 use super::{
     tokenizer::{Node, TransitionError},
     HEPBERN_SHIKI, HIRAGANA, KUNREI_SHIKI, NIHON_SHIKI, ROMAJI_TO_KANA,
 };
-use crate::{errors::CodeError, traits::Code};
+use crate::traits::Code;
 
 pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     let tokens = tree.extract_tokens(orig)?;
@@ -48,20 +50,20 @@ impl Default for Romaji {
 }
 
 impl Code for Romaji {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, GeneralError> {
         let tokens = self
             .variant
             .root()
             .extract_tokens(text)
-            .map_err(|e| CodeError::General(e.to_string()))?;
+            .map_err(|e| GeneralError::general(e.to_string()))?;
 
         Ok(tokens.iter().cloned().collect())
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let tokens = ROMAJI_TO_KANA
             .extract_tokens(&text.to_lowercase())
-            .map_err(|e| CodeError::General(e.to_string()))?;
+            .map_err(|e| GeneralError::general(e.to_string()))?;
 
         Ok(tokens.iter().cloned().collect())
     }
