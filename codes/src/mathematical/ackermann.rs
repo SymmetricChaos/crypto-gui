@@ -17,7 +17,7 @@ use crate::{ traits::Code};
 // f({{{{{}}}}}) = 2^f({{{{}}}}) = 2^4 = 16
 
 // For 32-bit numbers only these 32 sets are used, each effectively represents a particular bit
-const BASE_SETS: [&str; 32] = [
+pub const BASE_SETS: [&str; 32] = [
     "{}",
     "{{}}",
     "{{{}}}",
@@ -57,12 +57,24 @@ pub fn number_to_set(mut n: u32) -> String {
     for i in 0..=32 {
         if n & 1 == 1 {
             // out.push_str(&number_to_set(i));
-            out.push_str(BASE_SETS[i]); // faster than recursion
+            out.push_str(BASE_SETS[i]); // much faster than recursion
         }
         n >>= 1;
     }
     out.push('}');
     out
+}
+
+pub fn set_to_number(s: &str) -> Result<u32,GeneralError> {
+    let mut n = 0;
+    for range in paren_ranges_nonoverlapping_subsets(s,'{', '}')? {
+        n += 1_u32
+            << BASE_SETS
+                .iter()
+                .position(|x| *x == &s[range.clone()])
+                .unwrap();
+    }
+    Ok(n)
 }
 
 
@@ -91,15 +103,7 @@ impl Code for Ackermann {
     fn decode(&self, text: &str) -> Result<String, GeneralError> {
         let mut out = Vec::new();
         for set in text.split(",").map(|s| s.trim()) {
-            let mut n = 0;
-            for range in paren_ranges_nonoverlapping_subsets(set,'{', '}')? {
-                n += 1_u32
-                    << BASE_SETS
-                        .iter()
-                        .position(|x| *x == &set[range.clone()])
-                        .unwrap();
-            }
-            out.push(n.to_string());
+            out.push(set_to_number(set)?.to_string());
         }
         Ok(out.join(", "))
     }
@@ -109,6 +113,24 @@ impl Code for Ackermann {
 mod tests {
 
     use super::*;
+
+    #[ignore = "constant generation"]
+    #[test]
+    fn generate_base_sets() {
+        println!("pub const BASE_SETS: [&str; 32] = [");
+        for i in 0..32 {
+            println!("    \"{}\",",number_to_set(i))
+        }
+        println!("];");
+    }
+
+    #[test]
+    fn encode_decode() {
+        for i in 0..1_000_000 {
+            let s = number_to_set(i);
+            assert_eq!(i,set_to_number(&s).unwrap())
+        }
+    }
 
     #[test]
     fn encode_test() {
