@@ -19,7 +19,7 @@ pub fn read_u64(slice: &[u8], offset: usize) -> u64 {
 }
 
 pub fn read_u32(slice: &[u8]) -> u64 {
-    u32::from_le_bytes(slice.try_into().unwrap()) as u64
+    u32::from_le_bytes(slice[0..4].try_into().unwrap()) as u64
 }
 
 fn read_u24(bytes: &[u8]) -> u64 {
@@ -72,8 +72,8 @@ pub struct Wyhash {
 impl Default for Wyhash {
     fn default() -> Self {
         Self {
-            buffer: Vec::with_capacity(48),
-            last_read: Vec::with_capacity(48),
+            buffer: Vec::with_capacity(96),
+            last_read: Vec::with_capacity(96),
             state: [0; 3],
             secrets: [P0, P1, P2, P3],
             bytes_taken: 0,
@@ -90,7 +90,7 @@ impl Wyhash {
             loop {
                 secrets[i] = 0;
                 for j in (0..64).step_by(8) {
-                    secrets[i] |= u64::from((C[wy_rand(&mut tseed) as usize % 70]) << j)
+                    secrets[i] |= u64::from(C[wy_rand(&mut tseed) as usize % 70]) << j;
                 }
                 // ???
                 if secrets[i] % 2 == 0 {
@@ -147,6 +147,7 @@ impl StatefulHasher for Wyhash {
                 compress(&self.buffer[..48], &mut self.state, &self.secrets);
                 self.buffer = self.buffer[48..].to_vec();
             }
+            self.last_read.extend_from_slice(&self.buffer);
             self.state[0] ^= self.state[1];
             self.state[0] ^= self.state[2];
             while self.buffer.len() > 16 {
@@ -157,7 +158,7 @@ impl StatefulHasher for Wyhash {
                 let (_, split) = self.buffer.split_at(16);
                 self.buffer = split.to_vec();
             }
-            self.last_read.extend_from_slice(&self.buffer);
+
             a = read_u64(&self.last_read[self.last_read.len() - 16..], 0);
             b = read_u64(&self.last_read[self.last_read.len() - 8..], 0);
         }
@@ -166,3 +167,42 @@ impl StatefulHasher for Wyhash {
             .to_vec()
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    const PHRASE: &'static [u8; 378] = b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.";
+
+    use super::*;
+    use core::hash::Hasher;
+    use wyhash::final3::wyhash;
+
+    #[test]
+    fn outputs() {
+        for i in [0, 1, 4, 5, 16, 17, 47, 48, 96, 160] {
+            println!(
+                "reference   {i}: {:016x?}",
+                wyhash(&PHRASE[0..i], 0, [0, 0, 0, 0])
+            );
+            let hasher = Wyhash::with_seed(0);
+            println!(
+                "implimented {i}: {:016x?}",
+                u64::from_be_bytes(hasher.hash(&PHRASE[0..i]).try_into().unwrap())
+            )
+        }
+
+        // // with seed
+        // for i in [0, 1, 4, 5, 16, 17, 47, 48, 96, 160] {
+        //     println!(
+        //         "reference   {i}: {:08x?}",
+        //         wyhash(&PHRASE[0..i], 0x0BAD_5EED_0BAD_5EED, [0, 0, 0, 0])
+        //     );
+        //     let hasher = Wyhash::with_seed(0x0BAD_5EED_0BAD_5EED);
+        //     println!("implimented {i}: {:02x?}", hasher.hash(&PHRASE[0..i]))
+        // }
+    }
+}
+
+// crate::stateful_hash_tests!(
+
+// );
