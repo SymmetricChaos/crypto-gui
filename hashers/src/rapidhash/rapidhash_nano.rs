@@ -59,7 +59,6 @@ impl RapidHashNanoV3 {
         secrets[6] = mix_seed(secrets[5], 6);
         Self {
             state: [seed; 3],
-            buffer: Vec::with_capacity(112),
             secrets: secrets,
             ..Default::default()
         }
@@ -70,7 +69,6 @@ impl RapidHashNanoV3 {
         let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
         Self {
             state: [seed; 3],
-            buffer: Vec::with_capacity(112),
             ..Default::default()
         }
     }

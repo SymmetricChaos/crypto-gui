@@ -69,7 +69,6 @@ impl RapidHashMicroV3 {
         secrets[6] = mix_seed(secrets[5], 6);
         Self {
             state: [seed; 5],
-            buffer: Vec::with_capacity(112),
             secrets: secrets,
             ..Default::default()
         }
@@ -80,7 +79,6 @@ impl RapidHashMicroV3 {
         let seed = seed ^ rapid_mix(seed ^ DEFAULT_SECRETS[2], DEFAULT_SECRETS[1], false);
         Self {
             state: [seed; 5],
-            buffer: Vec::with_capacity(112),
             ..Default::default()
         }
     }
