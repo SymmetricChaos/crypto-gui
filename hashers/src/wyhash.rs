@@ -30,15 +30,15 @@ fn read_u24(bytes: &[u8]) -> u64 {
 
 fn compress(bytes: &[u8], state: &mut [u64; 3], secrets: &[u64; 4]) {
     state[0] = wy_mix(
-        read_u64(bytes, 0) ^ secrets[0],
+        read_u64(bytes, 0) ^ secrets[1],
         read_u64(bytes, 8) ^ state[0],
     );
     state[1] = wy_mix(
-        read_u64(bytes, 16) ^ secrets[1],
+        read_u64(bytes, 16) ^ secrets[2],
         read_u64(bytes, 24) ^ state[1],
     );
     state[2] = wy_mix(
-        read_u64(bytes, 32) ^ secrets[2],
+        read_u64(bytes, 32) ^ secrets[3],
         read_u64(bytes, 40) ^ state[2],
     );
 }
@@ -82,6 +82,7 @@ impl Default for Wyhash {
 }
 
 impl Wyhash {
+    // Double checked that this matches the reference
     pub fn with_seed(seed: u64) -> Self {
         let mut secrets = [0; 4];
         let mut tseed = seed;
@@ -96,7 +97,7 @@ impl Wyhash {
                 if secrets[i] % 2 == 0 {
                     continue;
                 }
-                // Ensure the secrets have sufficient difference from each other?
+                // Ensure there are exactly 32 ones across all the secrets
                 if (0..i)
                     .find(|n| (secrets[*n] ^ secrets[i]).count_ones() != 32)
                     .is_none()
@@ -105,9 +106,9 @@ impl Wyhash {
                 }
             }
         }
-
+        // println!("{:016x?}", secrets);
         Self {
-            state: [seed; 3],
+            state: [seed ^ secrets[0]; 3],
             secrets: secrets,
             ..Default::default()
         }
@@ -147,9 +148,11 @@ impl StatefulHasher for Wyhash {
                 compress(&self.buffer[..48], &mut self.state, &self.secrets);
                 self.buffer = self.buffer[48..].to_vec();
             }
+
             self.last_read.extend_from_slice(&self.buffer);
             self.state[0] ^= self.state[1];
             self.state[0] ^= self.state[2];
+
             while self.buffer.len() > 16 {
                 self.state[0] = wy_mix(
                     read_u64(&self.buffer, 0) ^ self.secrets[1],
@@ -169,40 +172,32 @@ impl StatefulHasher for Wyhash {
 }
 
 #[cfg(test)]
-mod tests {
+const PHRASE: &'static [u8; 378] = b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.";
 
-    const PHRASE: &'static [u8; 378] = b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.";
-
-    use super::*;
-    use core::hash::Hasher;
-    use wyhash::final3::wyhash;
-
-    #[test]
-    fn outputs() {
-        for i in [0, 1, 4, 5, 16, 17, 47, 48, 96, 160] {
-            println!(
-                "reference   {i}: {:016x?}",
-                wyhash(&PHRASE[0..i], 0, [0, 0, 0, 0])
-            );
-            let hasher = Wyhash::with_seed(0);
-            println!(
-                "implimented {i}: {:016x?}",
-                u64::from_be_bytes(hasher.hash(&PHRASE[0..i]).try_into().unwrap())
-            )
-        }
-
-        // // with seed
-        // for i in [0, 1, 4, 5, 16, 17, 47, 48, 96, 160] {
-        //     println!(
-        //         "reference   {i}: {:08x?}",
-        //         wyhash(&PHRASE[0..i], 0x0BAD_5EED_0BAD_5EED, [0, 0, 0, 0])
-        //     );
-        //     let hasher = Wyhash::with_seed(0x0BAD_5EED_0BAD_5EED);
-        //     println!("implimented {i}: {:02x?}", hasher.hash(&PHRASE[0..i]))
-        // }
-    }
-}
-
-// crate::stateful_hash_tests!(
-
-// );
+crate::stateful_hash_tests!(
+    // All of the short paths
+    test_0, Wyhash::with_seed(0), &PHRASE[..0],
+    "c8d31a514467bf1f";
+    test_1, Wyhash::with_seed(0), &PHRASE[..1],
+    "aec526ecfc044b2d";
+    test_4, Wyhash::with_seed(0), &PHRASE[..4],
+    "46becab88af11bb8";
+    test_5, Wyhash::with_seed(0), &PHRASE[..5],
+    "dcf5af2a544cc48b";
+    test_16, Wyhash::with_seed(0), &PHRASE[..16],
+    "086e08e3459f06da";
+    test_17, Wyhash::with_seed(0), &PHRASE[..17],
+    "ccbde67d4400e30f";
+    test_47, Wyhash::with_seed(0), &PHRASE[..47],
+    "91da1f9c995da9b5";
+    test_48, Wyhash::with_seed(0), &PHRASE[..48],
+    "8748c6400ec37652";
+    test_49, Wyhash::with_seed(0), &PHRASE[..49],
+    "fd1813f7c5944c1e";
+    test_96, Wyhash::with_seed(0), &PHRASE[..96],
+    "7b6b1df03a0eb3e5";
+    test_160, Wyhash::with_seed(0), &PHRASE[..160],
+    "759bb5bdd83ba9ca";
+    test_378, Wyhash::with_seed(0), &PHRASE[..378],
+    "f9721a01b03724fd";
+);
