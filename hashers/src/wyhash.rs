@@ -82,7 +82,6 @@ impl Default for Wyhash {
 }
 
 impl Wyhash {
-    // Double checked that this matches the reference
     pub fn with_seed(seed: u64) -> Self {
         let mut secrets = [0; 4];
         let mut tseed = seed;
@@ -93,7 +92,7 @@ impl Wyhash {
                 for j in (0..64).step_by(8) {
                     secrets[i] |= u64::from(C[wy_rand(&mut tseed) as usize % 70]) << j;
                 }
-                // ???
+                // Why?
                 if secrets[i] % 2 == 0 {
                     continue;
                 }
@@ -106,7 +105,6 @@ impl Wyhash {
                 }
             }
         }
-        // println!("{:016x?}", secrets);
         Self {
             state: [seed ^ secrets[0]; 3],
             secrets: secrets,
@@ -175,7 +173,6 @@ impl StatefulHasher for Wyhash {
 const PHRASE: &'static [u8; 378] = b"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife. However little known the feelings or views of such a man may be on his first entering a neighbourhood, this truth is so well fixed in the minds of the surrounding families, that he is considered as the rightful property of some one or other of their daughters.";
 
 crate::stateful_hash_tests!(
-    // All of the short paths
     test_0, Wyhash::with_seed(0), &PHRASE[..0],
     "c8d31a514467bf1f";
     test_1, Wyhash::with_seed(0), &PHRASE[..1],
