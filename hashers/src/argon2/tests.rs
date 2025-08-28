@@ -120,14 +120,17 @@
 //      c8 de 6b 01 6d d3 88 d2
 //      99 52 a4 c4 67 2b 6c e8
 
-use super::argon2::Argon2;
-use crate::traits::StatefulHasher;
+#[cfg(test)]
+mod big_test {
+    use crate::argon2::argon2::Argon2;
+    use crate::traits::StatefulHasher;
 
-crate::stateful_hash_tests!(
-    test_argon2d, Argon2::init_argon2d(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
-    &[0x01; 32],
-    "512b391b6f1162975371d30919734294f868e3be3984f3c1a13a4db9fabe4acb";
-    test_argon2i, Argon2::init_argon2i(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
-    &[0x01; 32],
-    "c814d9d1dc7f37aa13f0d77f2494bda1c8de6b016dd388d29952a4c4672b6ce8";
-);
+    crate::stateful_hash_tests!(
+        test_argon2d, Argon2::init_argon2d(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
+        &[0x01; 32],
+        "512b391b6f1162975371d30919734294f868e3be3984f3c1a13a4db9fabe4acb";
+        test_argon2i, Argon2::init_argon2i(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
+        &[0x01; 32],
+        "c814d9d1dc7f37aa13f0d77f2494bda1c8de6b016dd388d29952a4c4672b6ce8";
+    );
+}
