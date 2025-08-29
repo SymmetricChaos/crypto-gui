@@ -1,8 +1,10 @@
-use crate::Cipher;
+use utils::byte_formatting::ByteFormat;
 
 pub struct Wake {
     pub table: [u32; 256],
     pub regs: [u32; 6],
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
 }
 
 impl Default for Wake {
@@ -10,6 +12,8 @@ impl Default for Wake {
         Self {
             table: [0; 256],
             regs: [0; 6],
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
         }
     }
 }
@@ -42,12 +46,4 @@ impl Wake {
     }
 }
 
-impl Cipher for Wake {
-    fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
-        todo!()
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
-        todo!()
-    }
-}
+crate::impl_cipher_for_stream_cipher!(Wake);
