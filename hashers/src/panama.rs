@@ -1,5 +1,7 @@
 // https://github.com/bitbandi/all-hash-python/blob/master/sph/panama.c
 
+use utils::{byte_formatting::make_u32s_le, padding::bit_padding};
+
 use crate::traits::StatefulHasher;
 
 struct Buffer([[u32; 8]; 32]);
@@ -31,6 +33,7 @@ impl Buffer {
 pub struct Panama {
     state: [u32; 17],
     buffer: Buffer,
+    byte_buffer: Vec<u8>,
 }
 
 impl Default for Panama {
@@ -38,6 +41,7 @@ impl Default for Panama {
         Self {
             state: [0; 17],
             buffer: Buffer::new(),
+            byte_buffer: Vec::with_capacity(32),
         }
     }
 }
@@ -59,7 +63,7 @@ impl Panama {
 
     // Invertible linear transformation of the state
     fn theta(&mut self) {
-        let mut t = self.state.clone();
+        let t = self.state.clone();
         for i in 0..17 {
             self.state[i] = t[i] ^ t[(i + 1) % 17] ^ t[(i + 4) % 17];
         }
@@ -67,7 +71,7 @@ impl Panama {
 
     // Invertible nonlinear transformation of the state
     fn gamma(&mut self) {
-        let mut t = self.state.clone();
+        let t = self.state.clone();
         for i in 0..17 {
             self.state[i] = t[i] ^ (t[(i + 1) % 17] | !t[(i + 42) % 17]);
         }
@@ -107,10 +111,30 @@ impl Panama {
 
 impl StatefulHasher for Panama {
     fn update(&mut self, mut bytes: &[u8]) {
-        todo!()
+        crate::compression_routine!(self.byte_buffer, bytes, 32, {
+            let block = make_u32s_le::<8>(&self.byte_buffer);
+            self.state_update_push(&block);
+        });
     }
 
-    fn finalize(self) -> Vec<u8> {
+    fn finalize(mut self) -> Vec<u8> {
+        bit_padding(&mut self.byte_buffer, 32).unwrap();
+
+        // Either one or two final blocks
+        if self.byte_buffer.len() == 32 {
+            let block = make_u32s_le::<8>(&self.byte_buffer);
+            self.state_update_push(&block);
+        } else {
+            let block = make_u32s_le::<8>(&self.byte_buffer[..32]);
+            self.state_update_push(&block);
+            let block = make_u32s_le::<8>(&self.byte_buffer[32..]);
+            self.state_update_push(&block);
+        }
+
+        for _ in 0..32 {
+            self.state_update_pull();
+        }
+
         todo!()
     }
 }
