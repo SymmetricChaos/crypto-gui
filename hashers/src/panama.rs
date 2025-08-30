@@ -1,8 +1,11 @@
 // https://github.com/bitbandi/all-hash-python/blob/master/sph/panama.c
+// https://tnlandforms.us/cns06/panama.pdf
 
-use utils::{byte_formatting::make_u32s_le, padding::bit_padding};
-
-use crate::traits::StatefulHasher;
+use crate::traits::{ResettableHasher, StatefulHasher};
+use utils::{
+    byte_formatting::{make_u32s_le, u32s_to_bytes_be},
+    padding::bit_padding,
+};
 
 struct Buffer([[u32; 8]; 32]);
 
@@ -11,15 +14,11 @@ impl Buffer {
         Buffer([[0; 8]; 32])
     }
 
-    pub fn reset(&mut self) {
-        self.0 = [[0; 8]; 32]
-    }
-
     pub fn stage(&self, n: usize) -> &[u32; 8] {
         &self.0[n]
     }
 
-    pub fn update(&mut self, q: &[u32; 8]) {
+    pub fn update(&mut self, q: &[u32]) {
         self.0.rotate_right(1);
         for i in 0..8 {
             self.0[0][i] = self.0[31][i] ^ q[i]
@@ -32,30 +31,30 @@ impl Buffer {
 
 pub struct Panama {
     state: [u32; 17],
-    buffer: Buffer,
-    byte_buffer: Vec<u8>,
+    panama_buffer: Buffer,
+    buffer: Vec<u8>,
 }
 
 impl Default for Panama {
     fn default() -> Self {
         Self {
             state: [0; 17],
-            buffer: Buffer::new(),
-            byte_buffer: Vec::with_capacity(32),
+            panama_buffer: Buffer::new(),
+            buffer: Vec::with_capacity(32),
         }
     }
 }
 
 impl Panama {
     fn state_update_push(&mut self, p: &[u32; 8]) {
-        self.gamma();
+        self.panama_buffer.update(p); // gamma
         self.pi();
         self.theta();
         self.sigma_push(p)
     }
 
     fn state_update_pull(&mut self) -> [u32; 8] {
-        self.gamma();
+        self.panama_buffer.update(&self.state[0..8]); // gamma
         self.pi();
         self.theta();
         self.sigma_pull()
@@ -66,14 +65,6 @@ impl Panama {
         let t = self.state.clone();
         for i in 0..17 {
             self.state[i] = t[i] ^ t[(i + 1) % 17] ^ t[(i + 4) % 17];
-        }
-    }
-
-    // Invertible nonlinear transformation of the state
-    fn gamma(&mut self) {
-        let t = self.state.clone();
-        for i in 0..17 {
-            self.state[i] = t[i] ^ (t[(i + 1) % 17] | !t[(i + 42) % 17]);
         }
     }
 
@@ -92,7 +83,7 @@ impl Panama {
         self.state[0] ^= 1;
         for i in 0..8 {
             self.state[i + 1] ^= l[i];
-            self.state[i + 9] ^= self.buffer.stage(16)[i]
+            self.state[i + 9] ^= self.panama_buffer.stage(16)[i]
         }
     }
 
@@ -100,8 +91,8 @@ impl Panama {
     fn sigma_pull(&mut self) -> [u32; 8] {
         self.state[0] ^= 1;
         for i in 0..8 {
-            self.state[i + 1] ^= self.buffer.stage(4)[i];
-            self.state[i + 9] ^= self.buffer.stage(16)[i];
+            self.state[i + 1] ^= self.panama_buffer.stage(4)[i];
+            self.state[i + 9] ^= self.panama_buffer.stage(16)[i];
         }
         let mut out = [0; 8];
         out.copy_from_slice(&self.state[9..16]);
@@ -111,23 +102,23 @@ impl Panama {
 
 impl StatefulHasher for Panama {
     fn update(&mut self, mut bytes: &[u8]) {
-        crate::compression_routine!(self.byte_buffer, bytes, 32, {
-            let block = make_u32s_le::<8>(&self.byte_buffer);
+        crate::compression_routine!(self.buffer, bytes, 32, {
+            let block = make_u32s_le::<8>(&self.buffer);
             self.state_update_push(&block);
         });
     }
 
     fn finalize(mut self) -> Vec<u8> {
-        bit_padding(&mut self.byte_buffer, 32).unwrap();
+        bit_padding(&mut self.buffer, 32).unwrap();
 
         // Either one or two final blocks
-        if self.byte_buffer.len() == 32 {
-            let block = make_u32s_le::<8>(&self.byte_buffer);
+        if self.buffer.len() == 32 {
+            let block = make_u32s_le::<8>(&self.buffer);
             self.state_update_push(&block);
         } else {
-            let block = make_u32s_le::<8>(&self.byte_buffer[..32]);
+            let block = make_u32s_le::<8>(&self.buffer[..32]);
             self.state_update_push(&block);
-            let block = make_u32s_le::<8>(&self.byte_buffer[32..]);
+            let block = make_u32s_le::<8>(&self.buffer[32..]);
             self.state_update_push(&block);
         }
 
@@ -135,6 +126,15 @@ impl StatefulHasher for Panama {
             self.state_update_pull();
         }
 
+        let mut out = [0_u8; 32];
+        u32s_to_bytes_be(&mut out, &self.state_update_pull());
+        out.to_vec()
+    }
+}
+
+// Don't update until basic methods are finalized
+impl ResettableHasher for Panama {
+    fn finalize_and_reset(&mut self) -> Vec<u8> {
         todo!()
     }
 }
