@@ -219,7 +219,7 @@ macro_rules! fillers_and_makers {
                     out
                 }
 
-                /// Take a slice of the type and filled the target with bytes. Panics if the target cannot be exactly filled. Big-endian.
+                /// Take a slice of the type and fill the target with bytes. Panics if the target cannot be exactly filled. Big-endian.
                 pub fn [<$t s_to_bytes_be>]<T: AsRef<[$t]>, S: AsMut<[u8]>>(mut target: S, words: T) {
                     for (chunk, word) in target.as_mut().chunks_exact_mut($w).zip_eq(words.as_ref()) {
                         chunk.copy_from_slice(&word.to_be_bytes());
@@ -242,7 +242,7 @@ macro_rules! fillers_and_makers {
                     out
                 }
 
-                /// Take a slice of the type and filled the target with bytes. Panics if the target cannot be exactly filled. Little-endian.
+                /// Take a slice of the type and fill the target with bytes. Panics if the target cannot be exactly filled. Little-endian.
                 pub fn [<$t s_to_bytes_le>]<T: AsRef<[$t]>, S: AsMut<[u8]>>(mut target: S, words: T) {
                     for (chunk, word) in target.as_mut().chunks_exact_mut($w).zip_eq(words.as_ref()) {
                         chunk.copy_from_slice(&word.to_le_bytes());
