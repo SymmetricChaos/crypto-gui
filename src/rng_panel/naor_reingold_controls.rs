@@ -5,7 +5,7 @@ use itertools::Itertools;
 use num_prime::RandPrime;
 use rand::{thread_rng, Rng};
 use rngs::naor_reingold::NaorReingold;
-use utils::math_functions::{mod_pow_64, prime_factors};
+use utils::{math_functions::mod_pow_64, primality::prime_factors};
 
 pub struct NaorReingoldFrame {
     rng: NaorReingold,

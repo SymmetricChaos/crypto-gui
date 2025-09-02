@@ -1,6 +1,8 @@
 // https://github.com/bitbandi/all-hash-python/blob/master/sph/panama.c
 // https://tnlandforms.us/cns06/panama.pdf
 
+// TODO: find test vectors or KATs in order to confirm the design
+
 use crate::traits::{ResettableHasher, StatefulHasher};
 use utils::{
     byte_formatting::{make_u32s_le, u32s_to_bytes_be},
@@ -95,7 +97,7 @@ impl Panama {
             self.state[i + 9] ^= self.panama_buffer.stage(16)[i];
         }
         let mut out = [0; 8];
-        out.copy_from_slice(&self.state[9..16]);
+        out.copy_from_slice(&self.state[8..16]);
         out
     }
 }
@@ -138,3 +140,7 @@ impl ResettableHasher for Panama {
         todo!()
     }
 }
+
+crate::stateful_hash_tests!(
+    intentional_failed_test_to_catch_runtime_errs, Panama::default(), b"abcdefghijklmnopqrstuvwxyz", "0000000000000000000000000000000000000000000000000000000000000000";
+);
