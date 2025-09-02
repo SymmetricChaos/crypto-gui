@@ -48,23 +48,23 @@ pub fn prime_factors<N: Integer + Copy + Unsigned>(n: N) -> Vec<N> {
 }
 
 pub struct PrimeSieve {
-    sieve: HashMap<usize, Vec<usize>>,
-    n: usize,
+    sieve: HashMap<u64, Vec<u64>>,
+    n: u64,
 }
 
 impl PrimeSieve {
     pub fn new() -> PrimeSieve {
         PrimeSieve {
-            sieve: HashMap::<usize, Vec<usize>>::new(),
-            n: 1usize,
+            sieve: HashMap::<u64, Vec<u64>>::new(),
+            n: 1,
         }
     }
 }
 
 impl Iterator for PrimeSieve {
-    type Item = usize;
+    type Item = u64;
 
-    fn next(&mut self) -> Option<usize> {
+    fn next(&mut self) -> Option<u64> {
         loop {
             self.n += 1;
             if !self.sieve.contains_key(&self.n) {
