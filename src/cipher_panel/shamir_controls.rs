@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::digital::shamir_secret_sharing::ShamirSecretSharing;
 use egui::Slider;
-use utils::{math_functions::is_prime64, text_functions::filter_string};
+use utils::{primality::is_prime64, text_functions::filter_string};
 
 pub struct ShamirSecretSharingFrame {
     cipher: ShamirSecretSharing,

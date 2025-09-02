@@ -5,8 +5,8 @@ use rand::{thread_rng, Rng};
 use std::num::ParseIntError;
 use utils::{
     errors::GeneralError,
-    math_functions::is_prime64,
     polynomial_interpolation::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
+    primality::is_prime64,
 };
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing

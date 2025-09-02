@@ -1,10 +1,7 @@
 use ciphers::substitution::Affine;
 use eframe::egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::{
-    math_functions::{mul_inv, prime_factors},
-    preset_alphabet::Alphabet,
-};
+use utils::{math_functions::mul_inv, preset_alphabet::Alphabet, primality::prime_factors};
 
 use crate::ui_elements::UiElements;
 

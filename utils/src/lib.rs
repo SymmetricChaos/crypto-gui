@@ -11,5 +11,6 @@ pub mod other_word_sizes;
 pub mod padding;
 pub mod polynomial_interpolation;
 pub mod preset_alphabet;
+pub mod primality;
 pub mod text_functions;
 pub mod vecstring;
