@@ -1,4 +1,6 @@
 pub mod columnar;
+pub mod skip;
+pub mod skip_shrink;
 pub use columnar::Columnar;
 
 pub mod diagonal_columnar;
