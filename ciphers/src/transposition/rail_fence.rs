@@ -9,8 +9,8 @@ pub struct RailFence {
 }
 
 impl Default for RailFence {
-    fn default() -> RailFence {
-        RailFence {
+    fn default() -> Self {
+        Self {
             num_rails: 3,
             start_rail: 0,
             falling: true,

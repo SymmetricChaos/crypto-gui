@@ -35,7 +35,6 @@ mod elgamal_controls;
 mod enigma_controls;
 mod fealnx_control;
 mod four_square_controls;
-mod general_sub_controls;
 mod gost_controls;
 mod grille_controls;
 mod hc128_controls;
@@ -72,6 +71,7 @@ mod serpent_controls;
 mod shamir_controls;
 mod sigaba_controls;
 mod simon_controls;
+mod simple_substitution_controls;
 mod slidefair_controls;
 mod sm4_controls;
 mod snow3g_controls;
@@ -247,7 +247,7 @@ pub struct CipherInterface {
     affine: affine_controls::AffineFrame,
     caesar: caesar_controls::CaesarFrame,
     decoder_ring: decoder_ring_controls::DecoderRingFrame,
-    gen_sub: general_sub_controls::GeneralSubstitutionFrame,
+    gen_sub: simple_substitution_controls::GeneralSubstitutionFrame,
     plugboard: plugboard_controls::PlugboardFrame,
 
     // Electromechanical

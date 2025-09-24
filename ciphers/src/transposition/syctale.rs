@@ -7,8 +7,8 @@ pub struct Scytale {
 }
 
 impl Default for Scytale {
-    fn default() -> Scytale {
-        Scytale {
+    fn default() -> Self {
+        Self {
             num_rails: 4,
             padding: 'X',
         }

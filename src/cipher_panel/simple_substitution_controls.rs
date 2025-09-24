@@ -53,13 +53,39 @@ impl CipherFrame for GeneralSubstitutionFrame {
         }
         ui.add_space(16.0);
 
-        if ui.button("Atbash").clicked() {
+        ui.collapsing("Specific Ciphers", |ui| {
+        if ui.button("Atbash").on_hover_text("An atbash uses a ciphertext alphabet that is in the reverse order of the plaintext alphabet.").clicked() {
             self.pt_alphabet_string = String::from(Alphabet::BasicLatin);
             self.ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
             self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
         ui.add_space(16.0);
+
+        if ui
+            .button("Gold-Bug")
+            .on_hover_text("The cipher used in Edgar Allen Poe's story The Gold-Bug.")
+            .clicked()
+        {
+            self.pt_alphabet_string = String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            self.ct_alphabet_string = String::from("52-†81346,709*‡.$();?¶]¢:[");
+            self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
+            self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
+        }
+        ui.add_space(16.0);
+
+        if ui
+            .button("QWERTY")
+            .on_hover_text("Uses keyboard order as the ciphertext alphabet.")
+            .clicked()
+        {
+            self.pt_alphabet_string = String::from(Alphabet::BasicLatin);
+            self.ct_alphabet_string = String::from("QWERTYUIOPASDFGHJKLZXCVBNM");
+            self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
+            self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
+        }
+        ui.add_space(16.0);
+        });
     }
 
     fn randomize(&mut self) {
