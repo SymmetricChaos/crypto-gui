@@ -21,7 +21,7 @@ impl Default for SkipCipher {
 impl SkipCipher {
     /// Panics if skip == 0
     pub fn new(initial: usize, skip: usize) -> Self {
-        assert!(skip > 0);
+        assert!(skip > 0, "skip must be positive");
         Self { initial, skip }
     }
 }
@@ -44,7 +44,19 @@ impl Cipher for SkipCipher {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
-        todo!()
+        let cs = text.chars().collect_vec();
+        if cs.len().gcd(&self.skip) != 1 {
+            return Err(GeneralError::input(
+                "input text must have a length that is coprime to the skip size",
+            ));
+        }
+        let mut out_vec = vec!['\0'; cs.len()];
+        let mut idx = self.initial % cs.len();
+        for i in 0..cs.len() {
+            out_vec[idx] = cs[i];
+            idx = (idx + self.skip) % cs.len();
+        }
+        Ok(out_vec.iter().collect())
     }
 }
 

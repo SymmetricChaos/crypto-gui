@@ -107,6 +107,7 @@ cipher_ids_and_names!(
     Shamir, "Shamir's Secret Sharing";
     Sigaba, "SIGABA";
     Simon, "Simon";
+    SkipCipher, "Skip Cipher";
     Skipjack, "Skipjack";
     Slidefair, "Slidefair";
     Solitaire, "Solitaire";

@@ -1024,6 +1024,18 @@
       "Feistel"
     ]
   },
+  "Skip Cipher": {
+    "Names": [
+      "Skip Cipher",
+      "Skip"
+    ],
+    "Description": "A simple transposition cipher can be made by writing down every nth character of message, wrapping around at the end each time. In order for this to pick each character exactly once the size of the skip must be coprime to the length of the message. In essence this uses a Weyl-Marsaglia sequence as a very weak random number generator to define a permutation of the text.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Transposition"
+    ]
+  },
   "Skipjack": {
     "Names": [
       "Skipjack"

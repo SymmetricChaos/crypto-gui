@@ -1,6 +1,4 @@
 pub mod columnar;
-pub mod skip;
-pub mod skip_shrink;
 pub use columnar::Columnar;
 
 pub mod diagonal_columnar;
@@ -20,3 +18,6 @@ pub use turning_grille::TurningGrille;
 
 pub mod amsco;
 pub use amsco::Amsco;
+
+pub mod skip_cipher;
+pub use skip_cipher::SkipCipher;

@@ -72,6 +72,7 @@ mod shamir_controls;
 mod sigaba_controls;
 mod simon_controls;
 mod simple_substitution_controls;
+mod skip_cipher_controls;
 mod slidefair_controls;
 mod sm4_controls;
 mod snow3g_controls;
@@ -282,6 +283,7 @@ pub struct CipherInterface {
     diagonal_columnar: diagonal_columnar_controls::DiagonalColumnarFrame,
     grille: grille_controls::GrilleFrame,
     rail_fence: rail_fence_controls::RailFenceFrame,
+    skip: skip_cipher_controls::SkipCipherFrame,
     scytale: scytale_controls::ScytaleFrame,
     turning_grille: turning_grille_controls::TurningGrilleFrame,
 
@@ -442,6 +444,7 @@ impl CipherInterface {
                 CipherId::DiagonalColumnar,
                 CipherId::Grille,
                 CipherId::RailFence,
+                CipherId::SkipCipher,
                 CipherId::Scytale,
                 CipherId::TurningGrille,
             ],
@@ -600,6 +603,7 @@ impl CipherInterface {
             CipherId::Shamir => &mut self.shamir,
             CipherId::Sigaba => &mut self.sigaba,
             CipherId::Simon => &mut self.simon,
+            CipherId::SkipCipher => &mut self.skip,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Sm4 => &mut self.sm4,
             CipherId::Snow3G => &mut self.snow3g,
