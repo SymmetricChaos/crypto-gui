@@ -11,3 +11,4 @@ pub mod slidefair;
 pub use slidefair::Slidefair;
 
 pub mod seriated_playfair;
+pub use seriated_playfair::SeriatedPlayfair;

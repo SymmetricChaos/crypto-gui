@@ -10,7 +10,17 @@ use utils::{
 pub struct Playfair {
     pub square: String,
     pub spacer: char,
-    grid_side_len: usize,
+    pub grid_side_len: usize,
+}
+
+impl Default for Playfair {
+    fn default() -> Self {
+        Self {
+            square: String::from(Alphabet::BasicLatinNoQ),
+            spacer: 'X',
+            grid_side_len: 5,
+        }
+    }
 }
 
 impl Playfair {
@@ -102,16 +112,6 @@ impl Playfair {
             )));
         }
         Ok(())
-    }
-}
-
-impl Default for Playfair {
-    fn default() -> Self {
-        Self {
-            square: String::from(Alphabet::BasicLatinNoQ),
-            spacer: 'X',
-            grid_side_len: 5,
-        }
     }
 }
 

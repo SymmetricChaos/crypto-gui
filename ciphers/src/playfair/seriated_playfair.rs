@@ -11,17 +11,21 @@ pub struct SeriatedPlayfair {
 impl Default for SeriatedPlayfair {
     fn default() -> Self {
         Self {
-            period: 4,
+            period: 5,
             playfair: Playfair::default(),
         }
     }
 }
 
 impl SeriatedPlayfair {
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
+        self.playfair.assign_key(keyword, alphabet);
+    }
+
     pub fn groups(&self, text: &str) -> Vec<String> {
         let mut chunks = string_chunks(text, self.period);
 
-        // if there are an even number of chunks fill ot the last one with spacers
+        // if there are an even number of chunks fill out the last one with spacers
         if chunks.len() % 2 == 0 {
             let x = chunks.last_mut().unwrap();
             while x.len() != self.period {
@@ -31,12 +35,12 @@ impl SeriatedPlayfair {
         } else {
             let last = chunks.pop().unwrap();
             let len = last.len();
-            let left: String = last.chars().take(len / 2 + 1).collect();
-            let right: String = last.chars().skip(len / 2 + 1).collect();
+            let left: String = last.chars().take(len / 2).collect();
+            let right: String = last.chars().skip(len / 2).collect();
             chunks.push(left);
             chunks.push(right);
             let x = chunks.last_mut().unwrap();
-            while x.len() != len / 2 + 1 {
+            while x.len() != len / 2 {
                 x.push(self.playfair.spacer)
             }
         }
@@ -47,61 +51,60 @@ impl SeriatedPlayfair {
 impl Cipher for SeriatedPlayfair {
     fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
         let groups = self.groups(text);
-        let mut out = String::with_capacity(text.len() + 4); // maximum spacer size is four bytes
+        let mut out = String::new();
         for (l_str, r_str) in groups
             .into_iter()
             .chunks(2)
             .into_iter()
             .map(|c| c.collect_tuple().unwrap())
         {
+            let mut left_out = String::new();
+            let mut right_out = String::new();
             for (l, r) in l_str.chars().zip(r_str.chars()) {
                 if l == r {
                     return Err(GeneralError::input(format!(
-                        "found repeated character {}, a spacer should be inserted",
-                        l
+                        "found repeated character {l}, a spacer should be inserted",
                     )));
                 }
                 let lpos = self.playfair.char_to_position(l)?;
                 let rpos = self.playfair.char_to_position(r)?;
                 let pair = self.playfair.playfair_shift(lpos, rpos, true);
-                out.push(pair.0);
-                out.push(pair.1);
+                left_out.push(pair.0);
+                right_out.push(pair.1);
             }
+            out.push_str(&left_out);
+            out.push_str(&right_out);
         }
 
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if text.chars().count() % 2 != 0 {
-            return Err(GeneralError::input(
-                "decrypting a seriated playfair requires an even number of characters",
-            ));
-        }
-
-        let mut out = String::with_capacity(text.len());
-        let mut left = String::with_capacity(text.len() / 2);
-        let mut right = String::with_capacity(text.len() / 2);
-        for (l, r) in text
-            .chars()
+        let groups = self.groups(text);
+        let mut out = String::new();
+        for (l_str, r_str) in groups
+            .into_iter()
             .chunks(2)
             .into_iter()
             .map(|c| c.collect_tuple().unwrap())
         {
-            if l == r {
-                return Err(GeneralError::input(format!(
-                    "found repeated character {}, a spacer should be inserted",
-                    l
-                )));
+            let mut left_out = String::new();
+            let mut right_out = String::new();
+            for (l, r) in l_str.chars().zip(r_str.chars()) {
+                if l == r {
+                    return Err(GeneralError::input(format!(
+                        "found repeated character {l}, a spacer should be inserted",
+                    )));
+                }
+                let lpos = self.playfair.char_to_position(l)?;
+                let rpos = self.playfair.char_to_position(r)?;
+                let pair = self.playfair.playfair_shift(lpos, rpos, false);
+                left_out.push(pair.0);
+                right_out.push(pair.1);
             }
-            let lpos = self.playfair.char_to_position(l)?;
-            let rpos = self.playfair.char_to_position(r)?;
-            let pair = self.playfair.playfair_shift(lpos, rpos, false);
-            left.push(pair.0);
-            right.push(pair.1);
+            out.push_str(&left_out);
+            out.push_str(&right_out);
         }
-        out.push_str(&left);
-        out.push_str(&right);
 
         Ok(out)
     }
@@ -109,6 +112,8 @@ impl Cipher for SeriatedPlayfair {
 
 #[cfg(test)]
 mod seriated_playfair_tests {
+    use utils::preset_alphabet::Alphabet;
+
     use super::*;
 
     #[test]
@@ -127,14 +132,18 @@ mod seriated_playfair_tests {
     }
 
     #[test]
-    fn encrypt_test() {
-        let cipher = SeriatedPlayfair::default();
-        assert_eq!(cipher.encrypt("THEKUICX").unwrap(), "UPIJADMV");
+    fn encrypt_test_example() {
+        let mut cipher = SeriatedPlayfair::default();
+        cipher.assign_key("SERIATEDPLAYFAIR", Alphabet::BasicLatinNoJ.slice());
+        cipher.period = 7;
+        assert_eq!(cipher.encrypt("BABBAGESRULENOMANSCIPHERISWORTHLOOKINGATUNLESSTHEINVENTORHASHIMSELFSOLVEDAVERYDIFFICULTCIPHERXTHECODEBREAKERSBYKAHNX").unwrap(), "FSFGSCIEIVDROMQSWEFRLBRPARXNIPFYKKMAKHILXOGREEPFILMURKYMIBITFLOEAYKAXDZDLSURPDBEHBANVPLFADFSIUPGRGQBRFEASMDIECDQRGQZ");
     }
 
     #[test]
-    fn decrypt_test() {
-        let cipher = SeriatedPlayfair::default();
-        assert_eq!(cipher.decrypt("UPIJADMV").unwrap(), "THEKUICX");
+    fn decrypt_test_example() {
+        let mut cipher = SeriatedPlayfair::default();
+        cipher.assign_key("SERIATEDPLAYFAIR", Alphabet::BasicLatinNoJ.slice());
+        cipher.period = 7;
+        assert_eq!(cipher.decrypt("FSFGSCIEIVDROMQSWEFRLBRPARXNIPFYKKMAKHILXOGREEPFILMURKYMIBITFLOEAYKAXDZDLSURPDBEHBANVPLFADFSIUPGRGQBRFEASMDIECDQRGQZ").unwrap(), "BABBAGESRULENOMANSCIPHERISWORTHLOOKINGATUNLESSTHEINVENTORHASHIMSELFSOLVEDAVERYDIFFICULTCIPHERXTHECODEBREAKERSBYKAHNX");
     }
 }
