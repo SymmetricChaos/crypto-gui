@@ -960,8 +960,8 @@
       "Seriated Playfair"
     ],
     "Description": "The seriated Playfair provides some diffusion to improve the effectiveness of the Playfair cipher. The text is divided into groups of a specified size and the groups are arranged into two rows, filled column by column, then pairs are taken from each column. This makes it harder for an attacker to guess what pair of letters are being encrypted each time.",
-    "Authors": null,
-    "Publication": null,
+    "Authors": "Helen Gaines",
+    "Publication": "1939",
     "Traits": [
       "Playfair",
       "Substitution"
