@@ -55,14 +55,16 @@ impl CipherFrame for AdfgvxFrame {
                 };
                 if ui.button("ADFGVX").clicked() {
                     self.cipher.assign_mode(AdfgvxMode::Long);
+                    filter_string(&mut self.columnar_key_string, &self.cipher.alphabet());
+                    filter_string(&mut self.polybius_key_string, &self.cipher.alphabet());
                     self.cipher.assign_polybius_key(&self.polybius_key_string);
                     self.assign_columnar_key();
                 };
             });
         });
 
-        // False alphabet display
-        ui.false_control_string(&self.cipher.alphabet());
+        ui.subheading("Alphabet");
+        ui.label(self.cipher.alphabet());
         ui.add_space(16.0);
 
         ui.subheading("Polybius Keyword");
@@ -93,17 +95,18 @@ impl CipherFrame for AdfgvxFrame {
     }
 
     fn randomize(&mut self) {
-        self.polybius_key_string = shuffled_str(self.cipher.alphabet(), &mut thread_rng());
+        let mut rng = thread_rng();
+        self.polybius_key_string = shuffled_str(self.cipher.alphabet(), &mut rng);
         self.cipher.assign_polybius_key(&self.polybius_key_string);
 
-        let n_chars = thread_rng().gen_range(6..10);
+        let n_chars = rng.gen_range(6..10);
 
         self.columnar_key_string.clear();
         for _ in 0..n_chars {
             self.columnar_key_string.push(
                 Alphabet::BasicLatin
                     .chars()
-                    .nth(thread_rng().gen_range(0..26))
+                    .nth(rng.gen_range(0..26))
                     .unwrap(),
             )
         }

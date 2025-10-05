@@ -9,12 +9,30 @@ pub enum AdfgvxMode {
 }
 
 pub struct Adfgvx {
-    pub mode: AdfgvxMode,
+    mode: AdfgvxMode,
     polybius: PolybiusSquare,
     columnar: Columnar,
 }
 
 impl Adfgvx {
+    /// The longer version with the 36 letter Alphanumeric alphabet
+    pub fn new_adfgvx() -> Result<Self, GeneralError> {
+        Ok(Self {
+            mode: AdfgvxMode::Long,
+            polybius: PolybiusSquare::new(Alphabet::Alphanumeric.slice(), "ADFGVX", false)?,
+            columnar: Columnar::default(),
+        })
+    }
+
+    /// The shorter version with the 25 letter alphabet (J removed)
+    pub fn new_adfgx() -> Result<Self, GeneralError> {
+        Ok(Self {
+            mode: AdfgvxMode::Short,
+            polybius: PolybiusSquare::new(Alphabet::BasicLatinNoJ.slice(), "ADFGX", false)?,
+            columnar: Columnar::default(),
+        })
+    }
+
     pub fn alphabet(&self) -> &'static str {
         match self.mode {
             AdfgvxMode::Short => Alphabet::BasicLatinNoJ.slice(),
@@ -44,13 +62,7 @@ impl Adfgvx {
 
 impl Default for Adfgvx {
     fn default() -> Self {
-        let polybius = PolybiusSquare::default();
-
-        Self {
-            mode: AdfgvxMode::Short,
-            polybius,
-            columnar: Columnar::default(),
-        }
+        Self::new_adfgx().unwrap()
     }
 }
 
@@ -74,13 +86,13 @@ mod adfgvx_tests {
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
     const CIPHERTEXT1: &'static str =
-        "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
+        "DAGGADDFFXADFXDFXGDDDDAFFADFGAXGAGADXXXXFFXDXAAXXAAAFDFFDDDGGAFAAGXGXG";
     const CIPHERTEXT2: &'static str =
-        "FDGGFAAVDFXXFFDAFDDFAGFGAFDFDDFAXXGVVVXGVVAAAFFFGDVDVFFFAGDDAGGAFDGFDA";
+        "ADFVXDDXVXDFFVFGVFFVFVGADGFFVGXVDFADXVVAGVAGVGDVGFFVAVDGFAVGFFDGGDVFXF";
 
     #[test]
     fn encrypt_test_adfgx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = Adfgvx::new_adfgx().unwrap();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
@@ -88,7 +100,7 @@ mod adfgvx_tests {
 
     #[test]
     fn decrypt_test_adfgx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = Adfgvx::new_adfgx().unwrap();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
@@ -96,8 +108,7 @@ mod adfgvx_tests {
 
     #[test]
     fn encrypt_test_adfgvx() {
-        let mut cipher = Adfgvx::default();
-        cipher.mode = AdfgvxMode::Long;
+        let mut cipher = Adfgvx::new_adfgvx().unwrap();
         cipher.assign_polybius_key("57This9Should0Mix2Words");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
@@ -105,8 +116,7 @@ mod adfgvx_tests {
 
     #[test]
     fn decrypt_test_adfgvx() {
-        let mut cipher = Adfgvx::default();
-        cipher.mode = AdfgvxMode::Long;
+        let mut cipher = Adfgvx::new_adfgvx().unwrap();
         cipher.assign_polybius_key("57This9Should0Mix2Words");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);

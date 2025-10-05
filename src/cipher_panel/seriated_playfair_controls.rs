@@ -74,17 +74,17 @@ impl CipherFrame for SeriatedPlayfairFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Period");
+        ui.label("Group Size");
         ui.add(Slider::new(&mut self.cipher.period, 4..=12));
 
-        // ui.menu_button("Spacer Character", |ui| {
-        //     for c in self.alphabet_string.chars() {
-        //         if ui.button(c.to_string()).clicked() {
-        //             self.cipher.spacer = c
-        //         }
-        //     }
-        // });
-        // ui.label(self.cipher.spacer.to_string());
+        ui.menu_button("Spacer Character", |ui| {
+            for c in self.alphabet_string.chars() {
+                if ui.button(c.to_string()).clicked() {
+                    self.cipher.playfair.spacer = c
+                }
+            }
+        });
+        ui.label(self.cipher.playfair.spacer.to_string());
 
         ui.horizontal(|ui| {
             ui.label("Grid");

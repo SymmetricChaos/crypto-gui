@@ -1,7 +1,7 @@
 use crate::traits::Cipher;
 use itertools::Itertools;
 use num::integer::Roots;
-use std::fmt::{self, Formatter};
+use std::fmt::Formatter;
 use utils::{
     errors::GeneralError, math_functions::is_square, preset_alphabet::Alphabet,
     vecstring::VecString,
@@ -26,6 +26,28 @@ impl Default for PolybiusSquare {
 }
 
 impl PolybiusSquare {
+    pub fn new(square: &str, labels: &str, spaced: bool) -> Result<Self, GeneralError> {
+        let square = VecString::from(square);
+        if !is_square(square.len()) {
+            return Err(GeneralError::input(
+                "the square must have a square number of characters",
+            ));
+        }
+        let labels = VecString::from(labels);
+        if labels.len() != square.len().isqrt() {
+            return Err(GeneralError::input(
+                "the number of label characters must be equal to the square root of the square size",
+            ));
+        }
+        let side_len = square.len().isqrt();
+        Ok(Self {
+            square,
+            labels,
+            side_len,
+            spaced,
+        })
+    }
+
     pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
         self.square = VecString::keyed_alphabet(keyword, alphabet);
         self.side_len = alphabet.chars().count().sqrt();
@@ -176,8 +198,8 @@ impl Cipher for PolybiusSquare {
     }
 }
 
-impl fmt::Display for PolybiusSquare {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for PolybiusSquare {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut square = String::from("  ");
         for xlab in self.labels.chars().take(self.side_len) {
             square.push_str(&format!("{xlab} "))

@@ -1,4 +1,4 @@
-use std::fmt::{self, Formatter};
+use std::fmt::{Display, Formatter};
 
 use crate::traits::Cipher;
 use itertools::Itertools;
@@ -125,8 +125,8 @@ impl Cipher for Slidefair {
     }
 }
 
-impl fmt::Display for Slidefair {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl Display for Slidefair {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut out = String::new();
         let alpha = String::from(&self.alphabet.to_string());
         for (n, _) in self.alphabet.chars().enumerate() {
