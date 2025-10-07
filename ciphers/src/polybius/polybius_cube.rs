@@ -2,27 +2,51 @@ use crate::traits::Cipher;
 use itertools::Itertools;
 use utils::{errors::GeneralError, vecstring::VecString};
 
+fn icbrt(n: usize) -> usize {
+    (n as f64).cbrt().floor() as usize
+}
+
+fn is_cube(n: usize) -> bool {
+    let rt = icbrt(n);
+    rt * rt * rt == n
+}
+
 pub struct PolybiusCube {
-    pub grid: VecString,
+    pub cube: VecString,
     pub labels: VecString,
     pub side_len: usize,
 }
 
 impl Default for PolybiusCube {
     fn default() -> Self {
-        let grid = VecString::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
-        let labels = VecString::from("123456789");
-        Self {
-            grid,
-            labels,
-            side_len: 3,
-        }
+        Self::new("ABCDEFGHIJKLMNOPQRSTUVWXYZ+", "123").unwrap()
     }
 }
 
 impl PolybiusCube {
+    pub fn new(cube: &str, labels: &str) -> Result<Self, GeneralError> {
+        let cube = VecString::from(cube);
+        if !is_cube(cube.len()) {
+            return Err(GeneralError::input(
+                "the square must have a square number of characters",
+            ));
+        }
+        let side_len = icbrt(cube.len());
+        let labels = VecString::from(labels);
+        if labels.len() != side_len {
+            return Err(GeneralError::input(
+                "the number of label characters must be equal to the square root of the square size",
+            ));
+        }
+        Ok(Self {
+            cube,
+            labels,
+            side_len,
+        })
+    }
+
     pub fn assign_grid(&mut self, keyword: &str, alphabet: &str) {
-        self.grid = VecString::keyed_alphabet(keyword, alphabet);
+        self.cube = VecString::keyed_alphabet(keyword, alphabet);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
@@ -32,7 +56,7 @@ impl PolybiusCube {
     fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, GeneralError> {
         if text.chars().count() % 3 != 0 {
             return Err(GeneralError::input(
-                "ciphertext length must be a multiple of three.",
+                "ciphertext length must be a multiple of three",
             ));
         }
         let out = text
@@ -45,11 +69,11 @@ impl PolybiusCube {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.grid.len()
+        self.cube.len()
     }
 
     fn char_to_position(&self, symbol: char) -> (usize, usize, usize) {
-        let num = self.grid.get_pos(symbol).unwrap();
+        let num = self.cube.get_pos(symbol).unwrap();
         let l = self.side_len;
         let x = num / (l * l);
         let y = (num / l) % l;
@@ -73,7 +97,7 @@ impl PolybiusCube {
 
         let l = self.side_len;
         let num = x * (l * l) + y * l + z;
-        Ok(*self.grid.get_char(num).unwrap())
+        Ok(*self.cube.get_char(num).unwrap())
     }
 
     fn check_labels(&self) -> Result<(), GeneralError> {
@@ -96,7 +120,7 @@ impl PolybiusCube {
         // Without the cycle we'll can be missing contents for the last chunk and panic later on
         let blanks = " ".chars().cycle();
         let grid_idxs = self
-            .grid
+            .cube
             .chars()
             .chain(blanks)
             .take(self.side_len.pow(3))

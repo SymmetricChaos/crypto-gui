@@ -1,19 +1,6 @@
-use utils::errors::GeneralError;
-
 use super::PolybiusCube;
 use crate::traits::Cipher;
-
-fn is_power_of_three(a: usize) -> bool {
-    let mut p = 1;
-    while p < a {
-        if a == p {
-            return true;
-        } else {
-            p *= 3
-        }
-    }
-    false
-}
+use utils::errors::GeneralError;
 
 // The Trifid Cipher combines a Polybius Cube with a simple transposition
 pub struct Trifid {
@@ -32,11 +19,11 @@ impl Default for Trifid {
 
 impl Cipher for Trifid {
     fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if !is_power_of_three(self.polybius.alphabet_len()) {
-            return Err(GeneralError::alphabet(
-                "alphabet length must be exactly a power of three to fill the grid",
-            ));
-        }
+        // if !is_power_of_three(self.polybius.alphabet_len()) {
+        //     return Err(GeneralError::alphabet(
+        //         "alphabet length must be exactly a power of three to fill the grid",
+        //     ));
+        // }
 
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
@@ -49,7 +36,7 @@ impl Cipher for Trifid {
 
         for block in vector
             .chunks(self.block_size)
-            .map(|x| x.to_vec().iter().collect::<String>())
+            .map(|x| x.iter().collect::<String>())
         {
             let poly = self.polybius.encrypt(&block)?;
             let mut first = String::with_capacity(len);
@@ -71,11 +58,11 @@ impl Cipher for Trifid {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if !is_power_of_three(self.polybius.alphabet_len()) {
-            return Err(GeneralError::alphabet(
-                "alphabet length must be exactly a power of three to fill the grid",
-            ));
-        }
+        // if !is_power_of_three(self.polybius.alphabet_len()) {
+        //     return Err(GeneralError::alphabet(
+        //         "alphabet length must be exactly a power of three to fill the grid",
+        //     ));
+        // }
 
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
@@ -89,21 +76,23 @@ impl Cipher for Trifid {
         // Divide the vector into chunks of the block size
         for block in vector
             .chunks(self.block_size)
-            .map(|x| x.to_vec().iter().collect::<String>())
+            .map(|x| x.iter().collect::<String>())
         {
             // Turn the block into a String then encrypt it with the Polybius cipher
-            let poly: String = self.polybius.encrypt(&block)?;
+            let poly = self.polybius.encrypt(&block)?;
 
-            // Divide the encrypted string in half
+            // Divide the encrypted string in three
             // TODO: This will likely panic with non-ASCII inputs
-            let left = &poly[0..self.block_size];
-            let right = &poly[self.block_size..self.block_size * 3];
+            let s0 = &poly[0..self.block_size];
+            let s1 = &poly[self.block_size..self.block_size * 2];
+            let s2 = &poly[self.block_size * 2..self.block_size * 3];
 
             // Take characters from left and right as pairs and write them into a new string
             let mut sorted = String::with_capacity(self.block_size * 3);
-            for (l, r) in left.chars().zip(right.chars()) {
-                sorted.push(l);
-                sorted.push(r);
+            for ((c0, c1), c2) in s0.chars().zip(s1.chars()).zip(s2.chars()) {
+                sorted.push(c0);
+                sorted.push(c1);
+                sorted.push(c2);
             }
 
             // Decrypt the result and push it onto the output string
@@ -118,7 +107,7 @@ mod trifid_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const CIPHERTEXT: &'static str = "SPCPTN+KQAWNROQWWBUUAPPEPXFNLTAZRDG";
 
     #[test]
     fn encrypt_test() {
