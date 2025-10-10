@@ -1,4 +1,5 @@
 pub mod digital;
+pub mod hill;
 pub mod machines;
 pub mod playfair;
 pub mod polyalphabetic;
