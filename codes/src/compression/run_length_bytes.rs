@@ -183,7 +183,7 @@ impl Code for RunLengthEncodingBytes {
 mod rle_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ffffffffababab0000000000";
+    const PTEXT: &'static str = "ffffffffababab0000000000";
     const ENCODEDTEXT: &'static str = "ff04ab030005";
 
     #[test]
@@ -216,12 +216,12 @@ mod rle_tests {
     #[test]
     fn encode_test() {
         let code = RunLengthEncodingBytes::default();
-        assert_eq!(ENCODEDTEXT, code.encode(PLAINTEXT).unwrap())
+        assert_eq!(ENCODEDTEXT, code.encode(PTEXT).unwrap())
     }
 
     #[test]
     fn decode_test() {
         let code = RunLengthEncodingBytes::default();
-        assert_eq!(PLAINTEXT, code.decode(ENCODEDTEXT).unwrap())
+        assert_eq!(PTEXT, code.decode(ENCODEDTEXT).unwrap())
     }
 }

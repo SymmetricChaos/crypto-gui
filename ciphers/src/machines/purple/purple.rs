@@ -173,18 +173,18 @@ mod purple_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "KONNICHIWAWATASHIWAAREKUSUDESU";
-    const CIPHERTEXT: &'static str = "YTOUQBBXVSDRYJGSIVQIFHYNRTVMIT";
+    const PTEXT: &'static str = "KONNICHIWAWATASHIWAAREKUSUDESU";
+    const CTEXT: &'static str = "YTOUQBBXVSDRYJGSIVQIFHYNRTVMIT";
 
     #[test]
     fn encrypt() {
         let cipher = Purple::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt() {
         let cipher = Purple::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

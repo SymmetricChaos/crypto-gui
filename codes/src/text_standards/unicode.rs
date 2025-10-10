@@ -91,7 +91,7 @@ impl Code for Unicode {
 mod unicode_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "The 素早い καφέ 🦊 ｊｕｍｐｓ over the lazy 🐶.";
+    const PTEXT: &'static str = "The 素早い καφέ 🦊 ｊｕｍｐｓ over the lazy 🐶.";
 
     #[test]
     fn encrypt_decrypt() {
@@ -107,12 +107,12 @@ mod unicode_tests {
             for mode in [ByteFormat::Binary, ByteFormat::Hex, ByteFormat::Base64] {
                 code.mode = mode;
                 let encoded = code
-                    .encode(PLAINTEXT)
+                    .encode(PTEXT)
                     .expect(&format!("encoding {:?} {:?} GeneralError", encoding, mode));
                 let decoded = code
                     .decode(&encoded)
                     .expect(&format!("decoding{:?} {:?} GeneralError", encoding, mode));
-                if decoded != PLAINTEXT {
+                if decoded != PTEXT {
                     panic!(
                         "decoded {:?} {:?} not equivalent to plaintext",
                         encoding, mode

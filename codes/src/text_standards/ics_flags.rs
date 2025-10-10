@@ -98,18 +98,18 @@ impl Code for IcsFlags {
 mod ics_flag_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "EXAMPLE";
+    const PTEXT: &'static str = "EXAMPLE";
     const CODETEXT: &'static str = "Per fess azure and gules. Argent, a cross azure. Swallowtailed, per pale argent and azure. Azure, a saltire argent. Azure, an inescutcheon argent. Quarterly or and sable. Per fess azure and gules.";
 
     #[test]
     fn encrypt_test() {
         let code = IcsFlags::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = IcsFlags::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

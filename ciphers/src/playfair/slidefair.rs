@@ -143,20 +143,20 @@ mod slidefair_tests {
     use super::*;
 
     // Note X used as padding
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
-    const CIPHERTEXT: &'static str = "HTPFGWHFRBVPDPURUJONMUBYTRDIYNVCODWH";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
+    const CTEXT: &'static str = "HTPFGWHFRBVPDPURUJONMUBYTRDIYNVCODWH";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Slidefair::default();
         cipher.assign_key("ABCD");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Slidefair::default();
         cipher.assign_key("ABCD");
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

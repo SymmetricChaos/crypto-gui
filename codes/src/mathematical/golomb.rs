@@ -154,8 +154,8 @@ impl Code for Golomb {
 mod golomb_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9";
-    const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2, 2, -3, 3, -4, 4, -5";
+    const PTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9";
+    const PTEXT_SIGNED: &'static str = "0, -1, 1, -2, 2, -3, 3, -4, 4, -5";
     const ENCODEDTEXT: &'static str = "00010011100101010111100110101101111100";
     const ENCODEDTEXT_SP: &'static str = "00, 010, 011, 100, 1010, 1011, 1100, 11010, 11011, 11100";
     const ENCODEDTEXT_INV: &'static str = "11101100011010101000011001010010000011";
@@ -165,48 +165,48 @@ mod golomb_tests {
     #[test]
     fn encode_test() {
         let mut code = Golomb::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV_SP);
         code.signed = true;
         code.spaced = false;
         code.invert = false;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_INV);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_INV_SP);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_INV_SP);
     }
 
     #[test]
     fn decode_test() {
         let mut code = Golomb::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_INV_SP).unwrap(), PTEXT);
         code.signed = true;
         code.spaced = false;
         code.invert = false;
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT_SIGNED);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT_SIGNED);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PTEXT_SIGNED);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV_SP).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_INV_SP).unwrap(), PTEXT_SIGNED);
     }
 }

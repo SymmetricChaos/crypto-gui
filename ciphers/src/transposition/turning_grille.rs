@@ -222,21 +222,19 @@ impl Cipher for TurningGrille {
 mod turning_grille_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =
-        "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGPOHTZAXHOSKWEZSOXIBTNEXJKQVNV";
-    const CIPHERTEXT: &'static str =
-        "TUGXEXJVHMPIBROXEPOBRAZYQSHTAXHOUICKTOKSZSONHWQKDOTZENVWJOVELFNE";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGPOHTZAXHOSKWEZSOXIBTNEXJKQVNV";
+    const CTEXT: &'static str = "TUGXEXJVHMPIBROXEPOBRAZYQSHTAXHOUICKTOKSZSONHWQKDOTZENVWJOVELFNE";
 
     #[test]
     fn encrypt_test_full_grid() {
         let cipher = TurningGrille::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test_full_grid() {
         let cipher = TurningGrille::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
     #[test]

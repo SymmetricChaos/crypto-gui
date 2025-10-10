@@ -138,18 +138,18 @@ impl Cipher for Quagmire {
 mod quagmire_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "DONTLETANYONE";
-    const CIPHERTEXT_V1: &'static str = "HIFUFCIRFKUYK";
-    const CIPHERTEXT_V2: &'static str = "RMGXKEVLGUQQN";
-    const CIPHERTEXT_V3: &'static str = "FXDIEOGNDBZII";
-    const CIPHERTEXT_V4: &'static str = "KFBIFICEWQVII";
+    const PTEXT: &'static str = "DONTLETANYONE";
+    const CTEXT_V1: &'static str = "HIFUFCIRFKUYK";
+    const CTEXT_V2: &'static str = "RMGXKEVLGUQQN";
+    const CTEXT_V3: &'static str = "FXDIEOGNDBZII";
+    const CTEXT_V4: &'static str = "KFBIFICEWQVII";
 
     #[test]
     fn encrypt_test_v1() {
         let mut cipher = Quagmire::default();
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V1);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V1);
     }
 
     #[test]
@@ -157,7 +157,7 @@ mod quagmire_tests {
         let mut cipher = Quagmire::default();
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V1).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V1).unwrap(), PTEXT);
     }
 
     #[test]
@@ -167,7 +167,7 @@ mod quagmire_tests {
         cipher.indicator = 'C';
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V2);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V2);
     }
 
     #[test]
@@ -177,7 +177,7 @@ mod quagmire_tests {
         cipher.indicator = 'C';
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V2).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V2).unwrap(), PTEXT);
     }
 
     #[test]
@@ -187,7 +187,7 @@ mod quagmire_tests {
         cipher.indicator = 'P';
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V3);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V3);
     }
 
     #[test]
@@ -197,7 +197,7 @@ mod quagmire_tests {
         cipher.indicator = 'P';
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ind_key("BRANDT").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V3).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V3).unwrap(), PTEXT);
     }
 
     #[test]
@@ -208,7 +208,7 @@ mod quagmire_tests {
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ct_key("BRANDT");
         cipher.assign_ind_key("COUNTRY").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V4);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V4);
     }
 
     #[test]
@@ -219,6 +219,6 @@ mod quagmire_tests {
         cipher.assign_pt_key("PAULBRANDT");
         cipher.assign_ct_key("BRANDT");
         cipher.assign_ind_key("COUNTRY").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V4).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V4).unwrap(), PTEXT);
     }
 }

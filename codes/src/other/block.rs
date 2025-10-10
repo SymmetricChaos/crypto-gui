@@ -136,7 +136,7 @@ impl Code for BlockCode {
 mod block_code_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ABC";
+    const PTEXT: &'static str = "ABC";
     const CODETEXT_01: &'static str = "000000000100010";
     const CODETEXT_XYZ: &'static str = "XXXYXZ";
     const CODETEXT_01_SP: &'static str = "00000, 00001, 00010";
@@ -145,16 +145,16 @@ mod block_code_tests {
     #[test]
     fn encode_test_default() {
         let mut code = BlockCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_01);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_01);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_01_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_01_SP);
     }
 
     #[test]
     fn decode_test_default() {
         let code = BlockCode::default();
-        assert_eq!(code.decode(CODETEXT_01).unwrap(), PLAINTEXT);
-        assert_eq!(code.decode(CODETEXT_01_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_01).unwrap(), PTEXT);
+        assert_eq!(code.decode(CODETEXT_01_SP).unwrap(), PTEXT);
     }
 
     #[test]
@@ -162,9 +162,9 @@ mod block_code_tests {
         let mut code = BlockCode::default();
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_XYZ);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_XYZ);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_XYZ_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_XYZ_SP);
     }
 
     #[test]
@@ -172,7 +172,7 @@ mod block_code_tests {
         let mut code = BlockCode::default();
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
-        assert_eq!(code.decode(CODETEXT_XYZ).unwrap(), PLAINTEXT);
-        assert_eq!(code.decode(CODETEXT_XYZ_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_XYZ).unwrap(), PTEXT);
+        assert_eq!(code.decode(CODETEXT_XYZ_SP).unwrap(), PTEXT);
     }
 }

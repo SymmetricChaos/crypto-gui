@@ -235,18 +235,18 @@ impl Code for BaseNegativeTwo {
 mod twos_complement_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "-3, -2, -1, 0, 1, 2, 3";
+    const PTEXT: &'static str = "-3, -2, -1, 0, 1, 2, 3";
     const ENCODEDTEXT: &'static str = "11111111111111111111111111111101111111111111111111111111111111101111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000001000000000000000000000000000000011";
 
     #[test]
     fn encode_test() {
         let code = BaseNegativeTwo::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = BaseNegativeTwo::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

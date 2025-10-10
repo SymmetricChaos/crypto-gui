@@ -166,8 +166,8 @@ impl Code for UnaryCode {
 mod unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9";
-    const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2, 2, -3, 3, -4, 4, -5";
+    const PTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9";
+    const PTEXT_SIGNED: &'static str = "0, -1, 1, -2, 2, -3, 3, -4, 4, -5";
     const ENCODEDTEXT: &'static str = "0101101110111101111101111110111111101111111101111111110";
     const ENCODEDTEXT_SYM: &'static str = "1000100110011100111100111110011111100111111100111111110";
     const ENCODEDTEXT_INV: &'static str = "1010010001000010000010000001000000010000000010000000001";
@@ -181,63 +181,63 @@ mod unary_tests {
     #[test]
     fn encode_test() {
         let mut code = UnaryCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
         code.symmetric = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SYM);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SYM);
         code.symmetric = false;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP);
         code.symmetric = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP_SYM);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP_SYM);
     }
 
     #[test]
     fn encode_test_signed() {
         let mut code = UnaryCode::default();
         code.signed = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT);
         code.symmetric = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SYM);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SYM);
         code.symmetric = false;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
         code.symmetric = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP_SYM);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP_SYM);
     }
 
     #[test]
     fn encode_test_inverted() {
         let mut code = UnaryCode::default();
         code.invert = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV);
         code.symmetric = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV_SYM);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV_SYM);
     }
 
     #[test]
     fn decode_test() {
         let mut code = UnaryCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
         code.symmetric = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PTEXT);
         code.symmetric = false;
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT);
         code.symmetric = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_test_signed() {
         let mut code = UnaryCode::default();
         code.signed = true;
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT_SIGNED);
         code.symmetric = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PTEXT_SIGNED);
         code.symmetric = false;
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT_SIGNED);
         code.symmetric = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PTEXT_SIGNED);
     }
 }

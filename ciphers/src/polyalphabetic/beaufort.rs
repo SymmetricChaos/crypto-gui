@@ -242,10 +242,10 @@ impl Cipher for Beaufort {
 mod beaufort_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =         "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGANDTHENSOMEMORETOMAKEALONGERPLAINTEXTFORTHISCIPHERTOUSE";
-    const CIPHERTEXT_CYCLIC: &'static str = "LGYIVLGEMNZGLKFLFTSYKKUPRVGACCZRQUINRKJRLGQABABOHLAUCNUJCNBGCKWPCCQCAERUZZLFILQMFPGYHWFOWJ";
-    const CIPHERTEXT_AUTO: &'static str =   "LGYIVLGEMCTIDPUFBHFZEZKKGQNIESPXBDNHRIHSUQWSOJRFQAUECMUIOGQGIIJVTADBUCHYKXJPGLMVLQHNCOUYKE";
-    const CIPHERTEXT_PROG: &'static str =   "LGYIVLGEMQCJONIOIWYEQQAVXBMJLLIAZDRWDWVDXSCMNPQDWAPJRCMBUFTYUCOKXXLXVZMPXXJDGJOKDQHZIXGPXK";
+    const PTEXT: &'static str =         "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGANDTHENSOMEMORETOMAKEALONGERPTEXTFORTHISCIPHERTOUSE";
+    const CTEXT_CYCLIC: &'static str = "LGYIVLGEMNZGLKFLFTSYKKUPRVGACCZRQUINRKJRLGQABABOHLAUCNUJCNBGCKWPCCQCAERUZZLFILQMFPGYHWFOWJ";
+    const CTEXT_AUTO: &'static str =   "LGYIVLGEMCTIDPUFBHFZEZKKGQNIESPXBDNHRIHSUQWSOJRFQAUECMUIOGQGIIJVTADBUCHYKXJPGLMVLQHNCOUYKE";
+    const CTEXT_PROG: &'static str =   "LGYIVLGEMQCJONIOIWYEQQAVXBMJLLIAZDRWDWVDXSCMNPQDWAPJRCMBUFTYUCOKXXLXVZMPXXJDGJOKDQHZIXGPXK";
 
     #[test]
     fn encrypt_test_cyclic() {
@@ -254,7 +254,7 @@ mod beaufort_tests {
         cipher.keywords[0] = String::from("ENCYPTION");
 
         cipher.mode = PolyMode::CylicKey;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_CYCLIC);
     }
 
     #[test]
@@ -263,7 +263,7 @@ mod beaufort_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::CylicKey;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_CYCLIC).unwrap(), PTEXT);
     }
 
     #[test]
@@ -272,7 +272,7 @@ mod beaufort_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_AUTO);
     }
 
     #[test]
@@ -281,7 +281,7 @@ mod beaufort_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_AUTO).unwrap(), PTEXT);
     }
 
     #[test]
@@ -291,7 +291,7 @@ mod beaufort_tests {
         cipher.keywords[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_PROG);
     }
 
     #[test]
@@ -301,6 +301,6 @@ mod beaufort_tests {
         cipher.keywords[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_PROG).unwrap(), PTEXT);
     }
 }

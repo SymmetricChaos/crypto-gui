@@ -206,8 +206,8 @@ impl Code for SimpleBraille {
 mod braille_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "The Quick 023";
-    const CIPHERTEXT: &'static str = "⠠⠞⠓⠑ ⠠⠟⠥⠊⠉⠅ ⠼⠚⠼⠃⠼⠉";
+    const PTEXT: &'static str = "The Quick 023";
+    const CTEXT: &'static str = "⠠⠞⠓⠑ ⠠⠟⠥⠊⠉⠅ ⠼⠚⠼⠃⠼⠉";
 
     #[test]
     #[ignore = "letter pairing test"]
@@ -229,12 +229,12 @@ mod braille_tests {
     #[test]
     fn encode_test() {
         let code = SimpleBraille::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = SimpleBraille::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CTEXT).unwrap(), PTEXT);
     }
 }

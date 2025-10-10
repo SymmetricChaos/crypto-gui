@@ -195,7 +195,7 @@ impl Code for Morse {
 mod morseitu_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THE QUICK BROWN FOX";
+    const PTEXT: &'static str = "THE QUICK BROWN FOX";
     const MORSE_ASCII: &'static str =
         "- .... .   --.- ..- .. -.-. -.-   -... .-. --- .-- -.   ..-. --- -..-";
     const MORSE_WORD: &'static str = "dah   di di di dit   dit       dah dah di dah   di di dah   di dit   dah di dah dit   dah di dah       dah di di dit   di dah dit   dah dah dah   di dah dah   dah dit       di di dah dit   dah dah dah   dah di di dah";
@@ -211,27 +211,27 @@ mod morseitu_tests {
     fn encode_test_ascii() {
         let mut code = Morse::default();
         code.representation = MorseRep::Ascii;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), MORSE_ASCII);
+        assert_eq!(code.encode(PTEXT).unwrap(), MORSE_ASCII);
     }
 
     #[test]
     fn decode_test_ascii() {
         let mut code = Morse::default();
         code.representation = MorseRep::Ascii;
-        assert_eq!(code.decode(MORSE_ASCII).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(MORSE_ASCII).unwrap(), PTEXT);
     }
 
     #[test]
     fn encode_test_word() {
         let mut code = Morse::default();
         code.representation = MorseRep::Word;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), MORSE_WORD);
+        assert_eq!(code.encode(PTEXT).unwrap(), MORSE_WORD);
     }
 
     #[test]
     fn decode_test_word() {
         let mut code = Morse::default();
         code.representation = MorseRep::Word;
-        assert_eq!(code.decode(MORSE_WORD).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(MORSE_WORD).unwrap(), PTEXT);
     }
 }

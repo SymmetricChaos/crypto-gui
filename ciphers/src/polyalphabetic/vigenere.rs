@@ -239,10 +239,10 @@ impl Cipher for Vigenere {
 mod vigenere_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =         "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGANDTHENSOMEMORETOMAKEALONGERPLAINTEXTFORTHISCIPHERTOUSE";
-    const CIPHERTEXT_CYCLIC: &'static str = "XUGHSXVSPESJPWMMCCACWBXVPIAMZNDLFFEPGLHUIAUFKTFWFRXBORITTTCAKRTGJPBVHRBGHFPIAQGPMCJVPIHCGR";
-    const CIPHERTEXT_AUTO: &'static str =   "XUGHSXVSPEHDRVIFLENGGKIJFQQYXPRMYSXTUHEHDLVCSEZRKLXBEOWIMZFRZSDPVEIYHRDXWDCTPVLGFIMSIMVCKG";
-    const CIPHERTEXT_PROG: &'static str =   "XUGHSXVSPEVMSZPPFFDFCHDBVOGSFTMUOONYPUQDUMGRWFRIRDMQDGXIIIRPCJLYBHTNZJWBCAKDVLBKKAHTNGFAEP";
+    const PTEXT: &'static str =         "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGANDTHENSOMEMORETOMAKEALONGERPTEXTFORTHISCIPHERTOUSE";
+    const CTEXT_CYCLIC: &'static str = "XUGHSXVSPESJPWMMCCACWBXVPIAMZNDLFFEPGLHUIAUFKTFWFRXBORITTTCAKRTGJPBVHRBGHFPIAQGPMCJVPIHCGR";
+    const CTEXT_AUTO: &'static str =   "XUGHSXVSPEHDRVIFLENGGKIJFQQYXPRMYSXTUHEHDLVCSEZRKLXBEOWIMZFRZSDPVEIYHRDXWDCTPVLGFIMSIMVCKG";
+    const CTEXT_PROG: &'static str =   "XUGHSXVSPEVMSZPPFFDFCHDBVOGSFTMUOONYPUQDUMGRWFRIRDMQDGXIIIRPCJLYBHTNZJWBCAKDVLBKKAHTNGFAEP";
 
     #[test]
     fn encrypt_test_cyclic() {
@@ -250,7 +250,7 @@ mod vigenere_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::CylicKey;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_CYCLIC);
     }
 
     #[test]
@@ -259,7 +259,7 @@ mod vigenere_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::CylicKey;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_CYCLIC).unwrap(), PTEXT);
     }
 
     #[test]
@@ -268,7 +268,7 @@ mod vigenere_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::Autokey;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_AUTO);
     }
 
     #[test]
@@ -277,7 +277,7 @@ mod vigenere_tests {
         cipher.keywords[1] = String::from("GOOD");
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::Autokey;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_AUTO).unwrap(), PTEXT);
     }
 
     #[test]
@@ -287,7 +287,7 @@ mod vigenere_tests {
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::ProgKey;
         cipher.prog_shift = 3;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_PROG);
     }
 
     #[test]
@@ -297,6 +297,6 @@ mod vigenere_tests {
         cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::ProgKey;
         cipher.prog_shift = 3;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_PROG).unwrap(), PTEXT);
     }
 }

@@ -87,20 +87,20 @@ mod nihilist_tests {
     use super::*;
 
     // Note Q replaced by K
-    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "37 87 65 93 63 35 43 64 77 73 72 64 36 45 43 106 92 103 55 69 63 43 65 65 73 26 59 26 65 76 106 74 43 45 46";
+    const PTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "37 87 65 93 63 35 43 64 77 73 72 64 36 45 43 106 92 103 55 69 63 43 65 65 73 26 59 26 65 76 106 74 43 45 46";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Nihilist::default();
         _ = cipher.assign_keys("INVENTORY", "RUSSIAN", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Nihilist::default();
         _ = cipher.assign_keys("INVENTORY", "RUSSIAN", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

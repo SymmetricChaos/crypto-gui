@@ -63,11 +63,11 @@ impl Code for Hexadecimal {
 mod base32_tests {
     use super::*;
 
-    const PLAINTEXT0: &'static str = "Manyh";
-    const PLAINTEXT1: &'static str = "Many";
-    const PLAINTEXT2: &'static str = "Man";
-    const PLAINTEXT3: &'static str = "Ma";
-    const PLAINTEXT4: &'static str = "M";
+    const PTEXT0: &'static str = "Manyh";
+    const PTEXT1: &'static str = "Many";
+    const PTEXT2: &'static str = "Man";
+    const PTEXT3: &'static str = "Ma";
+    const PTEXT4: &'static str = "M";
 
     const CODETEXT0: &'static str = "4D616E7968";
     const CODETEXT1: &'static str = "4D616E79";
@@ -78,20 +78,20 @@ mod base32_tests {
     #[test]
     fn encode_test() {
         let code = Hexadecimal::default();
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2);
-        assert_eq!(code.encode(PLAINTEXT3).unwrap(), CODETEXT3);
-        assert_eq!(code.encode(PLAINTEXT4).unwrap(), CODETEXT4);
+        assert_eq!(code.encode(PTEXT0).unwrap(), CODETEXT0);
+        assert_eq!(code.encode(PTEXT1).unwrap(), CODETEXT1);
+        assert_eq!(code.encode(PTEXT2).unwrap(), CODETEXT2);
+        assert_eq!(code.encode(PTEXT3).unwrap(), CODETEXT3);
+        assert_eq!(code.encode(PTEXT4).unwrap(), CODETEXT4);
     }
 
     #[test]
     fn decode_test() {
         let code = Hexadecimal::default();
-        assert_eq!(code.decode(CODETEXT0).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CODETEXT1).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CODETEXT2).unwrap(), PLAINTEXT2);
-        assert_eq!(code.decode(CODETEXT3).unwrap(), PLAINTEXT3);
-        assert_eq!(code.decode(CODETEXT4).unwrap(), PLAINTEXT4);
+        assert_eq!(code.decode(CODETEXT0).unwrap(), PTEXT0);
+        assert_eq!(code.decode(CODETEXT1).unwrap(), PTEXT1);
+        assert_eq!(code.decode(CODETEXT2).unwrap(), PTEXT2);
+        assert_eq!(code.decode(CODETEXT3).unwrap(), PTEXT3);
+        assert_eq!(code.decode(CODETEXT4).unwrap(), PTEXT4);
     }
 }

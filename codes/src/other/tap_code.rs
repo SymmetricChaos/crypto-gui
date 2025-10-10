@@ -114,18 +114,18 @@ mod polybius_tests {
     use super::*;
 
     // Note Q replaced by K
-    const PLAINTEXT: &'static str = "AFL";
+    const PTEXT: &'static str = "AFL";
     const CODETEXT: &'static str = ". .  .. .  ... .";
 
     #[test]
     fn encode_test() {
         let cipher = TapCode::default();
-        assert_eq!(cipher.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(cipher.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let cipher = TapCode::default();
-        assert_eq!(cipher.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

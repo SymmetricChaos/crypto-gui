@@ -65,8 +65,8 @@ impl Cipher for B64 {
 mod b64_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "hMzRT3BBKyRgKfOgJBQ6DoRwaRCI1UD4MQF";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "hMzRT3BBKyRgKfOgJBQ6DoRwaRCI1UD4MQF";
 
     #[test]
     fn encrypt_test() {
@@ -74,7 +74,7 @@ mod b64_tests {
         cipher.assign_polybius_key("ENCRYPTION");
         cipher.assign_columnar_key_1("NOVELTY").unwrap();
         cipher.assign_columnar_key_2("SHUFFLE").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -83,6 +83,6 @@ mod b64_tests {
         cipher.assign_polybius_key("ENCRYPTION");
         cipher.assign_columnar_key_1("NOVELTY").unwrap();
         cipher.assign_columnar_key_2("SHUFFLE").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

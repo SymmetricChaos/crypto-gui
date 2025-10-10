@@ -107,18 +107,18 @@ impl Code for BaseNBijective {
 mod base_n_bijective_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 6";
+    const PTEXT: &'static str = "1, 2, 3, 4, 5, 6";
     const ENCODEDTEXT: &'static str = "1, 2, 11, 12, 21, 22";
 
     #[test]
     fn encode_test_bijective() {
         let code = BaseNBijective::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test_bijective() {
         let code = BaseNBijective::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

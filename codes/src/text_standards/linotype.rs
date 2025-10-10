@@ -109,18 +109,18 @@ mod linotype_tests {
     use super::*;
 
     // Multiple 'e' characters appear
-    const PLAINTEXT: &'static str = "TheQuickBrownFoxJumpsOverTheLazyDog";
+    const PTEXT: &'static str = "TheQuickBrownFoxJumpsOverTheLazyDog";
     const CODETEXT_90: &'static str = "10000000001010000001010101010001110000011100011110011000101001000010110000110001001000010001001101000011000110111010110000111000100000010100000100110000100010101000001100010111000000000101000000101001001000010100111000010011100100000001100010111";
 
     #[test]
     fn encrypt_test() {
         let code = Linotype::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_90);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_90);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Linotype::default();
-        assert_eq!(code.decode(CODETEXT_90).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_90).unwrap(), PTEXT);
     }
 }

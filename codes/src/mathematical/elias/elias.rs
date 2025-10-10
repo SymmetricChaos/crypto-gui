@@ -165,7 +165,7 @@ mod elias_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5";
+    const PTEXT: &'static str = "1, 2, 3, 4, 5";
     const ENCODEDTEXT_DELTA: &'static str = "1010001010110001101";
     const ENCODEDTEXT_DELTA_SP: &'static str = "1, 0100, 0101, 01100, 01101";
     const ENCODEDTEXT_DELTA_INV: &'static str = "0101110101001110010";
@@ -185,83 +185,83 @@ mod elias_tests {
     fn encode_delta() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Delta;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_DELTA);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_DELTA);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_DELTA_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_DELTA_SP);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_DELTA_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_DELTA_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_DELTA_INV_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_DELTA_INV_SP);
     }
 
     #[test]
     fn encode_gamma() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Gamma;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_GAMMA);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_GAMMA);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_GAMMA_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_GAMMA_SP);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_GAMMA_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_GAMMA_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_GAMMA_INV_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_GAMMA_INV_SP);
     }
 
     #[test]
     fn encode_omega() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Omega;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_OMEGA);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_OMEGA_SP);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_OMEGA_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA_INV_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_OMEGA_INV_SP);
     }
 
     #[test]
     fn decode_delta() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Delta;
-        assert_eq!(code.decode(ENCODEDTEXT_DELTA).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_DELTA).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_DELTA_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_DELTA_SP).unwrap(), PTEXT);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.decode(ENCODEDTEXT_DELTA_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_DELTA_INV).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_DELTA_INV_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_DELTA_INV_SP).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_gamma() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Gamma;
-        assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_SP).unwrap(), PTEXT);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_INV).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_INV_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA_INV_SP).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_omega() {
         let mut code = EliasCode::default();
         code.variant = EliasVariant::Omega;
-        assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_SP).unwrap(), PTEXT);
         code.invert = true;
         code.spaced = false;
-        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_INV).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_INV_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_INV_SP).unwrap(), PTEXT);
     }
 }

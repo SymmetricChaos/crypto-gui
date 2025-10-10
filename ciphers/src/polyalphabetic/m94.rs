@@ -96,20 +96,20 @@ impl Cipher for M94 {
 mod m94_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVER";
-    const CIPHERTEXT: &'static str = "WVYAHWENQCKCGUAYKNZFTISYK";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVER";
+    const CTEXT: &'static str = "WVYAHWENQCKCGUAYKNZFTISYK";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = M94::default();
         cipher.offset = 10;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = M94::default();
         cipher.offset = 10;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

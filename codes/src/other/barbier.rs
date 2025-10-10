@@ -90,18 +90,18 @@ impl Code for BarbierCode {
 mod barbier_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "é ou ien";
+    const PTEXT: &'static str = "é ou ien";
     const CODETEXT: &'static str = ". .....  .. ......  ...... ....";
 
     #[test]
     fn encode_test() {
         let cipher = BarbierCode::default();
-        assert_eq!(cipher.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(cipher.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let cipher = BarbierCode::default();
-        assert_eq!(cipher.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

@@ -286,9 +286,9 @@ mod rs44_tests {
 
     // check configuration for default
     // https://derekbruff.org/blogs/fywscrypto/historical-crypto/rasterschlussel-44-the-stencil-on-steroids/
-    const PLAINTEXT: &'static str =
+    const PTEXT: &'static str =
         "RAINNBOWUNICORNHORNSAREIMMENSELYMOREVALUABLETHANTHOSEOFEVENTHELARGESTNARWHALS";
-    const CIPHERTEXT: &'static str =
+    const CTEXT: &'static str =
         "HNANOESONMEGNANAALHRNTRAUHVSCWSTNAOAWVIBHMEFLREMLRNRLTIOEAEEBRSUIYEHREOTOLSEN";
     const STENCIL: &'static str = "⬛⬜⬛⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬜⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬜⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬜⬛RA⬛⬛⬛I⬛⬛NNB⬛OWU⬛⬛⬛⬛N⬛⬛⬛⬛I⬛⬛⬛CO⬛R⬛⬛⬛⬛⬛N⬛⬛⬛HO⬛R⬛⬛NS⬛⬛AR⬛⬛⬛EI⬛⬛⬛MM⬛⬛EN⬛⬛⬛S⬛⬛⬛⬛E⬛⬛⬛LYMO⬛⬛RE⬛V⬛⬛A⬛⬛LU⬛A⬛B⬛L⬛⬛⬛⬛⬛E⬛T⬛⬛⬛⬛H⬛⬛A⬛⬛⬛N⬛THO⬛⬛⬛SE⬛⬛O⬛⬛FE⬛V⬛⬛⬛E⬛⬛⬛⬛N⬛TH⬛⬛E⬛LA⬛R⬛⬛G⬛⬛E⬛⬛ST⬛⬛NA⬛⬛R⬛W⬛H⬛⬛⬛A⬛L⬛⬛S⬛⬛⬜⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬜⬛";
 
@@ -297,7 +297,7 @@ mod rs44_tests {
     fn grid_test() {
         let mut cipher = Rs44::default();
 
-        let mut symbols = PLAINTEXT.chars();
+        let mut symbols = PTEXT.chars();
         let start = cipher.stencil.index_from_coord((12, 16)).unwrap();
         for idx in start..600 {
             if cipher.stencil[idx].is_empty() {
@@ -320,7 +320,7 @@ mod rs44_tests {
         let mut cipher = Rs44::default();
         cipher.start_cell = (12, 16);
         cipher.start_column = 7;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -328,7 +328,7 @@ mod rs44_tests {
         let mut cipher = Rs44::default();
         cipher.start_cell = (12, 16);
         cipher.start_column = 7;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
     #[test]
@@ -336,7 +336,7 @@ mod rs44_tests {
         let mut cipher = Rs44::default();
         cipher.start_cell = (20, 20);
         cipher.start_column = 7;
-        let ciphertext = cipher.encrypt(PLAINTEXT).unwrap();
-        assert_eq!(cipher.decrypt(&ciphertext).unwrap(), PLAINTEXT);
+        let ciphertext = cipher.encrypt(PTEXT).unwrap();
+        assert_eq!(cipher.decrypt(&ciphertext).unwrap(), PTEXT);
     }
 }

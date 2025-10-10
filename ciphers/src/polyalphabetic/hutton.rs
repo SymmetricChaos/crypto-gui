@@ -101,16 +101,16 @@ impl Cipher for Hutton {
 mod hutton_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT_V1: &'static str = "ZLZJUPIMUKVJLFVFFBGZYVVDBVVANEPYEZB";
-    const CIPHERTEXT_V2: &'static str = "KVQPFLIRUTGZEUZEHUNBIYMPBMHLTREMUQU";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT_V1: &'static str = "ZLZJUPIMUKVJLFVFFBGZYVVDBVVANEPYEZB";
+    const CTEXT_V2: &'static str = "KVQPFLIRUTGZEUZEHUNBIYMPBMHLTREMUQU";
 
     #[test]
     fn encrypt_test_v1() {
         let mut cipher = Hutton::default();
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V1);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V1);
     }
 
     #[test]
@@ -118,7 +118,7 @@ mod hutton_tests {
         let mut cipher = Hutton::default();
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V1).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V1).unwrap(), PTEXT);
     }
 
     #[test]
@@ -127,7 +127,7 @@ mod hutton_tests {
         cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V2);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_V2);
     }
 
     #[test]
@@ -136,6 +136,6 @@ mod hutton_tests {
         cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT_V2).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_V2).unwrap(), PTEXT);
     }
 }

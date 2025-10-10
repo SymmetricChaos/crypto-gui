@@ -146,20 +146,20 @@ impl Cipher for FourSquare {
 mod four_square_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "HELPMEOBIWANKENOBI";
-    const CIPHERTEXT: &'static str = "FYGMKYHOBXMFKKKIMD";
+    const PTEXT: &'static str = "HELPMEOBIWANKENOBI";
+    const CTEXT: &'static str = "FYGMKYHOBXMFKKKIMD";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = FourSquare::default();
         cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = FourSquare::default();
         cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

@@ -110,7 +110,7 @@ impl Code for Combinadic {
 mod combinadic_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ETAOIN";
+    const PTEXT: &'static str = "ETAOIN";
     const ENCODEDTEXT: &'static str = "";
 
     #[test]
@@ -127,12 +127,12 @@ mod combinadic_tests {
     #[test]
     fn encode_test() {
         let code = Combinadic::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Combinadic::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

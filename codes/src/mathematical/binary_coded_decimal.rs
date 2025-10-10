@@ -338,10 +338,10 @@ impl Code for BinaryCodedDecimal {
 mod bcd_tests {
     use super::*;
 
-    const PLAINTEXT32: &'static str = "12345, -9876543";
+    const PTEXT32: &'static str = "12345, -9876543";
     const ENCODEDTEXT32: &'static str = "0012345c9876543d";
 
-    const PLAINTEXT64: &'static str = "1234567890, -876543211000, 567567567567567";
+    const PTEXT64: &'static str = "1234567890, -876543211000, 567567567567567";
     const ENCODEDTEXT64: &'static str = "000001234567890c000876543211000d567567567567567c";
 
     #[test]
@@ -364,7 +364,7 @@ mod bcd_tests {
     #[test]
     fn encode_test_32() {
         let code = BinaryCodedDecimal::default();
-        assert_eq!(ENCODEDTEXT32, code.encode(PLAINTEXT32).unwrap());
+        assert_eq!(ENCODEDTEXT32, code.encode(PTEXT32).unwrap());
     }
 
     #[test]
@@ -380,7 +380,7 @@ mod bcd_tests {
     #[test]
     fn decode_test_32() {
         let code = BinaryCodedDecimal::default();
-        assert_eq!(PLAINTEXT32, code.decode(ENCODEDTEXT32).unwrap())
+        assert_eq!(PTEXT32, code.decode(ENCODEDTEXT32).unwrap())
     }
 
     #[test]
@@ -411,14 +411,14 @@ mod bcd_tests {
     fn encode_test_64() {
         let mut code = BinaryCodedDecimal::default();
         code.width = WordWidth::W64;
-        assert_eq!(ENCODEDTEXT64, code.encode(PLAINTEXT64).unwrap());
+        assert_eq!(ENCODEDTEXT64, code.encode(PTEXT64).unwrap());
     }
 
     #[test]
     fn decode_test_64() {
         let mut code = BinaryCodedDecimal::default();
         code.width = WordWidth::W64;
-        assert_eq!(PLAINTEXT64, code.decode(ENCODEDTEXT64).unwrap())
+        assert_eq!(PTEXT64, code.decode(ENCODEDTEXT64).unwrap())
     }
 }
 
@@ -426,10 +426,10 @@ mod bcd_tests {
 mod bcd_unsigned_tests {
     use super::*;
 
-    const PLAINTEXT32: &'static str = "12345, 9876543";
+    const PTEXT32: &'static str = "12345, 9876543";
     const ENCODEDTEXT32: &'static str = "0001234509876543";
 
-    const PLAINTEXT64: &'static str = "1234567890, 876543211000, 567567567567567";
+    const PTEXT64: &'static str = "1234567890, 876543211000, 567567567567567";
     const ENCODEDTEXT64: &'static str = "000000123456789000008765432110000567567567567567";
 
     #[test]
@@ -451,13 +451,13 @@ mod bcd_unsigned_tests {
     #[test]
     fn encode_test_32() {
         let code = BinaryCodedDecimal::unsigned();
-        assert_eq!(ENCODEDTEXT32, code.encode(PLAINTEXT32).unwrap());
+        assert_eq!(ENCODEDTEXT32, code.encode(PTEXT32).unwrap());
     }
 
     #[test]
     fn decode_test_32() {
         let code = BinaryCodedDecimal::unsigned();
-        assert_eq!(PLAINTEXT32, code.decode(ENCODEDTEXT32).unwrap())
+        assert_eq!(PTEXT32, code.decode(ENCODEDTEXT32).unwrap())
     }
 
     #[test]
@@ -488,13 +488,13 @@ mod bcd_unsigned_tests {
     fn encode_test_64() {
         let mut code = BinaryCodedDecimal::unsigned();
         code.width = WordWidth::W64;
-        assert_eq!(ENCODEDTEXT64, code.encode(PLAINTEXT64).unwrap());
+        assert_eq!(ENCODEDTEXT64, code.encode(PTEXT64).unwrap());
     }
 
     #[test]
     fn decode_test_64() {
         let mut code = BinaryCodedDecimal::unsigned();
         code.width = WordWidth::W64;
-        assert_eq!(PLAINTEXT64, code.decode(ENCODEDTEXT64).unwrap())
+        assert_eq!(PTEXT64, code.decode(ENCODEDTEXT64).unwrap())
     }
 }

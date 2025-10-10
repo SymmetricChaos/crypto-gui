@@ -351,7 +351,7 @@ impl Code for Baudot {
 mod tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS£572WHILEONSALE";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXCOSTS£572WHILEONSALE";
     const CODETEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
 
     #[test]
@@ -365,12 +365,12 @@ mod tests {
     #[test]
     fn encode_test() {
         let code = Baudot::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Baudot::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

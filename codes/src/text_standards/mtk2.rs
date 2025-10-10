@@ -132,7 +132,7 @@ impl Code for Mtk2 {
 mod baudot_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
     const CODETEXT: &'static str = "0000100101100001110111100011000111011110100110101000011110010011010110000111011101110000111010000001101001101100101000011110011001111111100100101011000100110000000110011010100110000100110000";
 
     #[test]
@@ -146,12 +146,12 @@ mod baudot_tests {
     #[test]
     fn encode_test() {
         let code = Mtk2::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Mtk2::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

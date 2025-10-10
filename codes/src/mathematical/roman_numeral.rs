@@ -115,18 +115,18 @@ impl Code for RomanNumeral {
 mod roman_numeral_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "39, 246, 789, 2421, 9";
+    const PTEXT: &'static str = "39, 246, 789, 2421, 9";
     const ENCODEDTEXT: &'static str = "XXXIX, CCXLVI, DCCLXXXIX, MMCDXXI, IX";
 
     #[test]
     fn encode_test() {
         let code = RomanNumeral::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = RomanNumeral::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

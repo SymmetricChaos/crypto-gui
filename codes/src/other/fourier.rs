@@ -113,18 +113,18 @@ mod fourier_tests {
 
     // Input and output are written according to the simplest formatting rules
     // For this test we write the third element of the input as -0-1i because when decoding the zero has a negative sign
-    const PLAINTEXT: &'static str = "1+0i, 2-1i, -0-1i, -1+2i";
+    const PTEXT: &'static str = "1+0i, 2-1i, -0-1i, -1+2i";
     const CODETEXT: &'static str = "2+0i, -2-2i, 0-2i, 4+4i";
 
     #[test]
     fn encode_test() {
         let code = Fourier::default();
-        assert_eq!(CODETEXT, code.encode(PLAINTEXT).unwrap());
+        assert_eq!(CODETEXT, code.encode(PTEXT).unwrap());
     }
 
     #[test]
     fn decode_test() {
         let code = Fourier::default();
-        assert_eq!(PLAINTEXT, code.decode(CODETEXT).unwrap());
+        assert_eq!(PTEXT, code.decode(CODETEXT).unwrap());
     }
 }

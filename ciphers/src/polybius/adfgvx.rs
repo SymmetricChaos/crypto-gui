@@ -84,10 +84,10 @@ impl Cipher for Adfgvx {
 mod adfgvx_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT1: &'static str =
+    const PTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
+    const CTEXT1: &'static str =
         "DAGGADDFFXADFXDFXGDDDDAFFADFGAXGAGADXXXXFFXDXAAXXAAAFDFFDDDGGAFAAGXGXG";
-    const CIPHERTEXT2: &'static str =
+    const CTEXT2: &'static str =
         "ADFVXDDXVXDFFVFGVFFVFVGADGFFVGXVDFADXVVAGVAGVGDVGFFVAVDGFAVGFFDGGDVFXF";
 
     #[test]
@@ -95,7 +95,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::new_adfgx().unwrap();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT1);
     }
 
     #[test]
@@ -103,7 +103,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::new_adfgx().unwrap();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT1).unwrap(), PTEXT);
     }
 
     #[test]
@@ -111,7 +111,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::new_adfgvx().unwrap();
         cipher.assign_polybius_key("57This9Should0Mix2Words");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT2);
     }
 
     #[test]
@@ -119,6 +119,6 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::new_adfgvx().unwrap();
         cipher.assign_polybius_key("57This9Should0Mix2Words");
         cipher.assign_columnar_key("SOMEWORD").unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT2).unwrap(), PTEXT);
     }
 }

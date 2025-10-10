@@ -61,18 +61,18 @@ impl Code for RunLengthEncoding {
 mod rle_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1aaaaaaaaPPPPPPPPPPPPPPP   e";
+    const PTEXT: &'static str = "1aaaaaaaaPPPPPPPPPPPPPPP   e";
     const ENCODEDTEXT: &'static str = "1 1 a 8 P 15   3 e 1";
 
     #[test]
     fn encode_test() {
         let code = RunLengthEncoding::default();
-        assert_eq!(ENCODEDTEXT, code.encode(PLAINTEXT).unwrap())
+        assert_eq!(ENCODEDTEXT, code.encode(PTEXT).unwrap())
     }
 
     #[test]
     fn decode_test() {
         let code = RunLengthEncoding::default();
-        assert_eq!(PLAINTEXT, code.decode(ENCODEDTEXT).unwrap())
+        assert_eq!(PTEXT, code.decode(ENCODEDTEXT).unwrap())
     }
 }

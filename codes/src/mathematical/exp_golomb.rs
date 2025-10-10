@@ -143,8 +143,8 @@ impl Code for ExpGolomb {
 mod golomb_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3, 8, 1234, 4294967295";
-    const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2, 4, 1234, -1234, -2147483647, 2147483647";
+    const PTEXT: &'static str = "0, 1, 2, 3, 8, 1234, 4294967295";
+    const PTEXT_SIGNED: &'static str = "0, -1, 1, -2, 4, 1234, -1234, -2147483647, 2147483647";
     const ENCODEDTEXT: &'static str = "101001100100000100100000000001001101001100000000000000000000000000000000100000000000000000000000000000000";
     const ENCODEDTEXT_SIGNED: &'static str = "10100110010000010010000000000010011010010100000000000100110100100000000000000000000000000000000011111111111111111111111111111110000000000000000000000000000000011111111111111111111111111111111";
     const ENCODEDTEXT_INV: &'static str = "010110011011111011011111111110110010110011111111111111111111111111111111011111111111111111111111111111111";
@@ -153,34 +153,34 @@ mod golomb_tests {
     #[test]
     fn encode_test() {
         let mut code = ExpGolomb::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
         code.invert = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV);
         code.invert = false;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn encode_test_signed() {
         let mut code = ExpGolomb::default();
         code.signed = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SIGNED);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SIGNED);
     }
 
     #[test]
     fn decode_test() {
         let mut code = ExpGolomb::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT);
         code.invert = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_test_signed() {
         let mut code = ExpGolomb::default();
         code.signed = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SIGNED).unwrap(), PLAINTEXT_SIGNED);
+        assert_eq!(code.decode(ENCODEDTEXT_SIGNED).unwrap(), PTEXT_SIGNED);
     }
 }

@@ -112,18 +112,18 @@ impl Code for NegativeBaseN {
 mod negative_base_n_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5";
+    const PTEXT: &'static str = "-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5";
     const ENCODEDTEXT: &'static str = "1111, 1100, 1101, 10, 11, 0, 1, 110, 111, 100, 101";
 
     #[test]
     fn encode_test() {
         let code = NegativeBaseN::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = NegativeBaseN::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

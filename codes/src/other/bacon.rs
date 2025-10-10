@@ -109,7 +109,7 @@ mod bacon_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "ATTACKAAA";
+    const PTEXT: &'static str = "ATTACKAAA";
     const FALSETEXT: &'static str = "There is nothing at all suspicious about this message.";
     const CODETEXT: &'static str = "there Is nOtHinG at all suspIciOus About this message.";
 
@@ -117,12 +117,12 @@ mod bacon_tests {
     fn encrypt_test() {
         let mut code = Bacon::default();
         code.false_text = FALSETEXT.into();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Bacon::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

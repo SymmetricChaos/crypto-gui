@@ -91,36 +91,36 @@ impl Cipher for GeneralSubstitution {
 mod gen_sub_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT1: &'static str = "ALGVBMUCDTRXWPRNEBJHYRZGTALGFOIQSRK";
-    const CIPHERTEXT2: &'static str =
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT1: &'static str = "ALGVBMUCDTRXWPRNEBJHYRZGTALGFOIQSRK";
+    const CTEXT2: &'static str =
         "🐏🚚📢🔝😩💡🆚🚅🍥☪🕳🚆🌃🍒🕳🚢🎴😩⏳👈📡🕳🕘📢☪🐏🚚📢😽⏯🚪😪💲🕳💮";
 
     #[test]
     fn encrypt_test1() {
         let mut cipher = GeneralSubstitution::default();
         cipher.assign_ct_alphabet("ODUSGPKLMECFJWRHVTYABZXNQI");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT1);
     }
 
     #[test]
     fn decrypt_test1() {
         let mut cipher = GeneralSubstitution::default();
         cipher.assign_ct_alphabet("ODUSGPKLMECFJWRHVTYABZXNQI");
-        assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT1).unwrap(), PTEXT);
     }
 
     #[test]
     fn encrypt_test2() {
         let mut cipher = GeneralSubstitution::default();
         cipher.assign_ct_alphabet("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT2);
     }
 
     #[test]
     fn decrypt_test2() {
         let mut cipher = GeneralSubstitution::default();
         cipher.assign_ct_alphabet("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
-        assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT2).unwrap(), PTEXT);
     }
 }

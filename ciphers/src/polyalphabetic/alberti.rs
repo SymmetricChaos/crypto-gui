@@ -112,13 +112,13 @@ impl Cipher for Alberti {
 mod alberti_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUItCKBReOWNFOsXJUMPStOVERTiHELAZYDnOG";
-    const CIPHERTEXT: &'static str = "thequiTvdukEsarjsSpbmehkThoxkmIpmtihglNbt";
+    const PTEXT: &'static str = "THEQUItCKBReOWNFOsXJUMPStOVERTiHELAZYDnOG";
+    const CTEXT: &'static str = "thequiTvdukEsarjsSpbmehkThoxkmIpmtihglNbt";
 
     #[test]
     fn encrypt_test() {
         let cipher = Alberti::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -135,6 +135,6 @@ mod alberti_tests {
     #[test]
     fn decrypt_test() {
         let cipher = Alberti::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

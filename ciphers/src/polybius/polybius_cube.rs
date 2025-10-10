@@ -215,20 +215,20 @@ impl Cipher for PolybiusCube {
 mod polybius_cube_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICK";
-    const CIPHERTEXT: &'static str = "122223121313322111212232";
+    const PTEXT: &'static str = "THEQUICK";
+    const CTEXT: &'static str = "122223121313322111212232";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusCube::default();
         cipher.assign_grid("INVENTORY", "ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusCube::default();
         cipher.assign_grid("INVENTORY", "ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

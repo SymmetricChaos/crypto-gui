@@ -169,11 +169,11 @@ impl Code for Base32 {
 mod base32_tests {
     use super::*;
 
-    const PLAINTEXT0: &'static str = "Manyh";
-    const PLAINTEXT1: &'static str = "Many";
-    const PLAINTEXT2: &'static str = "Man";
-    const PLAINTEXT3: &'static str = "Ma";
-    const PLAINTEXT4: &'static str = "M";
+    const PTEXT0: &'static str = "Manyh";
+    const PTEXT1: &'static str = "Many";
+    const PTEXT2: &'static str = "Man";
+    const PTEXT3: &'static str = "Ma";
+    const PTEXT4: &'static str = "M";
 
     const CODETEXT0: &'static str = "JVQW46LI";
     const CODETEXT1: &'static str = "JVQW46I=";
@@ -190,42 +190,42 @@ mod base32_tests {
     #[test]
     fn encode_test() {
         let code = Base32::default();
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2);
-        assert_eq!(code.encode(PLAINTEXT3).unwrap(), CODETEXT3);
-        assert_eq!(code.encode(PLAINTEXT4).unwrap(), CODETEXT4);
+        assert_eq!(code.encode(PTEXT0).unwrap(), CODETEXT0);
+        assert_eq!(code.encode(PTEXT1).unwrap(), CODETEXT1);
+        assert_eq!(code.encode(PTEXT2).unwrap(), CODETEXT2);
+        assert_eq!(code.encode(PTEXT3).unwrap(), CODETEXT3);
+        assert_eq!(code.encode(PTEXT4).unwrap(), CODETEXT4);
     }
 
     #[test]
     fn encode_test_nopad() {
         let mut code = Base32::default();
         code.use_padding = false;
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT3).unwrap(), CODETEXT3_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT4).unwrap(), CODETEXT4_NOPAD);
+        assert_eq!(code.encode(PTEXT0).unwrap(), CODETEXT0_NOPAD);
+        assert_eq!(code.encode(PTEXT1).unwrap(), CODETEXT1_NOPAD);
+        assert_eq!(code.encode(PTEXT2).unwrap(), CODETEXT2_NOPAD);
+        assert_eq!(code.encode(PTEXT3).unwrap(), CODETEXT3_NOPAD);
+        assert_eq!(code.encode(PTEXT4).unwrap(), CODETEXT4_NOPAD);
     }
 
     #[test]
     fn decode_test() {
         let code = Base32::default();
-        assert_eq!(code.decode(CODETEXT0).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CODETEXT1).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CODETEXT2).unwrap(), PLAINTEXT2);
-        assert_eq!(code.decode(CODETEXT3).unwrap(), PLAINTEXT3);
-        assert_eq!(code.decode(CODETEXT4).unwrap(), PLAINTEXT4);
+        assert_eq!(code.decode(CODETEXT0).unwrap(), PTEXT0);
+        assert_eq!(code.decode(CODETEXT1).unwrap(), PTEXT1);
+        assert_eq!(code.decode(CODETEXT2).unwrap(), PTEXT2);
+        assert_eq!(code.decode(CODETEXT3).unwrap(), PTEXT3);
+        assert_eq!(code.decode(CODETEXT4).unwrap(), PTEXT4);
     }
 
     #[test]
     fn decode_test_nopad() {
         let mut code = Base32::default();
         code.use_padding = false;
-        assert_eq!(code.decode(CODETEXT0_NOPAD).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CODETEXT1_NOPAD).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CODETEXT2_NOPAD).unwrap(), PLAINTEXT2);
-        assert_eq!(code.decode(CODETEXT3_NOPAD).unwrap(), PLAINTEXT3);
-        assert_eq!(code.decode(CODETEXT4_NOPAD).unwrap(), PLAINTEXT4);
+        assert_eq!(code.decode(CODETEXT0_NOPAD).unwrap(), PTEXT0);
+        assert_eq!(code.decode(CODETEXT1_NOPAD).unwrap(), PTEXT1);
+        assert_eq!(code.decode(CODETEXT2_NOPAD).unwrap(), PTEXT2);
+        assert_eq!(code.decode(CODETEXT3_NOPAD).unwrap(), PTEXT3);
+        assert_eq!(code.decode(CODETEXT4_NOPAD).unwrap(), PTEXT4);
     }
 }

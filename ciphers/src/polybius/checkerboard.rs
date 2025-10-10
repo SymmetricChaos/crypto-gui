@@ -177,19 +177,19 @@ impl Cipher for StraddlingCheckerboard {
 mod checkerboard_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
-    const PLAINTEXT: &'static str = "ATTACKTHEQUICKBROWNFOXAT/0/5/3/1";
-    const CIPHERTEXT: &'static str = "31132127125061638212720746552346631620625623621";
+    const PTEXT: &'static str = "ATTACKTHEQUICKBROWNFOXAT/0/5/3/1";
+    const CTEXT: &'static str = "31132127125061638212720746552346631620625623621";
 
     #[test]
     fn encrypt_test() {
         let cipher = StraddlingCheckerboard::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let cipher = StraddlingCheckerboard::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
     #[test]

@@ -154,36 +154,36 @@ impl Code for LevenshteinCode {
 mod levenshtein_int_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3";
-    const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2";
+    const PTEXT: &'static str = "0, 1, 2, 3";
+    const PTEXT_SIGNED: &'static str = "0, -1, 1, -2";
     const ENCODEDTEXT: &'static str = "01011001101";
     const ENCODEDTEXT_SP: &'static str = "0, 10, 1100, 1101";
 
     #[test]
     fn encode_test() {
         let mut code = LevenshteinCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
         code.signed = true;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn encode_sp_test() {
         let mut code = LevenshteinCode::default();
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn decode_test() {
         let code = LevenshteinCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_sp_test() {
         let code = LevenshteinCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT);
     }
 }

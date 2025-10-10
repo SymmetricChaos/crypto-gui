@@ -88,8 +88,8 @@ mod rc4_tests {
     use super::*;
     use crate::Cipher;
 
-    const PLAINTEXT: &'static str = "Attack at dawn";
-    const CIPHERTEXT: &'static str = "45a01f645fc35b383552544b9bf5";
+    const PTEXT: &'static str = "Attack at dawn";
+    const CTEXT: &'static str = "45a01f645fc35b383552544b9bf5";
 
     #[test]
     fn encrypt_test() {
@@ -98,7 +98,7 @@ mod rc4_tests {
         cipher.input_format = ByteFormat::Utf8;
         cipher.output_format = ByteFormat::Hex;
 
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT)
     }
 
     #[test]
@@ -107,6 +107,6 @@ mod rc4_tests {
         cipher.ksa("Secret".as_bytes());
         cipher.input_format = ByteFormat::Hex;
         cipher.output_format = ByteFormat::Utf8;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT)
     }
 }

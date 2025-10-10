@@ -149,7 +149,7 @@ impl Code for FibonacciCode {
 mod fibonacci_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17";
+    const PTEXT: &'static str = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17";
     const ENCODEDTEXT: &'static str = "110110011101100011100110101100001110001101001100101110101100000111000011010001100100111010011";
     const ENCODEDTEXT_SP: &'static str = "11, 011, 0011, 1011, 00011, 10011, 01011, 000011, 100011, 010011, 001011, 101011, 0000011, 1000011, 0100011, 0010011, 1010011";
     const ENCODEDTEXT_INV: &'static str = "001001100010011100011001010011110001110010110011010001010011111000111100101110011011000101100";
@@ -158,27 +158,27 @@ mod fibonacci_tests {
     #[test]
     fn encode_tests() {
         let mut code = FibonacciCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_INV);
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP_INV);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SP_INV);
     }
 
     #[test]
     fn decode_tests() {
         let mut code = FibonacciCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PTEXT);
         code.spaced = false;
         code.invert = true;
-        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PTEXT);
         code.spaced = true;
-        assert_eq!(code.decode(ENCODEDTEXT_SP_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP_INV).unwrap(), PTEXT);
     }
 
     #[test]

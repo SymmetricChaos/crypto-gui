@@ -97,7 +97,7 @@ impl Code for GrayCode {
 mod gray_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 14, 15";
+    const PTEXT: &'static str = "1, 2, 3, 4, 5, 14, 15";
     const ENCODEDTEXT: &'static str = "00001000110001000110001110100101000";
     const ENCODEDTEXT_SPACED: &'static str = "00001, 00011, 00010, 00110, 00111, 01001, 01000";
     const ENCODEDTEXT_VAR: &'static str = "1, 11, 10, 110, 111, 1001, 1000";
@@ -105,39 +105,39 @@ mod gray_tests {
     #[test]
     fn encode_test() {
         let code = GrayCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn encode_test_var() {
         let mut code = GrayCode::default();
         code.fixed_width = false;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_VAR);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_VAR);
     }
 
     #[test]
     fn encode_test_spaced() {
         let mut code = GrayCode::default();
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SPACED);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT_SPACED);
     }
 
     #[test]
     fn decode_test() {
         let code = GrayCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_test_var() {
         let mut code = GrayCode::default();
         code.fixed_width = false;
-        assert_eq!(code.decode(ENCODEDTEXT_VAR).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_VAR).unwrap(), PTEXT);
     }
 
     #[test]
     fn decode_test_spaced() {
         let code = GrayCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT_SPACED).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_SPACED).unwrap(), PTEXT);
     }
 }

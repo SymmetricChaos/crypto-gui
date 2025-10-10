@@ -88,35 +88,35 @@ impl Code for BaseN {
 mod base_n_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "0, 1, 2, 3, 4, 5";
+    const PTEXT_INT: &'static str = "0, 1, 2, 3, 4, 5";
     const ENCODEDTEXT: &'static str = "0, 1, 10, 11, 100, 101";
 
-    const PLAINTEXT_INT_BE: &'static str = "0, 1, 2, 3, 4, 5";
+    const PTEXT_INT_BE: &'static str = "0, 1, 2, 3, 4, 5";
     const ENCODEDTEXT_BE: &'static str = "0, 1, 01, 11, 001, 101";
 
     #[test]
     fn encode_test() {
         let code = BaseN::default();
-        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT_INT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn encode_test_be() {
         let mut code = BaseN::default();
         code.little_endian = false;
-        assert_eq!(code.encode(PLAINTEXT_INT_BE).unwrap(), ENCODEDTEXT_BE);
+        assert_eq!(code.encode(PTEXT_INT_BE).unwrap(), ENCODEDTEXT_BE);
     }
 
     #[test]
     fn decode_test() {
         let code = BaseN::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_INT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT_INT);
     }
 
     #[test]
     fn decode_test_be() {
         let mut code = BaseN::default();
         code.little_endian = false;
-        assert_eq!(code.decode(ENCODEDTEXT_BE).unwrap(), PLAINTEXT_INT_BE);
+        assert_eq!(code.decode(ENCODEDTEXT_BE).unwrap(), PTEXT_INT_BE);
     }
 }

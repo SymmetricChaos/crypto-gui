@@ -95,7 +95,7 @@ impl Code for Factoradic {
 mod factoradic_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5";
+    const PTEXT: &'static str = "0, 1, 2, 3, 4, 5";
     const ENCODEDTEXT: &'static str = "0, 1:0, 1:0:0, 1:1:0, 2:0:0, 2:1:0";
 
     #[test]
@@ -112,12 +112,12 @@ mod factoradic_tests {
     #[test]
     fn encode_test() {
         let code = Factoradic::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Factoradic::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

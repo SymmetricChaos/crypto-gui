@@ -115,18 +115,18 @@ impl Code for Primorial {
 mod factoradic_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 2100";
+    const PTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 2100";
     const ENCODEDTEXT: &'static str = "0, 1, 1:0, 1:1, 2:0, 2:1, 1:0:0, 1:0:1, 10:0:0:0:0";
 
     #[test]
     fn encode_test() {
         let code = Primorial::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Primorial::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

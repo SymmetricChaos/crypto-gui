@@ -77,18 +77,18 @@ mod chaocipher_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
 
-    const PLAINTEXT: &'static str = "WELLDONEISBETTERTHANWELLSAID";
-    const CIPHERTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
+    const PTEXT: &'static str = "WELLDONEISBETTERTHANWELLSAID";
+    const CTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
 
     #[test]
     fn encrypt_test() {
         let cipher = Chaocipher::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let cipher = Chaocipher::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

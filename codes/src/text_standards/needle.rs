@@ -62,18 +62,18 @@ impl Code for Needle {
 mod needle_code_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ABDE";
+    const PTEXT: &'static str = "ABDE";
     const CODETEXT: &'static str = r"/|||\ /||\| |/||\ /|\||";
 
     #[test]
     fn encrypt_test() {
         let code = Needle::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Needle::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

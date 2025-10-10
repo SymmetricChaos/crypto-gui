@@ -196,10 +196,10 @@ mod shamir_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "1234";
-    const CIPHERTEXT: &'static str = "(1, 1494), (2, 329), (3, 965), (4, 176), (5, 1188), (6, 775)";
-    const CIPHERTEXT_PARTIAL: &'static str = "(2, 329), (3, 965), (5, 1188)";
-    const CIPHERTEXT_INSUFFICIENT: &'static str = "(5, 1188), (6, 775)";
+    const PTEXT: &'static str = "1234";
+    const CTEXT: &'static str = "(1, 1494), (2, 329), (3, 965), (4, 176), (5, 1188), (6, 775)";
+    const CTEXT_PARTIAL: &'static str = "(2, 329), (3, 965), (5, 1188)";
+    const CTEXT_INSUFFICIENT: &'static str = "(5, 1188), (6, 775)";
 
     #[test]
     fn encrypt_test() {
@@ -209,7 +209,7 @@ mod shamir_tests {
         cipher.shares = 6;
         cipher.threshold = 3;
         cipher.random_shares = false;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT)
     }
 
     #[test]
@@ -220,8 +220,8 @@ mod shamir_tests {
         cipher.shares = 6;
         cipher.threshold = 3;
         cipher.random_shares = false;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
-        assert_eq!(cipher.decrypt(CIPHERTEXT_PARTIAL).unwrap(), PLAINTEXT);
-        assert!(cipher.decrypt(CIPHERTEXT_INSUFFICIENT).is_err());
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_PARTIAL).unwrap(), PTEXT);
+        assert!(cipher.decrypt(CTEXT_INSUFFICIENT).is_err());
     }
 }

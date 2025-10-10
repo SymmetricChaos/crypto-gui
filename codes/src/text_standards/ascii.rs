@@ -378,7 +378,7 @@ impl Code for Ascii {
 mod ascii_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0\0␀A ␠";
+    const PTEXT: &'static str = "0\0␀A ␠";
     const CODETEXT_SEVEN_SP: &'static str = "0110000 0000000 0000000 1000001 0100000 0100000";
     const CODETEXT_EIGHT_SP_EVEN: &'static str =
         "00110000 00000000 00000000 01000001 10100000 10100000";
@@ -390,12 +390,12 @@ mod ascii_tests {
         let mut code = Ascii::default();
         code.mode = DisplayMode::SevenBit;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_SEVEN_SP);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_SEVEN_SP);
         code.mode = DisplayMode::EightBit;
         code.upper_bit = UpperBit::Even;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_EIGHT_SP_EVEN);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_EIGHT_SP_EVEN);
         code.upper_bit = UpperBit::Odd;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_EIGHT_SP_ODD);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT_EIGHT_SP_ODD);
     }
 
     #[test]

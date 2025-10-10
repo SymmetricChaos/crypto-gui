@@ -276,20 +276,20 @@ impl Cipher for Sigaba {
 mod sigaba_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "OUSBJVKFICZXMWZGVJPAYZDSCOUSHNGTLZE";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "OUSBJVKFICZXMWZGVJPAYZDSCOUSHNGTLZE";
     //SIGABA is not perfectly reversible
     const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
 
     #[test]
     fn encrypt() {
         let cipher = Sigaba::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt() {
         let cipher = Sigaba::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), DECRYPT_TEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), DECRYPT_TEXT);
     }
 }

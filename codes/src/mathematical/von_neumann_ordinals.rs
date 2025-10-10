@@ -60,12 +60,12 @@ impl Code for VonNeumann {
 mod vn_tests {
     use super::*;
 
-    const PLAINTEXT: &str = "0, 1, 2, 3, 4, -2, 20";
+    const PTEXT: &str = "0, 1, 2, 3, 4, -2, 20";
     const CODETEXT: &str = "{}, {{}}, {{}{{}}}, {{}{{}}{{}{{}}}}, {{}{{}}{{}{{}}}{{}{{}}{{}{{}}}}}, INVALID INPUT, INPUT TOO LARGE";
 
     #[test]
     fn encode() {
         let code = VonNeumann::default();
-        assert_eq!(CODETEXT, code.encode(PLAINTEXT).unwrap())
+        assert_eq!(CODETEXT, code.encode(PTEXT).unwrap())
     }
 }

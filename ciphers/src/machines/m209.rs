@@ -273,8 +273,8 @@ mod m209_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "AAAAAAAAAAAAAAAAAAAAAAAAAA";
-    const CIPHERTEXT: &'static str = "TNJUWAUQTKCZKNUTOTBCWARMIO";
+    const PTEXT: &'static str = "AAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const CTEXT: &'static str = "TNJUWAUQTKCZKNUTOTBCWARMIO";
 
     #[test]
     fn encrypt_test() {
@@ -318,7 +318,7 @@ mod m209_tests {
             (0, 5),
             (0, 5),
         ]);
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -363,6 +363,6 @@ mod m209_tests {
             (0, 5),
             (0, 5),
         ]);
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

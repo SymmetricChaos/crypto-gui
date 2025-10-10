@@ -163,20 +163,20 @@ mod grille_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICK";
+    const PTEXT: &'static str = "THEQUICK";
 
     #[test]
     fn encrypt_decrypt_test() {
         let cipher = Grille::default();
-        let ptext = cipher.encrypt(PLAINTEXT).unwrap();
-        assert_eq!(&cipher.decrypt(&ptext).unwrap()[0..8], PLAINTEXT);
+        let ptext = cipher.encrypt(PTEXT).unwrap();
+        assert_eq!(&cipher.decrypt(&ptext).unwrap()[0..8], PTEXT);
     }
 
     #[test]
     fn encrypt_test_full_no_nulls() {
         let mut cipher = Grille::default();
         cipher.use_nulls = false;
-        let ptext = cipher.encrypt(PLAINTEXT).unwrap();
-        assert_eq!(&cipher.decrypt(&ptext).unwrap(), PLAINTEXT);
+        let ptext = cipher.encrypt(PTEXT).unwrap();
+        assert_eq!(&cipher.decrypt(&ptext).unwrap(), PTEXT);
     }
 }

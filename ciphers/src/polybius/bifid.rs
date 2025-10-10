@@ -100,18 +100,18 @@ impl Cipher for Bifid {
 mod bifid_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "RCRDOESKSXFGWPOINUOXCODREEIOKZCGETW";
+    const PTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "RCRDOESKSXFGWPOINUOXCODREEIOKZCGETW";
 
     #[test]
     fn encrypt_test() {
         let cipher = Bifid::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let cipher = Bifid::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

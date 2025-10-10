@@ -96,18 +96,18 @@ impl Code for Godel {
 mod godel_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0 s +";
+    const PTEXT: &'static str = "0 s +";
     const ENCODEDTEXT: &'static str = "2250";
 
     #[test]
     fn encode_test() {
         let code = Godel::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Godel::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

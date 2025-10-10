@@ -165,14 +165,14 @@ mod amsco_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "ZXTKBVEYDJUHERROMQOWTHGXPSUINEXOCFOLA";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "ZXTKBVEYDJUHERROMQOWTHGXPSUINEXOCFOLA";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Amsco::default();
         _ = cipher.assign_key("ECABD", Alphabet::BasicLatin.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -180,7 +180,7 @@ mod amsco_tests {
         let mut cipher = Amsco::default();
         _ = cipher.assign_key("ECABD", Alphabet::BasicLatin.into());
         assert_eq!(
-            cipher.decrypt(CIPHERTEXT).unwrap(),
+            cipher.decrypt(CTEXT).unwrap(),
             "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGXX"
         );
     }

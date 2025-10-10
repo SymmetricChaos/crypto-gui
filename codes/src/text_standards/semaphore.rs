@@ -160,18 +160,18 @@ impl Code for Semaphore {
 mod semaphore_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ABready123WORD";
+    const PTEXT: &'static str = "ABready123WORD";
     const CODETEXT: &'static str = "down/low down/out low/low high/up down/low down/out down/high out/up out/across-high across-high/out out/out down/up";
 
     #[test]
     fn encrypt_test() {
         let code = Semaphore::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Semaphore::default();
-        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PTEXT);
     }
 }

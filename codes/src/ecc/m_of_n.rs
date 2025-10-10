@@ -164,7 +164,7 @@ impl Code for MofNCode {
 #[cfg(test)]
 mod m_of_n_tests {
     use super::*;
-    const PLAINTEXT: &'static str = "011110000";
+    const PTEXT: &'static str = "011110000";
 
     // #[test]
     // fn encode_int_test() {
@@ -176,7 +176,7 @@ mod m_of_n_tests {
     #[test]
     fn encode_test() {
         let code = MofNCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), "011001100000011");
+        assert_eq!(code.encode(PTEXT).unwrap(), "011001100000011");
     }
 
     #[test]

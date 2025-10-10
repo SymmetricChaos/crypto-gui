@@ -99,18 +99,18 @@ impl Code for BiquinaryDecimal {
 mod balanced_ternary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0, 9, 1, 8, 2";
+    const PTEXT: &'static str = "0, 9, 1, 8, 2";
     const ENCODEDTEXT: &'static str = "01-11110, 10-01111, 01-11101, 10-10111, 01-11011";
 
     #[test]
     fn encode_test() {
         let code = BiquinaryDecimal::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = BiquinaryDecimal::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PTEXT);
     }
 }

@@ -127,8 +127,8 @@ impl Cipher for RailFence {
 mod railfence_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "TBJRDHKRXUETYOECOOMVHZGQIWFPOEAUNSL";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "TBJRDHKRXUETYOECOOMVHZGQIWFPOEAUNSL";
 
     #[test]
     fn encrypt_test() {
@@ -136,7 +136,7 @@ mod railfence_tests {
         cipher.num_rails = 5;
         cipher.start_rail = 0;
         cipher.falling = false;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -145,6 +145,6 @@ mod railfence_tests {
         cipher.num_rails = 5;
         cipher.start_rail = 0;
         cipher.falling = false;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }
