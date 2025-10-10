@@ -77,20 +77,20 @@ impl Cipher for Scytale {
 mod scytale_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "TKOOLHBXVAERJEZQOURYUWMTDINPHOCFSEG";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "TKOOLHBXVAERJEZQOURYUWMTDINPHOCFSEG";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Scytale::default();
         cipher.num_rails = 5;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Scytale::default();
         cipher.num_rails = 5;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

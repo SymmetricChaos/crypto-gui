@@ -29,11 +29,7 @@ impl Bazeries {
         self.alphabet.len()
     }
 
-    pub fn validate(&self, text: &str) -> Result<(), GeneralError> {
-        if text.chars().count() > self.alphabet.len() {
-            return Err(GeneralError::input("the text cannot be longer the the number of wheels, for longer messages send each part with a different key"));
-        }
-
+    pub fn validate_wheels(&self) -> Result<(), GeneralError> {
         let sorted = self.alphabet.chars().sorted().collect_vec();
         for wheel in self.wheels.iter() {
             if wheel.chars().sorted().collect_vec() != sorted {
@@ -42,14 +38,13 @@ impl Bazeries {
                 ));
             }
         }
-
         Ok(())
     }
 }
 
 impl Default for Bazeries {
     fn default() -> Self {
-        // 26 Random wheels
+        // 27 Random wheels
         // Maybe rotate these to be pseudo alphabetical
         let alphabet = VecString::from(Alphabet::BasicLatin);
         let wheels = [
@@ -95,11 +90,11 @@ impl Default for Bazeries {
 
 impl Cipher for Bazeries {
     fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
-        self.validate(text)?;
+        self.validate_wheels()?;
 
         let mut out = String::with_capacity(text.len());
 
-        let key = self.wheels.iter();
+        let key = self.wheels.iter().cycle();
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
                 Some(n) => (n + self.offset) % self.alphabet.len(),
@@ -111,12 +106,12 @@ impl Cipher for Bazeries {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
-        self.validate(text)?;
+        self.validate_wheels()?;
 
         let alen = self.alphabet.len();
         let mut out = String::with_capacity(text.len());
         let rev_offset = alen - self.offset;
-        let key = self.wheels.iter();
+        let key = self.wheels.iter().cycle();
 
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
@@ -133,20 +128,20 @@ impl Cipher for Bazeries {
 mod bazeries_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTH";
-    const CIPHERTEXT: &'static str = "LMKHCVBJVHSACSBZWOEWDHKAENN";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "LMKHCVBJVHSACSBZWOEWDHKAENNRDIFWQDU";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Bazeries::default();
         cipher.offset = 3;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Bazeries::default();
         cipher.offset = 3;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

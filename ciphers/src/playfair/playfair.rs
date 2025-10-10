@@ -176,8 +176,8 @@ mod playfair_tests {
     use super::*;
 
     // Note Q replaced by K and the X used as padding
-    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
-    const CIPHERTEXT: &'static str = "WGVOEGAOAWNXKHXEGLNKCMULTWIZVDLWCPIT";
+    const PTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
+    const CTEXT: &'static str = "WGVOEGAOAWNXKHXEGLNKCMULTWIZVDLWCPIT";
 
     #[test]
     fn test_pair_types() {
@@ -192,13 +192,13 @@ mod playfair_tests {
     fn encrypt_test() {
         let mut cipher = Playfair::default();
         cipher.assign_key("VUVUZELAS", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Playfair::default();
         cipher.assign_key("VUVUZELAS", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

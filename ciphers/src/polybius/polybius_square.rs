@@ -220,24 +220,24 @@ mod polybius_tests {
     use super::*;
 
     // Note Q replaced by K
-    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str =
+    const PTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str =
         "1535144252113142252221531233215441524445512113142215351443245523322134";
-    const CIPHERTEXT_SPACED: &'static str =
+    const CTEXT_SPACED: &'static str =
         "15 35 14 42 52 11 31 42 25 22 21 53 12 33 21 54 41 52 44 45 51 21 13 14 22 15 35 14 43 24 55 23 32 21 34";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod polybius_tests {
         let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
         cipher.spaced = true;
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_SPACED);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT_SPACED);
     }
 
     #[test]
@@ -253,6 +253,6 @@ mod polybius_tests {
         let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
         cipher.spaced = true;
-        assert_eq!(cipher.decrypt(CIPHERTEXT_SPACED).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT_SPACED).unwrap(), PTEXT);
     }
 }

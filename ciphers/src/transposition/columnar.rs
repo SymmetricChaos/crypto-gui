@@ -83,8 +83,8 @@ mod columnar_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "EKNUVEDQBFMELOHCWJOHYUROPRAGTIOXSTZ";
+    const PTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CTEXT: &'static str = "EKNUVEDQBFMELOHCWJOHYUROPRAGTIOXSTZ";
 
     #[test]
     fn encrypt_test() {
@@ -92,7 +92,7 @@ mod columnar_tests {
         cipher
             .assign_key("ECABD", Alphabet::BasicLatin.slice())
             .unwrap();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
     #[test]
@@ -101,6 +101,6 @@ mod columnar_tests {
         cipher
             .assign_key("ECABD", Alphabet::BasicLatin.slice())
             .unwrap();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }
