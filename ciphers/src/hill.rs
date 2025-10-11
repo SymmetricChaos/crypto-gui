@@ -8,7 +8,7 @@ use crate::Cipher;
 
 // https://patents.google.com/patent/US1845947
 
-// Defeaults because these are hard to create
+// Defaults for now because these are hard to create
 const HM: [[usize; 3]; 3] = [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
 const HMI: [[usize; 3]; 3] = [[8, 5, 10], [21, 8, 21], [21, 12, 8]];
 
@@ -169,6 +169,6 @@ mod test {
     fn encrypt_decrypt() {
         let cipher = Hill::default();
         let ct = cipher.encrypt("THEQUICKBROWNFOXJUMPS").unwrap();
-        assert_eq!("THEQUICKBROWNFOXJUMPS", cipher.encrypt(&ct).unwrap());
+        assert_eq!("THEQUICKBROWNFOXJUMPS", cipher.decrypt(&ct).unwrap());
     }
 }
