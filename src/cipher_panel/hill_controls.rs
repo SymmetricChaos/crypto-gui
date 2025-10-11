@@ -57,12 +57,31 @@ impl CipherFrame for HillFrame {
             filter_string(&mut self.cipher.key1, &self.alphabet_string);
             filter_string(&mut self.cipher.key2, &self.alphabet_string);
         }
+        ui.add_space(16.0);
 
         ui.subheading("Matrix");
+        ui.label(format!("{:>2?}", self.cipher.mat[0]));
+        ui.label(format!("{:>2?}", self.cipher.mat[1]));
+        ui.label(format!("{:>2?}", self.cipher.mat[2]));
+        ui.add_space(8.0);
+
+        ui.subheading("Matrix Inverse");
+        ui.label(format!("{:>2?}", self.cipher.mat_inv[0]));
+        ui.label(format!("{:>2?}", self.cipher.mat_inv[1]));
+        ui.label(format!("{:>2?}", self.cipher.mat_inv[2]));
+        ui.add_space(8.0);
 
         ui.subheading("Key 1");
+        if ui.control_string(&mut self.cipher.key1).changed() {
+            filter_string(&mut self.cipher.key1, &self.alphabet_string);
+        }
+        ui.add_space(8.0);
 
         ui.subheading("Key 2");
+        if ui.control_string(&mut self.cipher.key2).changed() {
+            filter_string(&mut self.cipher.key2, &self.alphabet_string);
+        }
+        ui.add_space(16.0);
     }
 
     fn randomize(&mut self) {

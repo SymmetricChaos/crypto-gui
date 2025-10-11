@@ -544,6 +544,18 @@
       "Electromechanical"
     ]
   },
+  "Hill Cipher": {
+    "Names": [
+      "Hill Cipher",
+      "Hill"
+    ],
+    "Description": "Hill's cipher is a composite cipher that applies a matrix multiplication as its essential operation in order to take information from a block of letters and produce a new block with information from each spread across the new letters. While this diffusion effect is useful it does not make a strong cipher on its own and in Hill's patent application he suggested using another (unspecified) method of encryption before and after the multiplication. In this example Vigenere ciphers are used. Although Hill's mechanical cipher never went into use, the idea of using matrix multiplication to produce diffusion would later be adopted by digital ciphers like AES. In order for decryption to be possible the matrix must be invertible.",
+    "Authors": "Lester Hill",
+    "Publication": "1929",
+    "Traits": [
+      "Composite"
+    ]
+  },
   "Hutton": {
     "Names": [
       "Hutton"

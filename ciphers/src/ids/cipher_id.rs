@@ -70,6 +70,7 @@ cipher_ids_and_names!(
     Hc128, "HC-128";
     Hc256, "HC-256";
     Hebern, "Hebern";
+    Hill, "Hill";
     Hutton, "Hutton";
     Idea, "IDEA";
     Isaac, "ISAAC";

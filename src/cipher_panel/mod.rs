@@ -350,6 +350,7 @@ pub struct CipherInterface {
 
     // Composite
     vic: vic_controls::VicFrame,
+    hill: hill_controls::HillFrame,
 
     // Secret ShARING
     shamir: shamir_controls::ShamirSecretSharingFrame,
@@ -459,6 +460,7 @@ impl CipherInterface {
                 CipherId::Adfgvx,
                 CipherId::B64,
                 CipherId::Bifid,
+                CipherId::Hill,
                 CipherId::Trifid,
                 CipherId::Vic,
             ],
@@ -574,6 +576,7 @@ impl CipherInterface {
             CipherId::Hc128 => &mut self.hc128,
             CipherId::Hc256 => &mut self.hc256,
             CipherId::Hebern => &mut self.hebern,
+            CipherId::Hill => &mut self.hill,
             CipherId::Hutton => &mut self.hutton,
             CipherId::Idea => &mut self.idea,
             CipherId::Isaac => &mut self.isaac,
