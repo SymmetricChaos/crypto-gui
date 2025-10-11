@@ -40,6 +40,7 @@ mod grille_controls;
 mod hc128_controls;
 mod hc256_controls;
 mod hebern_controls;
+mod hill_controls;
 mod hutton_controls;
 mod idea_controls;
 mod isaac_controls;

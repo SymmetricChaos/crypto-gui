@@ -1,20 +1,16 @@
+use crate::Cipher;
 use itertools::Itertools;
 use utils::{
     errors::GeneralError, preset_alphabet::Alphabet, text_functions::string_chunks,
     vecstring::VecString,
 };
 
-use crate::Cipher;
-
 // https://patents.google.com/patent/US1845947
-
-// Defaults for now because these are hard to create
-const HM: [[usize; 3]; 3] = [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
-const HMI: [[usize; 3]; 3] = [[8, 5, 10], [21, 8, 21], [21, 12, 8]];
 
 pub struct Hill {
     pub alphabet: VecString,
-    // pub mat: SomeKindOfMatrix, // some matrix where we can calculate the modular matrix inverse
+    pub mat: Vec<Vec<usize>>,
+    pub mat_inv: Vec<Vec<usize>>,
     pub key1: String,
     pub key2: String,
 }
@@ -23,6 +19,8 @@ impl Default for Hill {
     fn default() -> Self {
         Self {
             alphabet: Alphabet::BasicLatin.into(),
+            mat: vec![vec![6, 24, 1], vec![13, 16, 10], vec![20, 17, 15]],
+            mat_inv: vec![vec![8, 5, 10], vec![21, 8, 21], vec![21, 12, 8]],
             key1: String::from("EXAMPLE"),
             key2: String::from("PASSWORDS"),
         }
@@ -30,14 +28,18 @@ impl Default for Hill {
 }
 
 impl Hill {
-    pub fn cyclic_key_1(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(&alphabet);
+    }
+
+    fn cyclic_key_1(&self) -> impl Iterator<Item = usize> + '_ {
         self.key1
             .chars()
             .map(|x| self.alphabet.get_pos(x).unwrap())
             .cycle()
     }
 
-    pub fn cyclic_key_2(&self) -> impl Iterator<Item = usize> + '_ {
+    fn cyclic_key_2(&self) -> impl Iterator<Item = usize> + '_ {
         self.key2
             .chars()
             .map(|x| self.alphabet.get_pos(x).unwrap())
@@ -93,35 +95,39 @@ impl Hill {
     }
 
     fn encrypt_matrix(&self, text: &str) -> Result<String, GeneralError> {
+        let m = &self.mat;
         let mut out = String::new();
-        for chunk in string_chunks(text, 3) {
+        for chunk in string_chunks(text, m.len()) {
             let column = chunk
                 .chars()
                 .map(|x| self.alphabet.get_pos(x).unwrap())
                 .collect_vec();
-            let x = HM[0][0] * column[0] + HM[0][1] * column[1] + HM[0][2] * column[2];
-            let y = HM[1][0] * column[0] + HM[1][1] * column[1] + HM[1][2] * column[2];
-            let z = HM[2][0] * column[0] + HM[2][1] * column[1] + HM[2][2] * column[2];
-            out.push(*self.alphabet.get_char(x % 26).unwrap());
-            out.push(*self.alphabet.get_char(y % 26).unwrap());
-            out.push(*self.alphabet.get_char(z % 26).unwrap());
+            for i in 0..m.len() {
+                let mut n = 0;
+                for j in 0..m.len() {
+                    n += m[i][j] * column[j];
+                }
+                out.push(*self.alphabet.get_char(n % self.alphabet.len()).unwrap());
+            }
         }
         Ok(out)
     }
 
     fn decrypt_matrix(&self, text: &str) -> Result<String, GeneralError> {
+        let m = &self.mat_inv;
         let mut out = String::new();
-        for chunk in string_chunks(text, 3) {
+        for chunk in string_chunks(text, m.len()) {
             let column = chunk
                 .chars()
                 .map(|x| self.alphabet.get_pos(x).unwrap())
                 .collect_vec();
-            let x = HMI[0][0] * column[0] + HMI[0][1] * column[1] + HMI[0][2] * column[2];
-            let y = HMI[1][0] * column[0] + HMI[1][1] * column[1] + HMI[1][2] * column[2];
-            let z = HMI[2][0] * column[0] + HMI[2][1] * column[1] + HMI[2][2] * column[2];
-            out.push(*self.alphabet.get_char(x % 26).unwrap());
-            out.push(*self.alphabet.get_char(y % 26).unwrap());
-            out.push(*self.alphabet.get_char(z % 26).unwrap());
+            for i in 0..m.len() {
+                let mut n = 0;
+                for j in 0..m.len() {
+                    n += m[i][j] * column[j];
+                }
+                out.push(*self.alphabet.get_char(n % self.alphabet.len()).unwrap());
+            }
         }
         Ok(out)
     }
@@ -129,10 +135,11 @@ impl Hill {
 
 impl Cipher for Hill {
     fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if text.chars().count() % 3 != 0 {
-            return Err(GeneralError::input(
-                "plaintext length must be a multiple of three",
-            ));
+        if text.chars().count() % self.mat.len() != 0 {
+            return Err(GeneralError::input(format!(
+                "plaintext length must be a multiple of {}",
+                self.mat_inv.len(),
+            )));
         }
         let t = self.encrypt_cyclic_1(text)?;
         let t = self.encrypt_matrix(&t)?;
@@ -140,10 +147,11 @@ impl Cipher for Hill {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if text.chars().count() % 3 != 0 {
-            return Err(GeneralError::input(
-                "ciphertext length must be a multiple of three",
-            ));
+        if text.chars().count() % self.mat.len() != 0 {
+            return Err(GeneralError::input(format!(
+                "ciphertext length must be a multiple of {}",
+                self.mat_inv.len(),
+            )));
         }
         let t = self.decrypt_cyclic_2(text)?;
         let t = self.decrypt_matrix(&t)?;
