@@ -7,7 +7,6 @@ use utils::{
     preset_alphabet::Alphabet,
     text_functions::{filter_string, random_string_sample_replace},
 };
-
 pub struct HillFrame {
     cipher: Hill,
     alphabet_string: String,
@@ -50,6 +49,7 @@ impl CipherFrame for HillFrame {
                 }
             });
         });
+        ui.add_space(8.0);
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
@@ -59,17 +59,33 @@ impl CipherFrame for HillFrame {
         }
         ui.add_space(16.0);
 
-        ui.subheading("Matrix");
-        ui.label(format!("{:>2?}", self.cipher.mat[0]));
-        ui.label(format!("{:>2?}", self.cipher.mat[1]));
-        ui.label(format!("{:>2?}", self.cipher.mat[2]));
-        ui.add_space(8.0);
-
-        ui.subheading("Matrix Inverse");
-        ui.label(format!("{:>2?}", self.cipher.mat_inv[0]));
-        ui.label(format!("{:>2?}", self.cipher.mat_inv[1]));
-        ui.label(format!("{:>2?}", self.cipher.mat_inv[2]));
-        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            ui.group(|ui| {
+                ui.vertical(|ui| {
+                    ui.subheading("Matrix");
+                    for i in 0..3 {
+                        ui.monospace(format!(
+                            "{:>2} {:>2} {:>2}",
+                            self.cipher.mat[i][0], self.cipher.mat[i][1], self.cipher.mat[i][2]
+                        ));
+                    }
+                });
+            });
+            ui.group(|ui| {
+                ui.vertical(|ui| {
+                    ui.subheading("Inverse");
+                    for i in 0..3 {
+                        ui.monospace(format!(
+                            "{:>2} {:>2} {:>2}",
+                            self.cipher.mat_inv[i][0],
+                            self.cipher.mat_inv[i][1],
+                            self.cipher.mat_inv[i][2]
+                        ));
+                    }
+                });
+            });
+        });
+        ui.add_space(16.0);
 
         ui.subheading("Key 1");
         if ui.control_string(&mut self.cipher.key1).changed() {

@@ -21,3 +21,4 @@ regex = "1"
 crypto-bigint = { version = "0.6.1" }
 strum = { version = "0.26", features = ["derive"] }
 hex-literal = "1.0.0"
+nalgebra = "0.34.1"
