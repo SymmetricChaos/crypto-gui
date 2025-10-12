@@ -66,7 +66,9 @@ impl CipherFrame for HillFrame {
                     for i in 0..3 {
                         ui.monospace(format!(
                             "{:>2} {:>2} {:>2}",
-                            self.cipher.mat[i][0], self.cipher.mat[i][1], self.cipher.mat[i][2]
+                            self.cipher.mat.row(i)[0],
+                            self.cipher.mat.row(i)[1],
+                            self.cipher.mat.row(i)[2],
                         ));
                     }
                 });
@@ -77,9 +79,9 @@ impl CipherFrame for HillFrame {
                     for i in 0..3 {
                         ui.monospace(format!(
                             "{:>2} {:>2} {:>2}",
-                            self.cipher.mat_inv[i][0],
-                            self.cipher.mat_inv[i][1],
-                            self.cipher.mat_inv[i][2]
+                            self.cipher.mat_inv.row(i)[0],
+                            self.cipher.mat_inv.row(i)[1],
+                            self.cipher.mat_inv.row(i)[2],
                         ));
                     }
                 });

@@ -1,16 +1,15 @@
 use crate::Cipher;
-use itertools::Itertools;
+use nalgebra::{DMatrix, DVector};
 use utils::{
     errors::GeneralError, preset_alphabet::Alphabet, text_functions::string_chunks,
     vecstring::VecString,
 };
-
 // https://patents.google.com/patent/US1845947
 
 pub struct Hill {
     pub alphabet: VecString,
-    pub mat: Vec<Vec<usize>>,
-    pub mat_inv: Vec<Vec<usize>>,
+    pub mat: DMatrix<usize>,
+    pub mat_inv: DMatrix<usize>,
     pub key1: String,
     pub key2: String,
 }
@@ -19,8 +18,8 @@ impl Default for Hill {
     fn default() -> Self {
         Self {
             alphabet: Alphabet::BasicLatin.into(),
-            mat: vec![vec![6, 24, 1], vec![13, 16, 10], vec![20, 17, 15]],
-            mat_inv: vec![vec![8, 5, 10], vec![21, 8, 21], vec![21, 12, 8]],
+            mat: DMatrix::from_row_slice(3, 3, &[6, 24, 1, 13, 16, 10, 20, 17, 15]),
+            mat_inv: DMatrix::from_row_slice(3, 3, &[8, 5, 10, 21, 8, 21, 21, 12, 8]),
             key1: String::from("EXAMPLE"),
             key2: String::from("PASSWORDS"),
         }
@@ -97,16 +96,15 @@ impl Hill {
     fn encrypt_matrix(&self, text: &str) -> Result<String, GeneralError> {
         let m = &self.mat;
         let mut out = String::new();
-        for chunk in string_chunks(text, m.len()) {
-            let column = chunk
-                .chars()
-                .map(|x| self.alphabet.get_pos(x).unwrap())
-                .collect_vec();
-            for i in 0..m.len() {
-                let mut n = 0;
-                for j in 0..m.len() {
-                    n += m[i][j] * column[j];
-                }
+        for chunk in string_chunks(text, m.nrows()) {
+            let column = DVector::from_iterator(
+                m.nrows(),
+                chunk.chars().map(|x| self.alphabet.get_pos(x).unwrap()),
+            );
+
+            let t = m * column;
+
+            for n in t.iter() {
                 out.push(*self.alphabet.get_char(n % self.alphabet.len()).unwrap());
             }
         }
@@ -116,16 +114,15 @@ impl Hill {
     fn decrypt_matrix(&self, text: &str) -> Result<String, GeneralError> {
         let m = &self.mat_inv;
         let mut out = String::new();
-        for chunk in string_chunks(text, m.len()) {
-            let column = chunk
-                .chars()
-                .map(|x| self.alphabet.get_pos(x).unwrap())
-                .collect_vec();
-            for i in 0..m.len() {
-                let mut n = 0;
-                for j in 0..m.len() {
-                    n += m[i][j] * column[j];
-                }
+        for chunk in string_chunks(text, m.nrows()) {
+            let column = DVector::from_iterator(
+                m.nrows(),
+                chunk.chars().map(|x| self.alphabet.get_pos(x).unwrap()),
+            );
+
+            let t = m * column;
+
+            for n in t.iter() {
                 out.push(*self.alphabet.get_char(n % self.alphabet.len()).unwrap());
             }
         }
@@ -135,7 +132,7 @@ impl Hill {
 
 impl Cipher for Hill {
     fn encrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if text.chars().count() % self.mat.len() != 0 {
+        if text.chars().count() % self.mat.nrows() != 0 {
             return Err(GeneralError::input(format!(
                 "plaintext length must be a multiple of {}",
                 self.mat_inv.len(),
@@ -147,7 +144,7 @@ impl Cipher for Hill {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, GeneralError> {
-        if text.chars().count() % self.mat.len() != 0 {
+        if text.chars().count() % self.mat.nrows() != 0 {
             return Err(GeneralError::input(format!(
                 "ciphertext length must be a multiple of {}",
                 self.mat_inv.len(),
