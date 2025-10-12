@@ -1,10 +1,10 @@
 use num::integer::mod_floor;
 use num::{CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, Integer, One, Zero};
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// FiniteInt uses an i32 internally so N should not be more than 46340 to avoid issues with multiplication
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct FiniteInt<const N: i32>(i32);
 
 impl<const N: i32> Zero for FiniteInt<N> {
@@ -50,6 +50,12 @@ impl<const N: i32> FiniteInt<N> {
 }
 
 impl<const N: i32> Display for FiniteInt<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl<const N: i32> Debug for FiniteInt<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}[{}]", self.0, N)
     }
@@ -150,11 +156,12 @@ mod math_tests {
 
     #[test]
     fn mul() {
-        let a = FiniteInt::<26>(5);
-        let b = FiniteInt::<26>(7);
+        type FI26 = FiniteInt<26>;
+        let a = FI26::new(5);
+        let b = FI26::new(7);
         println!("{} * {} = {}", a, b, a * b);
-        let a = FiniteInt::<26>(5);
-        let b = FiniteInt::<26>(21);
+        let a = FI26::new(5);
+        let b = FI26::new(21);
         println!("{} * {} = {}", a, b, a * b);
     }
 
@@ -185,7 +192,7 @@ mod math_tests {
     #[test]
     fn recip() {
         let a = FiniteInt::<26>(5);
-        println!("1[26] / {} = {}", a, a.recip().unwrap())
+        println!("1 / {} = {}", a, a.recip().unwrap())
     }
 
     #[test]
