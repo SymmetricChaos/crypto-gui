@@ -5,6 +5,7 @@ pub mod byte_equality_check;
 pub mod byte_formatting;
 pub mod elliptic_curves;
 pub mod errors;
+pub mod finite_int;
 pub mod grid;
 pub mod math_functions;
 pub mod other_word_sizes;
