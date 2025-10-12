@@ -63,27 +63,13 @@ impl CipherFrame for HillFrame {
             ui.group(|ui| {
                 ui.vertical(|ui| {
                     ui.subheading("Matrix");
-                    for i in 0..3 {
-                        ui.monospace(format!(
-                            "{:>2} {:>2} {:>2}",
-                            self.cipher.mat.row(i)[0],
-                            self.cipher.mat.row(i)[1],
-                            self.cipher.mat.row(i)[2],
-                        ));
-                    }
+                    ui.monospace(format!("{}", self.cipher.mat));
                 });
             });
             ui.group(|ui| {
                 ui.vertical(|ui| {
                     ui.subheading("Inverse");
-                    for i in 0..3 {
-                        ui.monospace(format!(
-                            "{:>2} {:>2} {:>2}",
-                            self.cipher.mat_inv.row(i)[0],
-                            self.cipher.mat_inv.row(i)[1],
-                            self.cipher.mat_inv.row(i)[2],
-                        ));
-                    }
+                    ui.monospace(format!("{}", self.cipher.mat_inv));
                 });
             });
         });

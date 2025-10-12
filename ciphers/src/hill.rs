@@ -159,7 +159,20 @@ impl Cipher for Hill {
 #[cfg(test)]
 mod test {
 
+    use utils::finite_int::FiniteInt;
+
     use super::*;
+
+    #[test]
+    fn matrix_ops() {
+        let mat = DMatrix::from_row_slice(
+            3,
+            3,
+            &[6, 24, 1, 13, 16, 10, 20, 17, 15].map(|x| FiniteInt::<26>::new_raw(x)),
+        );
+        let x = mat.clone() * mat.clone();
+        println!("{x}");
+    }
 
     #[test]
     fn matrix_encr() {

@@ -1,7 +1,7 @@
 use num::integer::mod_floor;
 use num::{CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, Integer, One, Zero};
 use std::fmt::Display;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// FiniteInt uses an i32 internally so N should not be more than 46340 to avoid issues with multiplication
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -63,6 +63,12 @@ impl<const N: i32> Add for FiniteInt<N> {
     }
 }
 
+impl<const N: i32> AddAssign for FiniteInt<N> {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = Self((self.0 + rhs.0) % N)
+    }
+}
+
 impl<const N: i32> CheckedAdd for FiniteInt<N> {
     fn checked_add(&self, v: &Self) -> Option<Self> {
         Some(Self(self.0.checked_add(v.0)? % N))
@@ -74,6 +80,12 @@ impl<const N: i32> Sub for FiniteInt<N> {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self((self.0 + N - rhs.0) % N)
+    }
+}
+
+impl<const N: i32> SubAssign for FiniteInt<N> {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = Self((self.0 + N - rhs.0) % N)
     }
 }
 
@@ -91,6 +103,12 @@ impl<const N: i32> Mul for FiniteInt<N> {
     }
 }
 
+impl<const N: i32> MulAssign for FiniteInt<N> {
+    fn mul_assign(&mut self, rhs: Self) {
+        *self = Self((self.0 * rhs.0) % N)
+    }
+}
+
 impl<const N: i32> CheckedMul for FiniteInt<N> {
     fn checked_mul(&self, v: &Self) -> Option<Self> {
         Some(Self(self.0.checked_mul(v.0)? % N))
@@ -105,9 +123,23 @@ impl<const N: i32> Div for FiniteInt<N> {
     }
 }
 
+impl<const N: i32> DivAssign for FiniteInt<N> {
+    fn div_assign(&mut self, rhs: Self) {
+        *self = *self * rhs.recip().unwrap()
+    }
+}
+
 impl<const N: i32> CheckedDiv for FiniteInt<N> {
     fn checked_div(&self, v: &Self) -> Option<Self> {
         self.checked_mul(&v.recip()?)
+    }
+}
+
+impl<const N: i32> Neg for FiniteInt<N> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self.0)
     }
 }
 
@@ -154,5 +186,11 @@ mod math_tests {
     fn recip() {
         let a = FiniteInt::<26>(5);
         println!("1[26] / {} = {}", a, a.recip().unwrap())
+    }
+
+    #[test]
+    fn neg() {
+        let a = FiniteInt::<26>(11);
+        println!("{} + {} = {}", a, -a, a + -a)
     }
 }
