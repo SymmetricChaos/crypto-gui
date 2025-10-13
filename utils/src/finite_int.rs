@@ -7,26 +7,6 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct FiniteInt<const N: i32>(i32);
 
-impl<const N: i32> Zero for FiniteInt<N> {
-    fn zero() -> Self {
-        FiniteInt(0)
-    }
-
-    fn is_zero(&self) -> bool {
-        self.0 == 0
-    }
-}
-
-impl<const N: i32> One for FiniteInt<N> {
-    fn one() -> Self {
-        FiniteInt(1)
-    }
-
-    fn is_one(&self) -> bool {
-        self.0 == 1
-    }
-}
-
 impl<const N: i32> FiniteInt<N> {
     /// Create a new FiniteInt by reducing the input to ensure it is valid
     pub fn new(n: i32) -> Self {
@@ -46,6 +26,26 @@ impl<const N: i32> FiniteInt<N> {
         } else {
             Some(Self::new(egcd.x))
         }
+    }
+}
+
+impl<const N: i32> Zero for FiniteInt<N> {
+    fn zero() -> Self {
+        FiniteInt(0)
+    }
+
+    fn is_zero(&self) -> bool {
+        self.0 == 0
+    }
+}
+
+impl<const N: i32> One for FiniteInt<N> {
+    fn one() -> Self {
+        FiniteInt(1)
+    }
+
+    fn is_one(&self) -> bool {
+        self.0 == 1
     }
 }
 
@@ -85,13 +85,13 @@ impl<const N: i32> Sub for FiniteInt<N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Self((self.0 + N - rhs.0) % N)
+        self + -rhs
     }
 }
 
 impl<const N: i32> SubAssign for FiniteInt<N> {
     fn sub_assign(&mut self, rhs: Self) {
-        *self = Self((self.0 + N - rhs.0) % N)
+        *self = *self + -rhs;
     }
 }
 
