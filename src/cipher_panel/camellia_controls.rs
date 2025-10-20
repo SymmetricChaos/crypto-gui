@@ -73,6 +73,8 @@ impl CipherFrame for CamelliaFrame {
             "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/Camellia",
         );
         ui.add_space(8.0);
+        ui.randomize_reset_cipher(self);
+        ui.add_space(16.0);
 
         ui.selectable_value(
             &mut self.selector,
@@ -89,9 +91,6 @@ impl CipherFrame for CamelliaFrame {
             CamelliaSelect::Camellia256,
             "Camellia256",
         );
-
-        ui.randomize_reset_cipher(self);
-        ui.add_space(16.0);
 
         match self.selector {
             CamelliaSelect::Camellia128 => {
