@@ -4,6 +4,7 @@ use std::fmt::{Debug, Display};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// FiniteInt uses an i32 internally so N should not be more than 46340 to avoid issues with multiplication
+/// If N is not prime, division will fail for some inputs.
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct FiniteInt<const N: i32>(i32);
 
