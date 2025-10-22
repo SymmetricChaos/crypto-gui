@@ -86,6 +86,7 @@ pub struct RngInterface {
     halton: halton_controls::HaltonFrame,
     hc128: hc128_controls::Hc128Frame,
     hc256: hc256_controls::Hc256Frame,
+    isaac: isaac_controls::IsaacFrame,
     jsf: jsf_controls::JsfFrame,
     kiss: kiss_controls::KissFrame,
     lcg: lcg_controls::LcgFrame,
@@ -126,6 +127,7 @@ impl RngInterface {
         combox_box(
             &[
                 RngId::AlternatingStep,
+                RngId::Isaac,
                 RngId::Jsf,
                 RngId::Kiss,
                 RngId::Lcg,
@@ -198,6 +200,7 @@ impl RngInterface {
             RngId::Halton => &mut self.halton,
             RngId::Hc128 => &mut self.hc128,
             RngId::Hc256 => &mut self.hc256,
+            RngId::Isaac => &mut self.isaac,
             RngId::Jsf => &mut self.jsf,
             RngId::Kiss => &mut self.kiss,
             RngId::Lcg => &mut self.lcg,
