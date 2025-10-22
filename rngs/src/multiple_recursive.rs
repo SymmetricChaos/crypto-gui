@@ -52,12 +52,12 @@ impl MRG63k3a {
     pub fn new(seed: [i64; 6]) -> Result<Self, RngError> {
         if seed[0] >= Self::M1 || seed[1] >= Self::M1 || seed[2] >= Self::M1 {
             return Err(RngError::general(
-                "seed values 0..3 must be less than 9223372036854769163 (2^63 - 6645)",
+                "seed values 0..=2 must be less than 9223372036854769163 (2^63 - 6645)",
             ));
         };
         if seed[3] >= Self::M2 || seed[4] >= Self::M2 || seed[5] >= Self::M2 {
             return Err(RngError::general(
-                "seed values 0..3 must be less than 9223372036854754679 (2^63 - 21129)",
+                "seed values 3..=5 must be less than 9223372036854754679 (2^63 - 21129)",
             ));
         };
         Ok(Self { state: seed })
