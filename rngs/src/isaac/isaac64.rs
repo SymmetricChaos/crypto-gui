@@ -145,7 +145,7 @@ mod tests {
         let msg = b"a Top Secret secret";
         let key = b"this is my secret key";
         let mut rng = Isaac64::init_with_seed(key, true);
-        let enc = msg.iter().map(|&b| (rng.next_ascii() ^ b)).collect_vec();
+        let enc = msg.iter().map(|&b| rng.next_ascii() ^ b).collect_vec();
         println!("{:02x?}", enc);
     }
 }
