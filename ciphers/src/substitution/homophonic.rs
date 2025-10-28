@@ -1,5 +1,10 @@
 use crate::Cipher;
-use rand::{rngs::ThreadRng, seq::IteratorRandom, thread_rng, Rng};
+use itertools::Itertools;
+use rand::{
+    rngs::{StdRng, ThreadRng},
+    seq::{IteratorRandom, SliceRandom},
+    thread_rng, Rng, SeedableRng,
+};
 
 pub struct Homophonic {
     characters: Vec<char>,
@@ -11,6 +16,35 @@ pub struct Homophonic {
 
 impl Default for Homophonic {
     fn default() -> Self {
+        let mut rng = StdRng::seed_from_u64(347856);
+
+        let pairs = {
+            let mut p = Vec::new();
+            for i in utils::preset_alphabet::Alphabet::BasicLatin.chars() {
+                for j in utils::preset_alphabet::Alphabet::BasicLatin.chars() {
+                    p.push(format!("{}{}", i, j));
+                }
+            }
+            p
+        };
+        let mut x = pairs
+            .into_iter()
+            .map(|x| x.to_string())
+            .into_iter()
+            .collect_vec();
+        x.shuffle(&mut rng);
+
+        let mut groups = Vec::new();
+        let mut idx = 0;
+        for i in [
+            // this totals to 512
+            40, 7, 15, 25, 60, 15, 10, 30, 35, 3, 3, 20, 15, 35, 35, 10, 3, 30, 30, 45, 15, 5, 10,
+            3, 10, 3,
+        ] {
+            groups.push(x[idx..idx + i].to_vec());
+            idx += i;
+        }
+
         Self {
             characters: vec![
                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
@@ -19,10 +53,10 @@ impl Default for Homophonic {
             group_sizes: vec![
                 40, 7, 15, 25, 60, 15, 10, 30, 35, 3, 3, 20, 15, 35, 35, 10, 3, 30, 30, 45, 15, 5,
                 10, 3, 10, 3,
-            ], // this totals to 512
-            groups: Vec::default(),
-            nulls: Vec::default(), // should be 164
-            null_rate: 0.05,
+            ],
+            groups,
+            nulls: x[idx..].to_vec(), // should have 164 elements
+            null_rate: 0.5,
         }
     }
 }
@@ -94,7 +128,16 @@ mod tests {
             .into_iter()
             .collect_vec();
         x.shuffle(&mut rng);
-        println!("{:?}", x);
+        let mut idx = 0;
+        for i in [
+            40, 7, 15, 25, 60, 15, 10, 30, 35, 3, 3, 20, 15, 35, 35, 10, 3, 30, 30, 45, 15, 5, 10,
+            3, 10, 3,
+        ] {
+            println!("vec!{:?},", &x[idx..idx + i]);
+            idx += i;
+        }
+        println!("\n\nvec!{:?},", &x[idx..]);
+        // println!("{:?}", x);
     }
 
     #[test]
