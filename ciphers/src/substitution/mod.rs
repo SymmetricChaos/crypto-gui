@@ -1,4 +1,5 @@
 pub mod affine;
+pub mod homophonic;
 pub use affine::Affine;
 
 pub mod caesar;
