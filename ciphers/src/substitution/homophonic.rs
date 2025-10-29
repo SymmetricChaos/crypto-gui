@@ -10,8 +10,8 @@ pub struct Homophonic {
     characters: Vec<char>,
     groups: Vec<Vec<String>>,
     nulls: Vec<String>,
-    null_rate: f64,
-    seed: u64,
+    pub null_rate: f64,
+    pub enc_seed: u64,
 }
 
 impl Default for Homophonic {
@@ -46,7 +46,7 @@ impl Default for Homophonic {
             groups,
             nulls: pairs[idx..].to_vec(), // should have 164 elements
             null_rate: 0.5,
-            seed: 0xBAD5EED0BAD5EED0,
+            enc_seed: 0xBAD5EED0BAD5EED0,
         }
     }
 }
@@ -100,7 +100,7 @@ impl Homophonic {
 impl Cipher for Homophonic {
     fn encrypt(&self, text: &str) -> Result<String, utils::errors::GeneralError> {
         let mut out = String::new();
-        let mut rng = StdRng::seed_from_u64(self.seed);
+        let mut rng = StdRng::seed_from_u64(self.enc_seed);
         for c in text.chars() {
             // Possibly insert a null
             if rng.gen_bool(self.null_rate) {

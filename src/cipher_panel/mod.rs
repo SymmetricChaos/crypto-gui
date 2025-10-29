@@ -41,6 +41,7 @@ mod hc128_controls;
 mod hc256_controls;
 mod hebern_controls;
 mod hill_controls;
+mod homophonic_controls;
 mod hutton_controls;
 mod idea_controls;
 mod isaac_controls;
@@ -93,6 +94,7 @@ mod xor_splitting_controls;
 mod xtea_controls;
 
 #[macro_export]
+/// Implements reset, encrypt_string, and decrypt_string in the simplest way. Reset just calls Self::default() while the encrypt and decrypt just call the encrypt and decrypt methods from Cipher
 macro_rules! simple_cipher {
     () => {
         fn reset(&mut self) {
