@@ -61,6 +61,11 @@ impl Homophonic {
         if groups_sizes.iter().sum::<usize>() > 676 {
             return Err(GeneralError::input("only 676 code groups can be assigned"));
         }
+        if groups_sizes.len() != characters.len() {
+            return Err(GeneralError::input(
+                "there must be the same number of characters and group sizes",
+            ));
+        }
 
         self.characters = characters;
 
@@ -71,7 +76,6 @@ impl Homophonic {
             }
         }
 
-        // Seeded for consistency, specific ordering doesn't matter.
         let mut rng = StdRng::seed_from_u64(seed);
         pairs.shuffle(&mut rng);
 
