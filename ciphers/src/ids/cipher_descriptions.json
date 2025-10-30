@@ -556,6 +556,17 @@
       "Composite"
     ]
   },
+  "Homophonic": {
+    "Names": [
+      "Homophonic"
+    ],
+    "Description": "A homophonic cipher refers to a variety of technique that attempt to flatten the patterns that occur in simple substitution ciphers. The method here assigns various two letter code groups to each character and all remaining code groups to 'null' values that are ignored. More frequently used letters should be assigned more groups so that no groups gets used more often and reveals that it is a common letter. The name 'homophinic' likely comes from The Great Cipher used by French royalty in which rather than using this technique with letters each French sound was assigned code groups.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Substitution"
+    ]
+  },
   "Hutton": {
     "Names": [
       "Hutton"

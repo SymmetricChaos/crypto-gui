@@ -7,9 +7,9 @@ use rand::{
 use utils::{errors::GeneralError, text_functions::string_chunks};
 
 pub struct Homophonic {
-    characters: Vec<char>,
-    groups: Vec<Vec<String>>,
-    nulls: Vec<String>,
+    pub characters: Vec<char>,
+    pub groups: Vec<Vec<String>>,
+    pub nulls: Vec<String>,
     pub null_rate: f64,
     pub enc_seed: u64,
 }

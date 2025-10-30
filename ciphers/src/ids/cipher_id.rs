@@ -71,6 +71,7 @@ cipher_ids_and_names!(
     Hc256, "HC-256";
     Hebern, "Hebern";
     Hill, "Hill";
+    Homophonic, "Homophonic";
     Hutton, "Hutton";
     Idea, "IDEA";
     Isaac, "ISAAC";
