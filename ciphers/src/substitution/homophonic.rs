@@ -24,7 +24,7 @@ impl Default for Homophonic {
         }
 
         // Seeded for consistency, specific ordering doesn't matter.
-        let mut rng = StdRng::seed_from_u64(347856);
+        let mut rng = StdRng::seed_from_u64(0x0123456789ABCDEF);
         pairs.shuffle(&mut rng);
 
         let mut groups = Vec::new();
@@ -46,7 +46,7 @@ impl Default for Homophonic {
             groups,
             nulls: pairs[idx..].to_vec(), // should have 164 elements
             null_rate: 0.05,
-            enc_seed: 0xBAD5EED0BAD5EED0,
+            enc_seed: 0x5EED5EED5EED5EED,
         }
     }
 }

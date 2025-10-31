@@ -18,7 +18,7 @@ impl Default for HomophonicFrame {
             cipher: Default::default(),
             characters: String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
             group_sizes: String::from("40, 7, 15, 25, 60, 15, 10, 30, 35, 3, 3, 20, 15, 35, 35, 10, 3, 30, 30, 45, 15, 5, 10, 3, 10, 3"),
-            seed: 0xBAD5EED0BAD5EED0,
+            seed: 0x0123456789ABCDEF,
         }
     }
 }
@@ -55,7 +55,7 @@ impl CipherFrame for HomophonicFrame {
                 self.cipher.enc_seed = thread_rng().gen();
             }
         });
-        ui.label("Determines the selection of code groups. Should be changed for every message.");
+        ui.label("Determines the selection of code groups when encrypting. Should be changed for every message.");
         ui.u64_hex_edit(&mut self.cipher.enc_seed);
         ui.add_space(8.0);
 
@@ -69,7 +69,7 @@ impl CipherFrame for HomophonicFrame {
         ui.add_space(8.0);
 
         ui.group(|ui| {
-            if ui.button("Create Code Groups").clicked() {
+            if ui.button("Create New Code Groups").clicked() {
                 match self.parse_group_sizes() {
                     Ok(group_sizes) => {
                         match self.cipher.set_groups(
@@ -91,32 +91,39 @@ impl CipherFrame for HomophonicFrame {
                 };
             }
             ui.add_space(8.0);
+
             ui.horizontal(|ui| {
                 ui.subheading("Seed");
                 if ui.button("🎲").clicked() {
                     self.seed = thread_rng().gen();
                 }
             });
+            ui.label("Determine how the groups are shuffled.");
             ui.u64_hex_edit(&mut self.seed);
             ui.add_space(8.0);
+
             ui.subheading("Characters");
             ui.text_edit_multiline(&mut self.characters);
             ui.add_space(8.0);
+
             ui.subheading("Groups Per Character");
-            ui.label("Number of groups assigned to each character. Separate by commas.");
+            ui.label("Number of groups assigned to each character. Separate by commas. Total must be less than 676.");
             ui.text_edit_multiline(&mut self.group_sizes);
         });
         ui.add_space(8.0);
 
         ui.collapsing("Code Groups", |ui| {
             for n in 0..self.cipher.characters.len() {
-                ui.monospace(format!(
-                    "{} = {}\n",
-                    self.cipher.characters[n],
-                    self.cipher.groups[n].join(", ")
-                ));
+                ui.horizontal(|ui| {
+                    ui.mono_strong(self.cipher.characters[n]);
+                    ui.monospace(format!(" = [{}]", self.cipher.groups[n].join(", ")));
+                });
+                ui.add_space(4.0);
             }
-            ui.monospace(format!("NULLS = {}", self.cipher.nulls.join(", ")));
+            ui.horizontal(|ui| {
+                ui.mono_strong("NULLS");
+                ui.monospace(format!(" = [{}]", self.cipher.nulls.join(", ")));
+            });
         });
         ui.add_space(8.0);
     }
