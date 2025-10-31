@@ -47,6 +47,7 @@ impl CipherFrame for HomophonicFrame {
         if ui.button("Reset").clicked() {
             self.reset()
         }
+        ui.add_space(16.0);
 
         ui.horizontal(|ui| {
             ui.subheading("Encryption Seed");
@@ -60,31 +61,36 @@ impl CipherFrame for HomophonicFrame {
 
         ui.subheading("Null Rate");
         ui.label("Probability that a null group will be inserted before or after each real group.");
-        ui.add(egui::DragValue::new(&mut self.cipher.null_rate).speed(0.1));
+        ui.add(
+            egui::DragValue::new(&mut self.cipher.null_rate)
+                .speed(0.01)
+                .range(0..=1),
+        );
         ui.add_space(8.0);
 
-        if ui.button("Create Code Groups").clicked() {
-            match self.parse_group_sizes() {
-                Ok(group_sizes) => {
-                    match self.cipher.set_groups(
-                        self.characters.chars().collect_vec(),
-                        group_sizes,
-                        self.seed,
-                    ) {
-                        Ok(()) => (),
-                        Err(e) => {
-                            errors.clear();
-                            errors.push_str(&e.to_string());
+        ui.group(|ui| {
+            if ui.button("Create Code Groups").clicked() {
+                match self.parse_group_sizes() {
+                    Ok(group_sizes) => {
+                        match self.cipher.set_groups(
+                            self.characters.chars().collect_vec(),
+                            group_sizes,
+                            self.seed,
+                        ) {
+                            Ok(()) => (),
+                            Err(e) => {
+                                errors.clear();
+                                errors.push_str(&e.to_string());
+                            }
                         }
                     }
-                }
-                Err(e) => {
-                    errors.clear();
-                    errors.push_str(&e.to_string());
-                }
-            };
-        }
-        ui.group(|ui| {
+                    Err(e) => {
+                        errors.clear();
+                        errors.push_str(&e.to_string());
+                    }
+                };
+            }
+            ui.add_space(8.0);
             ui.horizontal(|ui| {
                 ui.subheading("Seed");
                 if ui.button("🎲").clicked() {
@@ -94,10 +100,11 @@ impl CipherFrame for HomophonicFrame {
             ui.u64_hex_edit(&mut self.seed);
             ui.add_space(8.0);
             ui.subheading("Characters");
-            ui.text_edit_singleline(&mut self.characters);
+            ui.text_edit_multiline(&mut self.characters);
             ui.add_space(8.0);
-            ui.subheading("Frequency");
-            ui.text_edit_singleline(&mut self.group_sizes);
+            ui.subheading("Groups Per Character");
+            ui.label("Number of groups assigned to each character. Separate by commas.");
+            ui.text_edit_multiline(&mut self.group_sizes);
         });
         ui.add_space(8.0);
 

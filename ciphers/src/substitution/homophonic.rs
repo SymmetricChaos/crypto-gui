@@ -45,7 +45,7 @@ impl Default for Homophonic {
             ],
             groups,
             nulls: pairs[idx..].to_vec(), // should have 164 elements
-            null_rate: 0.5,
+            null_rate: 0.05,
             enc_seed: 0xBAD5EED0BAD5EED0,
         }
     }
