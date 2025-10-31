@@ -1,4 +1,21 @@
 ﻿{
+  "Achterbahn": {
+    "Names": [
+      "Achterbahn",
+      "Achterbahn-80",
+      "Achterbahn-128",
+      "ACHTERBAHN",
+      "ACHTERBAHN-80",
+      "ACHTERBAHN-128"
+    ],
+    "Description": "Achterbahn was an entrant to the eSTREAM competition with version that can use 80-bit or 128-bit keys. Uses eleven non-linear feedback shift registers for the 80-bit version and thirteen for the 128-bit version. Because only the last two differ for Achterbahn-128 it is possible to simply downgrade to Achterbahn-80 both in hardware and software.",
+    "Authors": "Berndt Gammel, Rainer Göttfert, Oliver Kniffler",
+    "Publication": "2006",
+    "Traits": [
+      "Stream Cipher",
+      "eSTREAM"
+    ]
+  },
   "A5/1": {
     "Names": [
       "A5/1",

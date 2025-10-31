@@ -27,6 +27,7 @@ macro_rules! cipher_ids_and_names {
 }
 
 cipher_ids_and_names!(
+    Achterbahn, "Achterbahn";
     Adfgvx, "ADFGVX";
     Aes, "AES";
     AesGcm, "AES-GCM";
