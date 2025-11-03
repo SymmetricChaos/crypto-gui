@@ -64,25 +64,16 @@ macro_rules! maj3 {
 //                      )) << 20))
 
 fn step_a0(x: u64, feedin: u64) -> u64 {
-
-    (x >> 1) | 1 & 
-    xor3!(
-        xor3!(
-            feedin, 
-            x >> 15,
-            xor3!(x >> 3, x >> 2, x)
-            ),
-        xor3!(
-            and2!(x >> 4, x >> 7),
-            xor3!(x >> 5, x >> 6, x >> 8),
-            mux3!(x >> 4, x >> 5, x >> 6)
-            ),
-        mux3!(
-            mux3!(x >>11, x >>12, x >>2),
-            and3!(x >>6, x >>2, x >>13),
-            mux3!( x >>1, x >>10, x >>9)
-            )
-        )
+       (x >> 1) | ((1 & (xor3!(xor3!(feedin,
+                                         x >>15,
+                                        xor3!( x >>3, x >>2, x )),
+                                   xor3!(and2!( x >>4, x >>7),
+                                        xor3!( x >>5, x >>6, x >>8),
+                                        mux3!( x >>4, x >>5, x >>6)),
+                                   mux3!(mux3!( x >>11, x >>12, x >>2),
+                                        and3!( x >>6, x >>2, x >>13),
+                                        mux3!( x >>1, x >>10, x >>9)))
+                     )) << 20)
 }
 
 pub struct Achterbahn128 {}
