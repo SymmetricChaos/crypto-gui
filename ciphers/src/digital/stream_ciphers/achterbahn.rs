@@ -1,5 +1,5 @@
-const NLFSR_LEN: [usize; 13] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33];
-const NLFSR_MASK: [u64; 13] = [
+const LENS: [usize; 13] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33];
+const MASKS: [u64; 13] = [
     0x001FFFFF,
     0x003FFFFF,
     0x007FFFFF,
@@ -298,4 +298,60 @@ fn step_a12(x: u64, feedin: u64) -> u64 {
 
 pub struct Achterbahn128 {
     nlfsrs: [u64; 13],
+}
+
+impl Achterbahn128 {
+    pub fn step_all(&mut self, feedin: u64) {
+        self.nlfsrs[0] = step_a0(self.nlfsrs[0], feedin);
+        self.nlfsrs[1] = step_a1(self.nlfsrs[1], feedin);
+        self.nlfsrs[2] = step_a2(self.nlfsrs[2], feedin);
+        self.nlfsrs[3] = step_a3(self.nlfsrs[3], feedin);
+        self.nlfsrs[4] = step_a4(self.nlfsrs[4], feedin);
+        self.nlfsrs[5] = step_a5(self.nlfsrs[5], feedin);
+        self.nlfsrs[6] = step_a6(self.nlfsrs[6], feedin);
+        self.nlfsrs[7] = step_a7(self.nlfsrs[7], feedin);
+        self.nlfsrs[8] = step_a8(self.nlfsrs[8], feedin);
+        self.nlfsrs[9] = step_a9(self.nlfsrs[9], feedin);
+        self.nlfsrs[10] = step_a10(self.nlfsrs[10], feedin);
+        self.nlfsrs[11] = step_a11(self.nlfsrs[11], feedin);
+        self.nlfsrs[12] = step_a12(self.nlfsrs[12], feedin);
+    }
+
+    pub fn ksa(&mut self, key: [u8; 16], iv: [u8; 16]) {
+        // 1: Load all NLFSRs with the first key bits
+        let key33 = (key[0] as u64)
+            | (key[1] as u64) << 8
+            | (key[2] as u64) << 16
+            | (key[3] as u64) << 24
+            | (key[4] as u64) << 32;
+        self.nlfsrs[0] = step_a0(self.nlfsrs[0], key33 & MASKS[0]);
+        self.nlfsrs[1] = step_a1(self.nlfsrs[1], key33 & MASKS[1]);
+        self.nlfsrs[2] = step_a2(self.nlfsrs[2], key33 & MASKS[2]);
+        self.nlfsrs[3] = step_a3(self.nlfsrs[3], key33 & MASKS[3]);
+        self.nlfsrs[4] = step_a4(self.nlfsrs[4], key33 & MASKS[4]);
+        self.nlfsrs[5] = step_a5(self.nlfsrs[5], key33 & MASKS[5]);
+        self.nlfsrs[6] = step_a6(self.nlfsrs[6], key33 & MASKS[6]);
+        self.nlfsrs[7] = step_a7(self.nlfsrs[7], key33 & MASKS[7]);
+        self.nlfsrs[8] = step_a8(self.nlfsrs[8], key33 & MASKS[8]);
+        self.nlfsrs[9] = step_a9(self.nlfsrs[9], key33 & MASKS[9]);
+        self.nlfsrs[10] = step_a10(self.nlfsrs[10], key33 & MASKS[10]);
+        self.nlfsrs[11] = step_a11(self.nlfsrs[11], key33 & MASKS[11]);
+        self.nlfsrs[12] = step_a12(self.nlfsrs[12], key33 & MASKS[12]);
+
+        // 2: For each NLFSRS feed-in the key bits not loaded in step 1
+
+        // 3: for each NLFSR feed-in all IV bits
+
+        // 4: for each NLFSR feed-in the keystream output
+
+        // 5: set the least significant bit of each NLFSR to 1
+        for nlfsr in self.nlfsrs.iter_mut() {
+            *nlfsr |= 1;
+        }
+
+        // 6: warm up
+        for _ in 0..64 {
+            self.step_all(0);
+        }
+    }
 }
