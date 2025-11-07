@@ -296,6 +296,10 @@ fn step_a12(x: u64, feedin: u64) -> u64 {
             << 32)
 }
 
+fn combining_function(x: &[u64; 13]) -> u64 {
+    todo!()
+}
+
 pub struct Achterbahn128 {
     nlfsrs: [u64; 13],
 }
@@ -341,8 +345,12 @@ impl Achterbahn128 {
         // 2: For each NLFSRS feed-in the key bits not loaded in step 1
 
         // 3: for each NLFSR feed-in all IV bits
+        for byte in iv.iter() {
+            self.step_all(*byte as u64);
+        }
 
         // 4: for each NLFSR feed-in the keystream output
+        self.step_all(todo!("KEYSTREAM?"));
 
         // 5: set the least significant bit of each NLFSR to 1
         for nlfsr in self.nlfsrs.iter_mut() {
