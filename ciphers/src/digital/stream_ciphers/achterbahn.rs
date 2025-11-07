@@ -296,8 +296,52 @@ fn step_a12(x: u64, feedin: u64) -> u64 {
             << 32)
 }
 
-fn combining_function(x: &[u64; 13]) -> u64 {
-    todo!()
+// WTF German C programmer? why it is written like this?
+// u32 F (u32 x0, u32 x1, u32 x2, u32 x3, u32 x4, u32 x5,
+//        u32 x6, u32 x7, u32 x8, u32 x9, u32 x10, u32 x11, u32 x12)
+// {
+//   u32 A = x1^x2,
+//       C = x2^x9,
+//       H = x3^x7,
+//       T = x4^x9,
+//       E = ((x0^x6)&x5)^x6,
+//       R = ((x1^x4)&C)^T,
+//       b = (R^(A&x5)^x2)&H,
+//       a = ((x10^x11)&(C^(A&T)^E))^E,
+//       h = (x8^x12)&(b^a^R^x7^x10),
+//       n = H^A^T^a^h^x0^x5^x6^x11^x12;
+//   return (n);
+// }
+
+fn combining_function(x: [u64; 13]) -> u64 {
+    let a = x[1] ^ x[2];
+    let b = x[2] ^ x[9];
+    let c = x[3] ^ x[7];
+    let d = x[4] ^ x[9];
+    let e = ((x[0] ^ x[6]) & x[5]) ^ x[6];
+    let f = ((x[1] ^ x[4]) & b) ^ d;
+    let g = (f ^ (a & x[5]) ^ x[2]) & c;
+    let h = ((x[10] ^ x[11]) & (b ^ (a & d) ^ e)) ^ e;
+    let i = (x[8] ^ x[12]) & (g ^ h ^ f ^ x[7] ^ x[10]);
+    c ^ a ^ d ^ h ^ i ^ x[0] ^ x[5] ^ x[6] ^ x[11] ^ x[12]
+}
+
+fn keystream_bits(x: &[u64; 13]) -> u64 {
+    combining_function([
+        x[0] >> (LENS[0] - 16),
+        x[1] >> (LENS[1] - 16),
+        x[2] >> (LENS[2] - 16),
+        x[3] >> (LENS[3] - 16),
+        x[4] >> (LENS[4] - 16),
+        x[5] >> (LENS[5] - 16),
+        x[6] >> (LENS[6] - 16),
+        x[7] >> (LENS[7] - 16),
+        x[8] >> (LENS[8] - 16),
+        x[9] >> (LENS[9] - 16),
+        x[10] >> (LENS[10] - 16),
+        x[11] >> (LENS[11] - 16),
+        x[12] >> (LENS[12] - 16),
+    ])
 }
 
 pub struct Achterbahn128 {
@@ -305,52 +349,81 @@ pub struct Achterbahn128 {
 }
 
 impl Achterbahn128 {
+    pub fn step(&mut self, i: usize, feedin: u64) {
+        self.nlfsrs[i] = match i {
+            0 => step_a0(self.nlfsrs[i], feedin),
+            1 => step_a1(self.nlfsrs[i], feedin),
+            2 => step_a2(self.nlfsrs[i], feedin),
+            3 => step_a3(self.nlfsrs[i], feedin),
+            4 => step_a4(self.nlfsrs[i], feedin),
+            5 => step_a5(self.nlfsrs[i], feedin),
+            6 => step_a6(self.nlfsrs[i], feedin),
+            7 => step_a7(self.nlfsrs[i], feedin),
+            8 => step_a8(self.nlfsrs[i], feedin),
+            9 => step_a9(self.nlfsrs[i], feedin),
+            10 => step_a10(self.nlfsrs[i], feedin),
+            11 => step_a11(self.nlfsrs[i], feedin),
+            12 => step_a12(self.nlfsrs[i], feedin),
+            _ => unreachable!("invalid NLFSR chosen"),
+        }
+    }
+
     pub fn step_all(&mut self, feedin: u64) {
-        self.nlfsrs[0] = step_a0(self.nlfsrs[0], feedin);
-        self.nlfsrs[1] = step_a1(self.nlfsrs[1], feedin);
-        self.nlfsrs[2] = step_a2(self.nlfsrs[2], feedin);
-        self.nlfsrs[3] = step_a3(self.nlfsrs[3], feedin);
-        self.nlfsrs[4] = step_a4(self.nlfsrs[4], feedin);
-        self.nlfsrs[5] = step_a5(self.nlfsrs[5], feedin);
-        self.nlfsrs[6] = step_a6(self.nlfsrs[6], feedin);
-        self.nlfsrs[7] = step_a7(self.nlfsrs[7], feedin);
-        self.nlfsrs[8] = step_a8(self.nlfsrs[8], feedin);
-        self.nlfsrs[9] = step_a9(self.nlfsrs[9], feedin);
-        self.nlfsrs[10] = step_a10(self.nlfsrs[10], feedin);
-        self.nlfsrs[11] = step_a11(self.nlfsrs[11], feedin);
-        self.nlfsrs[12] = step_a12(self.nlfsrs[12], feedin);
+        for i in 0..13 {
+            self.step(i, feedin);
+        }
     }
 
     pub fn ksa(&mut self, key: [u8; 16], iv: [u8; 16]) {
-        // 1: Load all NLFSRs with the first key bits
+        // This is actual 48 bits but it will be masked to not more than 33 when used
         let key33 = (key[0] as u64)
             | (key[1] as u64) << 8
             | (key[2] as u64) << 16
             | (key[3] as u64) << 24
             | (key[4] as u64) << 32;
-        self.nlfsrs[0] = step_a0(self.nlfsrs[0], key33 & MASKS[0]);
-        self.nlfsrs[1] = step_a1(self.nlfsrs[1], key33 & MASKS[1]);
-        self.nlfsrs[2] = step_a2(self.nlfsrs[2], key33 & MASKS[2]);
-        self.nlfsrs[3] = step_a3(self.nlfsrs[3], key33 & MASKS[3]);
-        self.nlfsrs[4] = step_a4(self.nlfsrs[4], key33 & MASKS[4]);
-        self.nlfsrs[5] = step_a5(self.nlfsrs[5], key33 & MASKS[5]);
-        self.nlfsrs[6] = step_a6(self.nlfsrs[6], key33 & MASKS[6]);
-        self.nlfsrs[7] = step_a7(self.nlfsrs[7], key33 & MASKS[7]);
-        self.nlfsrs[8] = step_a8(self.nlfsrs[8], key33 & MASKS[8]);
-        self.nlfsrs[9] = step_a9(self.nlfsrs[9], key33 & MASKS[9]);
-        self.nlfsrs[10] = step_a10(self.nlfsrs[10], key33 & MASKS[10]);
-        self.nlfsrs[11] = step_a11(self.nlfsrs[11], key33 & MASKS[11]);
-        self.nlfsrs[12] = step_a12(self.nlfsrs[12], key33 & MASKS[12]);
+
+        // Makes life easier later
+        let ky = {
+            let mut bits = [0; 128];
+            for i in 0..128 {
+                bits[i] = (1 & (key[i / 8] >> (i % 8))) as u64;
+            }
+            bits
+        };
+
+        // Makes life easier later
+        let iv = {
+            let mut bits = [0; 128];
+            for i in 0..128 {
+                bits[i] = (1 & (iv[i / 8] >> (i % 8))) as u64;
+            }
+            bits
+        };
+
+        // 1: Load all NLFSRs with the first key bits
+        for i in 0..13 {
+            self.step(i, key33 & MASKS[i]);
+        }
 
         // 2: For each NLFSRS feed-in the key bits not loaded in step 1
+        for j in 0..13 {
+            for i in LENS[j]..128 {
+                self.step(j, ky[i]);
+            }
+        }
 
         // 3: for each NLFSR feed-in all IV bits
-        for byte in iv.iter() {
-            self.step_all(*byte as u64);
+        for j in 0..13 {
+            for i in 0..128 {
+                self.step(j, iv[i]);
+            }
         }
 
         // 4: for each NLFSR feed-in the keystream output
-        self.step_all(todo!("KEYSTREAM?"));
+        for _ in 0..32 {
+            let z = keystream_bits(&self.nlfsrs);
+            self.step_all(z);
+        }
 
         // 5: set the least significant bit of each NLFSR to 1
         for nlfsr in self.nlfsrs.iter_mut() {
