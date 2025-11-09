@@ -33,6 +33,7 @@ macro_rules! xor3 {
     };
 }
 
+// Defined in reference but never used
 // macro_rules! xor2 {
 //     ($a: expr, $b: expr) => {
 //         $a ^ $b
@@ -298,19 +299,19 @@ fn step_a12(x: u64, feedin: u64) -> u64 {
 
 fn step_a_n(n: usize, x: u64, feedin: u64) -> u64 {
     match n {
-        0 => step_a0(x, feedin),
-        1 => step_a1(x, feedin),
-        2 => step_a2(x, feedin),
-        3 => step_a3(x, feedin),
-        4 => step_a4(x, feedin),
-        5 => step_a5(x, feedin),
-        6 => step_a6(x, feedin),
-        7 => step_a7(x, feedin),
-        8 => step_a8(x, feedin),
-        9 => step_a9(x, feedin),
-        10 => step_a10(x, feedin),
-        11 => step_a11(x, feedin),
-        12 => step_a12(x, feedin),
+        0 => step_a0(x, feedin) & MASKS[n],
+        1 => step_a1(x, feedin) & MASKS[n],
+        2 => step_a2(x, feedin) & MASKS[n],
+        3 => step_a3(x, feedin) & MASKS[n],
+        4 => step_a4(x, feedin) & MASKS[n],
+        5 => step_a5(x, feedin) & MASKS[n],
+        6 => step_a6(x, feedin) & MASKS[n],
+        7 => step_a7(x, feedin) & MASKS[n],
+        8 => step_a8(x, feedin) & MASKS[n],
+        9 => step_a9(x, feedin) & MASKS[n],
+        10 => step_a10(x, feedin) & MASKS[n],
+        11 => step_a11(x, feedin) & MASKS[n],
+        12 => step_a12(x, feedin) & MASKS[n],
         _ => unreachable!("invalid NLFSR chosen"),
     }
 }
@@ -357,7 +358,7 @@ fn keystream_bits(x: &[u64; 13]) -> u64 {
         x[9] >> (LENS[9] - 16),
         x[10] >> (LENS[10] - 16),
         x[11] >> (LENS[11] - 16),
-        x[12] >> (LENS[12] - 16),
+        x[12] & 0xFFFFFFFF >> (LENS[12] - 16),
     ])
 }
 
@@ -367,9 +368,7 @@ pub struct Achterbahn128 {
 }
 impl Default for Achterbahn128 {
     fn default() -> Self {
-        let mut out = Self {
-            nlfsrs: Default::default(),
-        };
+        let mut out = Self { nlfsrs: [0; 13] };
         out.ksa(
             [
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
@@ -396,15 +395,17 @@ impl Achterbahn128 {
     }
 
     pub fn ksa(&mut self, key: [u8; 16], iv: [u8; 16]) {
-        // This is actual 48 bits but it will be masked to not more than 33 when used
+        self.nlfsrs = [0; 13];
+
+        // This is actually 48 bits but it will be masked to not more than 33 when used
         let key33 = (key[0] as u64)
             | (key[1] as u64) << 8
             | (key[2] as u64) << 16
             | (key[3] as u64) << 24
             | (key[4] as u64) << 32;
 
-        // Makes life easier later
-        let ky = {
+        // Split up BITS of the key for use later
+        let key_bits = {
             let mut bits = [0; 128];
             for i in 0..128 {
                 bits[i] = (1 & (key[i / 8] >> (i % 8))) as u64;
@@ -412,8 +413,8 @@ impl Achterbahn128 {
             bits
         };
 
-        // Makes life easier later
-        let iv = {
+        // Split up BITS of the iv for use later
+        let iv_bits = {
             let mut bits = [0; 128];
             for i in 0..128 {
                 bits[i] = (1 & (iv[i / 8] >> (i % 8))) as u64;
@@ -429,20 +430,18 @@ impl Achterbahn128 {
         // 2: For each NLFSRS feed-in the key bits not loaded in step 1
         for j in 0..13 {
             for i in LENS[j]..128 {
-                self.step(j, ky[i]);
+                self.step(j, key_bits[i]);
             }
         }
 
         // 3: for each NLFSR feed-in all IV bits
-        for j in 0..13 {
-            for i in 0..128 {
-                self.step(j, iv[i]);
-            }
+        for i in 0..128 {
+            self.step_all(iv_bits[i]);
         }
 
         // 4: for each NLFSR feed-in the keystream output
         for _ in 0..32 {
-            let z = keystream_bits(&self.nlfsrs);
+            let z = keystream_bits(&self.nlfsrs) & 0xFFFFFFFF;
             self.step_all(z);
         }
 
@@ -493,7 +492,7 @@ mod tests {
 
     #[test]
     fn test_keystream() {
-        let reference_steam = [
+        let reference_steam: [u8; 256] = [
             0xDF, 0x71, 0xF0, 0x42, 0x73, 0x8F, 0x6D, 0x9E, 0xC2, 0x1D, 0x89, 0x6D, 0x0C, 0xC1,
             0x2B, 0xAF, 0x54, 0xC8, 0xCE, 0x55, 0xA6, 0x50, 0x7A, 0x12, 0x43, 0xB4, 0x71, 0xC2,
             0xCD, 0xF0, 0xEC, 0x42, 0x86, 0xFC, 0x01, 0x45, 0x43, 0x80, 0x90, 0x13, 0xDC, 0xA4,
@@ -519,9 +518,10 @@ mod tests {
         for i in 0..256 {
             assert_eq!(
                 reference_steam[i], keystream[i],
-                "\nmismatch at index {i} {:02X?} != {:02X?}",
-                reference_steam[i], keystream[i]
-            )
+                "\n\nmismatch at index {i}\n  {:02X}  {:02X} ({:08b}  {:08b})\n",
+                reference_steam[i], keystream[i], reference_steam[i], keystream[i]
+            );
+            // println!("{:08b} {:08b}", reference_steam[i], keystream[i])
         }
     }
 
@@ -536,7 +536,6 @@ mod tests {
                 state = step_a_n(i, state, 0);
                 if seed & MASKS[i] == state {
                     assert!(ctr == MASKS[i]);
-                    // println!("NLFSR_{i} correctly has period {ctr}");
                     break;
                 }
             }
