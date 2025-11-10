@@ -13,16 +13,16 @@ use num::traits::ToBytes;
 
 #[derive(Debug, Clone)]
 pub struct Argon2 {
-    salt: Vec<u8>,    // salt
-    key: Vec<u8>,     // key
-    ad: Vec<u8>,      // associated data
-    tag_len: u32,     // tag length in bytes
-    par_cost: u32,    // this will always be 1 unless I figure out something clever
-    mem_cost: u32,    // memory requirement in kibibytes (1024 bytes)
-    iterations: u32,  // number of iterations run
-    version: Version, // currently 0x13
-    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
-    buffer: Vec<u8>,
+    pub salt: Vec<u8>,        // salt
+    pub key: Option<Vec<u8>>, // secret key, used as pepper
+    pub ad: Vec<u8>,          // associated data
+    pub tag_len: u32,         // tag length in bytes
+    pub par_cost: u32,        // this will always be 1 unless I figure out something clever
+    pub mem_cost: u32,        // memory requirement in kibibytes (1024 bytes)
+    pub iterations: u32,      // number of iterations run
+    pub version: Version,     // currently 0x13
+    pub mode: Mode,           // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    pub buffer: Vec<u8>,
 }
 
 impl Default for Argon2 {
@@ -51,7 +51,7 @@ impl Argon2 {
         version: Version,
         mode: Mode,
         salt: &[u8],
-        key: &[u8],
+        key: Option<&[u8]>,
         ad: &[u8],
     ) -> Self {
         assert!(tag_len >= 4, "tag_len must be at least 4 bytes");
@@ -63,10 +63,19 @@ impl Argon2 {
         assert!(par_cost > 0, "parallelism cannot be 0");
         assert!(par_cost < MAX_PAR, "parallelism must be less than 2^24");
         assert!(salt.len() <= u32::MAX as usize);
-        assert!(key.len() <= u32::MAX as usize);
+        if let Some(k) = key {
+            assert!(k.len() <= u32::MAX as usize);
+        }
+
         Self {
             salt: salt.to_vec(),
-            key: key.to_vec(),
+            key: {
+                if let Some(k) = key {
+                    Some(k.to_vec())
+                } else {
+                    None
+                }
+            },
             ad: ad.to_vec(),
             tag_len,
             par_cost,
@@ -85,7 +94,7 @@ impl Argon2 {
         mem_cost: u32,
         iterations: u32,
         salt: &[u8],
-        key: &[u8],
+        key: Option<&[u8]>,
         ad: &[u8],
     ) -> Self {
         Self::init(
@@ -108,7 +117,7 @@ impl Argon2 {
         mem_cost: u32,
         iterations: u32,
         salt: &[u8],
-        key: &[u8],
+        key: Option<&[u8]>,
         ad: &[u8],
     ) -> Self {
         Self::init(
@@ -131,7 +140,7 @@ impl Argon2 {
         mem_cost: u32,
         iterations: u32,
         salt: &[u8],
-        key: &[u8],
+        key: Option<&[u8]>,
         ad: &[u8],
     ) -> Self {
         Self::init(
@@ -160,8 +169,14 @@ impl Argon2 {
         h.update(password);
         h.update(&(self.salt.len() as u32).to_le_bytes());
         h.update(&self.salt);
-        h.update(&(self.key.len() as u32).to_le_bytes());
-        h.update(&self.key);
+
+        if let Some(key) = &self.key {
+            h.update(&(key.len() as u32).to_le_bytes());
+            h.update(key);
+        } else {
+            h.update(&0_u32.to_be_bytes());
+        }
+
         h.update(&(self.ad.len() as u32).to_le_bytes());
         h.update(&self.ad);
 

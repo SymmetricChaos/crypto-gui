@@ -222,6 +222,7 @@ fn step_a8(x: u64, feedin: u64) -> u64 {
             )))
             << 28)
 }
+
 fn step_a9(x: u64, feedin: u64) -> u64 {
     (x >> 1)
         | ((1
@@ -240,6 +241,7 @@ fn step_a9(x: u64, feedin: u64) -> u64 {
             )))
             << 29)
 }
+
 fn step_a10(x: u64, feedin: u64) -> u64 {
     (x >> 1)
         | ((1
