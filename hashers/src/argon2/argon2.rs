@@ -87,7 +87,7 @@ impl Argon2 {
         }
     }
 
-    // Initialize Argon2i v1.3
+    /// Initialize Argon2i v1.3
     pub fn init_argon2i(
         tag_len: u32,
         par_cost: u32,
@@ -110,7 +110,7 @@ impl Argon2 {
         )
     }
 
-    // Initialize Argon2d v1.3
+    /// Initialize Argon2d v1.3
     pub fn init_argon2d(
         tag_len: u32,
         par_cost: u32,
@@ -133,7 +133,7 @@ impl Argon2 {
         )
     }
 
-    // Initialize Argon2id v1.3
+    /// Initialize Argon2id v1.3
     pub fn init_argon2id(
         tag_len: u32,
         par_cost: u32,
@@ -219,7 +219,7 @@ impl StatefulHasher for Argon2 {
         // Initialization block
         let h0 = self.initial_hash(&self.buffer);
 
-        println!("{:02x?}", h0);
+        println!("Initial Hash\n{:02x?}", h0);
 
         let num_blocks = self.num_blocks(); // total number of blocks in the memory grid
         let num_lanes = self.num_lanes(); // number of "rows" in the memory grid (there are always four "columns"), each lane can be computed independently
@@ -252,19 +252,19 @@ impl StatefulHasher for Argon2 {
             mem_blocks[lane + 1] = block;
         }
 
-        println!("Block 0 (first four words)");
-        println!("{:016x?}", mem_blocks[0][0]);
-        println!("{:016x?}", mem_blocks[0][1]);
-        println!("{:016x?}", mem_blocks[0][2]);
-        println!("{:016x?}", mem_blocks[0][3]);
-        println!("");
+        // println!("Block 0 (first four words)");
+        // println!("{:016x?}", mem_blocks[0][0]);
+        // println!("{:016x?}", mem_blocks[0][1]);
+        // println!("{:016x?}", mem_blocks[0][2]);
+        // println!("{:016x?}", mem_blocks[0][3]);
+        // println!("");
 
-        println!("Block 31 (last four words)");
-        println!("{:016x?}", mem_blocks[31][124]);
-        println!("{:016x?}", mem_blocks[31][125]);
-        println!("{:016x?}", mem_blocks[31][126]);
-        println!("{:016x?}", mem_blocks[31][127]);
-        println!("");
+        // println!("Block 31 (last four words)");
+        // println!("{:016x?}", mem_blocks[31][124]);
+        // println!("{:016x?}", mem_blocks[31][125]);
+        // println!("{:016x?}", mem_blocks[31][126]);
+        // println!("{:016x?}", mem_blocks[31][127]);
+        // println!("");
 
         let mut ctr = [0u8; 976];
         // Additional passes over the lanes
@@ -388,19 +388,19 @@ impl StatefulHasher for Argon2 {
                     }
                 }
             }
-            println!("Block 0 (first four words)");
-            println!("{:016x?}", mem_blocks[0][0]);
-            println!("{:016x?}", mem_blocks[0][1]);
-            println!("{:016x?}", mem_blocks[0][2]);
-            println!("{:016x?}", mem_blocks[0][3]);
-            println!("");
+            // println!("Block 0 (first four words)");
+            // println!("{:016x?}", mem_blocks[0][0]);
+            // println!("{:016x?}", mem_blocks[0][1]);
+            // println!("{:016x?}", mem_blocks[0][2]);
+            // println!("{:016x?}", mem_blocks[0][3]);
+            // println!("");
 
-            println!("Block 31 (last four words)");
-            println!("{:016x?}", mem_blocks[31][124]);
-            println!("{:016x?}", mem_blocks[31][125]);
-            println!("{:016x?}", mem_blocks[31][126]);
-            println!("{:016x?}", mem_blocks[31][127]);
-            println!("");
+            // println!("Block 31 (last four words)");
+            // println!("{:016x?}", mem_blocks[31][124]);
+            // println!("{:016x?}", mem_blocks[31][125]);
+            // println!("{:016x?}", mem_blocks[31][126]);
+            // println!("{:016x?}", mem_blocks[31][127]);
+            // println!("");
         }
 
         // XOR together the final block of each lane
