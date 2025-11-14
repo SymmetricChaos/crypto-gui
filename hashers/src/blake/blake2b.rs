@@ -104,7 +104,7 @@ impl Blake2b {
         Self::init(&[], 64)
     }
 
-    pub fn init_hash_var(hash_len: u64) -> Self {
+    pub fn init_hash(hash_len: u64) -> Self {
         Self::init(&[], hash_len)
     }
 

@@ -14,4 +14,3 @@ json = "0.12.4"
 crypto-bigint = { version = "0.6.1" } 
 strum = { version = "0.26", features = ["derive"] }
 hex-literal = "1.0.0"
-wyhash = "0.6.0"

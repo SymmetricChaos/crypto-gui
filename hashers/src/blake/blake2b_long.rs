@@ -4,7 +4,7 @@ use crate::{blake::Blake2b, traits::StatefulHasher};
 #[derive(Debug, Clone)]
 pub struct Blake2bLong {
     state: Blake2b,
-    hash_len: u64, // length of output in bytes, 1 to 64
+    hash_len: u64,
 }
 
 impl Blake2bLong {
@@ -21,9 +21,9 @@ impl Blake2bLong {
 
     pub fn init_hash(hash_len: u64) -> Self {
         let mut h = if hash_len <= 64 {
-            Blake2b::init(&[], hash_len)
+            Blake2b::init_hash(hash_len)
         } else {
-            Blake2b::init(&[], 64)
+            Blake2b::init_hash(64)
         };
 
         h.update(&(hash_len as u32).to_le_bytes());
