@@ -28,6 +28,7 @@ mod rule30_controls;
 mod salsa20_controls;
 mod self_shrinking_generator_controls;
 mod shrinking_generator_controls;
+pub mod solitaire_controls;
 mod splitmix_controls;
 mod squares_controls;
 mod threefry_controls;

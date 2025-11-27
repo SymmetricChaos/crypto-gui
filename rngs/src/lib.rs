@@ -37,6 +37,7 @@ pub mod rule30;
 pub mod salsa20;
 pub mod self_shrinking_generator;
 pub mod shrinking_generator;
+pub mod solitaire;
 pub mod splitmix;
 pub mod squares;
 pub mod threefry;
